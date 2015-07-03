@@ -1,3 +1,6 @@
+# Week 1: Analysis of Algorithms
+# Question 1
+
 """
 (seed = 932025)
 Suppose that you time a program as a function of N and produce
@@ -66,6 +69,6 @@ a, b, c = popt
 print "b =", b
 
 plot(N, T, 'r.')
-plot(N, a*N**b +c )
+plot(N, a * N ** b + c )
 
 show()
