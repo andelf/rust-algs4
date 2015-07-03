@@ -1,7 +1,7 @@
+// stacks
 pub mod linked_stack;
-
-
-
+pub mod fixed_capacity_stack;
+pub mod resizing_array_stack;
 
 pub trait StackOfStrings {
     fn new() -> Self;
