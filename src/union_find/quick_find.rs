@@ -46,24 +46,3 @@ impl UF {
         println!("")
     }
 }
-
-
-fn main() {
-    let mut lines = io::BufReader::new(io::stdin()).lines();
-
-    let n = lines.next().unwrap().unwrap().parse().unwrap();
-    let mut uf = UF::new(n);
-
-    for line in lines {
-        let segs: Vec<usize> = line.unwrap().split(' ').map(|n| n.parse().unwrap()).collect();
-        let p = segs[0];
-        let q = segs[1];
-
-        if !uf.connected(p, q) {
-            uf.union(p, q);
-            println!("{} {}", p, q)
-        }
-    }
-
-    uf.dump()
-}
