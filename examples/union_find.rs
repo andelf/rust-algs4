@@ -1,5 +1,8 @@
 extern crate algs4;
 
+use std::io::prelude::*;
+use std::io;
+
 use algs4::union_find::quick_find;
 use algs4::union_find::quick_union;
 use algs4::union_find::weighted_quick_union;
@@ -22,5 +25,5 @@ fn main() {
         }
     }
 
-    uf.dump()
+    // uf.dump()
 }
