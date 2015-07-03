@@ -10,6 +10,7 @@ keywords = [
   "mooc",
   "coursera"
 ]
+license = "MIT"
 
 [dependencies]
 rand = "*"

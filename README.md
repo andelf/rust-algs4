@@ -1,5 +1,6 @@
-Algorithms
-----------
+# rust-algs4 [![Build Status][trav-ci-img]][trav-ci]
+
+Algorithms, 4ed.
 
 algs4partI-008 in Rust.
 
@@ -12,7 +13,6 @@ algs4partI-008 in Rust.
     cargo test
     cargo bench
 ```
-
 
 ## Week 1: Union-Find
 
