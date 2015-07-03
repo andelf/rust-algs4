@@ -1,6 +1,5 @@
-use std::io::prelude::*;
-use std::io;
 use std::iter;
+use std::fmt;
 
 pub struct UF {
     n: usize,
@@ -61,5 +60,14 @@ impl UF {
             print!("{} ", i);
         }
         println!("")
+    }
+}
+
+impl fmt::Display for UF {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for i in self.id.iter() {
+            write!(f, "{} ", i);
+        }
+        Ok(())
     }
 }

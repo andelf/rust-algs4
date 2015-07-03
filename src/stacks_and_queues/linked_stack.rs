@@ -28,7 +28,7 @@ impl StackOfStrings for LinkedStackOfStrings {
     fn push(&mut self, item: String) {
         // Takes the value out of the option, leaving a None in its place.
         let old_first = self.first.take();
-        let mut first = Node {
+        let first = Node {
             item: item,
             next: old_first
         };
@@ -47,9 +47,12 @@ impl StackOfStrings for LinkedStackOfStrings {
 #[test]
 fn test_linked_stack() {
     let mut stack: LinkedStackOfStrings = StackOfStrings::new();
+
+    let mut result = "to be not that or be".split(' ');
+
     for s in "to be or not to - be - - that - - - is".split(' ') {
         if s == "-" {
-            println!("{}", stack.pop());
+            assert_eq!(&stack.pop(), result.next().unwrap())
         } else {
             stack.push(s.into())
         }

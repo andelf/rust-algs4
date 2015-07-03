@@ -1,6 +1,5 @@
-use std::io::prelude::*;
-use std::io;
 use std::iter;
+use std::fmt;
 
 /// Quick union with path compression.
 pub struct UF {
@@ -29,6 +28,7 @@ impl UF {
         rid
     }
 
+    // NOTE: method type is different from other implementations!!
     pub fn connected(&mut self, p: usize, q: usize) -> bool {
         self.root_of(p) == self.root_of(q)
     }
@@ -64,5 +64,14 @@ impl UF {
             print!("{} ", i);
         }
         println!("")
+    }
+}
+
+impl fmt::Display for UF {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for i in self.id.iter() {
+            write!(f, "{} ", i);
+        }
+        Ok(())
     }
 }

@@ -25,5 +25,5 @@ fn main() {
         }
     }
 
-    // uf.dump()
+    println!("{}", uf);
 }

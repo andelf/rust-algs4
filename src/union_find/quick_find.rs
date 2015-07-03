@@ -1,5 +1,4 @@
-use std::io::prelude::*;
-use std::io;
+use std::fmt;
 
 pub struct UF {
     n: usize,
@@ -38,11 +37,13 @@ impl UF {
     pub fn count(&self) -> usize {
         unimplemented!()
     }
+}
 
-    fn dump(&self) {
+impl fmt::Display for UF {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for i in self.id.iter() {
-            print!("{} ", i);
+            write!(f, "{} ", i);
         }
-        println!("")
+        Ok(())
     }
 }
