@@ -47,5 +47,11 @@ impl StackOfStrings for LinkedStackOfStrings {
 #[test]
 fn test_linked_stack() {
     let mut stack: LinkedStackOfStrings = StackOfStrings::new();
-
+    for s in "to be or not to - be - - that - - - is".split(' ') {
+        if s == "-" {
+            println!("{}", stack.pop());
+        } else {
+            stack.push(s.into())
+        }
+    }
 }
