@@ -80,3 +80,26 @@ pub trait Bag<T> {
         unimplemented!()
     }
 }
+
+// Programming Assignment 2: Randomized Queues and Deques
+// Deque
+pub trait Deque<T> {
+    fn new() -> Self;
+    fn is_empty(&self) -> bool;
+    fn size(&self) -> usize;
+    fn add_first(&mut self, item: T);
+    fn add_last(&mut self, item: T);
+    fn remove_first(&mut self) -> T;
+    fn remove_last(&mut self) -> T;
+    fn iter(&self) -> Iterator<Item=T>;
+}
+
+// RandomizeQueue
+pub trait RandomizedQueue<T> {
+    fn new() -> Self;
+    fn is_empty(&self) -> bool;
+    fn size(&self) -> usize;
+    fn enqueue(&mut self, item: T);
+    fn dequeue(&mut self) -> T;
+    fn sample(&self) -> &T;
+}
