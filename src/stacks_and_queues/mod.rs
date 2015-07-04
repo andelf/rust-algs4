@@ -15,6 +15,7 @@ pub trait StackOfStrings {
 
 // queues
 pub mod linked_queue;
+pub mod resizing_array_queue;
 
 
 pub trait QueueOfStrings {
