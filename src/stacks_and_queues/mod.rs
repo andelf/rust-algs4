@@ -1,3 +1,5 @@
+use std::iter::Iterator;
+
 // stacks
 pub mod linked_stack;
 pub mod fixed_capacity_stack;
@@ -64,6 +66,16 @@ pub trait Queue<T> {
     /// is the queue empty?
     fn is_empty(&self) -> bool;
     /// number of items on the queue
+    fn size(&self) -> usize {
+        unimplemented!()
+    }
+}
+
+// bag
+pub trait Bag<T> {
+    fn new() -> Self;
+    fn add(&mut self, item: T);
+    fn iter(&self) -> Iterator<Item=T>;
     fn size(&self) -> usize {
         unimplemented!()
     }
