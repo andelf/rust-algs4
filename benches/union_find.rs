@@ -7,6 +7,7 @@ extern crate algs4;
 
 use test::{black_box, Bencher};
 
+use algs4::union_find::UnionFind;
 use algs4::union_find::quick_find;
 use algs4::union_find::quick_union;
 use algs4::union_find::weighted_quick_union;

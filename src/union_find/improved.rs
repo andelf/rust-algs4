@@ -3,7 +3,6 @@ use std::fmt;
 
 /// Quick union with path compression.
 pub struct UF {
-    n: usize,
     id: Vec<usize>,
     //  number of objects in the tree rooted at i.
     sz: Vec<usize>
@@ -12,7 +11,6 @@ pub struct UF {
 impl UF {
     pub fn new(n: usize) -> UF {
         UF {
-            n: n,
             id: (0..n).collect(),
             sz: iter::repeat(1).take(n).collect()
         }
@@ -51,6 +49,7 @@ impl UF {
         }
     }
 
+    #[allow(unused_variables)]
     pub fn find(&self, p: usize) -> usize {
         unimplemented!()
     }
@@ -58,19 +57,12 @@ impl UF {
     pub fn count(&self) -> usize {
         unimplemented!()
     }
-
-    fn dump(&self) {
-        for i in self.id.iter() {
-            print!("{} ", i);
-        }
-        println!("")
-    }
 }
 
 impl fmt::Display for UF {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for i in self.id.iter() {
-            write!(f, "{} ", i);
+            try!(write!(f, "{} ", i));
         }
         Ok(())
     }
