@@ -8,7 +8,6 @@ pub struct UF {
     sz: Vec<usize>
 }
 
-
 impl UF {
     fn root_of(&self, p: usize) -> usize {
         let mut rid = self.id[p];

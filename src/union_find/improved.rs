@@ -1,3 +1,5 @@
+/// FIXME: UF::connected has a different mutablity from UnionFind trait.
+
 use std::iter;
 use std::fmt;
 
