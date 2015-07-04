@@ -8,6 +8,7 @@ extern crate algs4;
 use test::{black_box, Bencher};
 use rand::{thread_rng, Rng};
 use algs4::elementary_sorts::*;
+use algs4::mergesort::merge_sort;
 
 
 static SIZE: usize = 1000;
@@ -30,6 +31,9 @@ macro_rules! defbench(
 defbench!(bench_selection_sort, selection_sort);
 defbench!(bench_insertion_sort, insertion_sort);
 defbench!(bench_shell_sort, shell_sort);
+
+defbench!(bench_merge_sort, merge_sort);
+
 
 #[bench]
 fn bench_knuth_shuffle(b: &mut Bencher) {
