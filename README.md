@@ -1,4 +1,7 @@
-# rust-algs4 [![Build Status][trav-ci-img]][trav-ci]
+rust-algs4
+==========
+
+[![Build Status](https://travis-ci.org/andelf/rust-algs4.svg?branch=master)](https://travis-ci.org/andelf/rust-algs4)
 
 Algorithms, 4ed.
 
@@ -21,7 +24,6 @@ Height of forest = 4 > lg N = lg(10)
 Size of tree rooted at parent of 2 < twice the size of tree rooted at 2
 
 两个指标：
-平均到顶点距离要短。
-average distance to root
 
-FIXME:
+- 平均到顶点距离要短。
+- average distance to root
