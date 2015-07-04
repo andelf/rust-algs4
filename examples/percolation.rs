@@ -47,6 +47,7 @@ impl Percolation {
         result.into_iter()
     }
 
+    #[inline]
     pub fn is_open(&self, i: usize, j: usize) -> bool {
         self.opened[self.idx_of(i, j)]
     }

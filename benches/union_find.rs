@@ -13,8 +13,8 @@ use algs4::union_find::quick_union;
 use algs4::union_find::weighted_quick_union;
 use algs4::union_find::improved;
 
-const NUM_OF_OBJECTS: usize = 1000;
-const NUM_OF_OPERATIONS: usize = 50000;
+const NUM_OF_OBJECTS: usize = 100;
+const NUM_OF_OPERATIONS: usize = 500;
 
 #[bench]
 fn bench_quick_find(b: &mut Bencher) {
