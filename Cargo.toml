@@ -1,6 +1,6 @@
 [package]
 name = "algs4"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Shuyu Wang <andelf@gmail.com>"]
 description = "Algorithms, 4ed. MOOC in Coursera. in Rust."
 homepage = "https://github.com/andelf/rust-algs4"

@@ -7,7 +7,6 @@ pub struct ResizingArrayQueueOfStrings {
     q: Vec<Option<String>>,
     head: usize,
     tail: usize
-
 }
 
 impl ResizingArrayQueueOfStrings {
