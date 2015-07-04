@@ -12,3 +12,22 @@ pub trait StackOfStrings {
         unimplemented!()
     }
 }
+
+// queues
+pub mod linked_queue;
+
+
+pub trait QueueOfStrings {
+    /// create an empty queue
+    fn new() -> Self;
+    /// insert a new string onto queue
+    fn enqueue(&mut self, item: String);
+    /// remove and return the string least recently added
+    fn dequeue(&mut self) -> String;
+    /// is the queue empty?
+    fn is_empty(&self) -> bool;
+    /// number of strings on the queue
+    fn size(&self) -> usize {
+        unimplemented!()
+    }
+}
