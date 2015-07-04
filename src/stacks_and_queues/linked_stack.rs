@@ -151,3 +151,23 @@ fn test_linked_stack_iter() {
         assert_eq!(v, rit.next().unwrap())
     }
 }
+
+
+#[test]
+fn test_linked_stack_iter_string() {
+    let mut stack: LinkedStack<String> = Stack::new();
+
+    let mut result = "is that or be to".split(' ');
+
+    for s in "to be or not to - be - - that is".split(' ') {
+        if s == "-" {
+            stack.pop();
+        } else {
+            stack.push(s.into());
+        }
+    }
+
+    for v in stack.iter() {
+        assert_eq!(v, result.next().unwrap())
+    }
+}

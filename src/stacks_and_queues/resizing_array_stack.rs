@@ -204,7 +204,6 @@ fn test_resizing_array_stack_iter() {
     }
 
     for v in stack.iter() {
-        println!("v => {:?}", v);
         assert_eq!(v, rit.next().unwrap())
     }
 }
