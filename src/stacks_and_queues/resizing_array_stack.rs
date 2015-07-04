@@ -1,4 +1,6 @@
 use std::iter;
+use std::iter::Iterator;
+use std::marker::PhantomData;
 use super::{StackOfStrings, Stack};
 
 const INITIAL_STACK_CAPACITY: usize = 1;
@@ -117,6 +119,42 @@ impl<T> Stack<T> for ResizingArrayStack<T> {
     }
 }
 
+pub struct Iter<'a, T: 'a> {
+    ptr: *const Option<T>,
+    end: *const Option<T>,
+    _marker: PhantomData<&'a T>
+}
+
+unsafe impl<'a, T: Sync> Sync for Iter<'a, T> {}
+unsafe impl<'a, T: Sync> Send for Iter<'a, T> {}
+
+// FIXME: maybe error with zero-sized type
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<&'a T> {
+        unsafe {
+            if self.ptr < self.end {
+                None
+            } else {
+                self.ptr = self.ptr.offset(-1);
+                (*self.ptr).as_ref()
+            }
+        }
+    }
+}
+
+impl<'a, T> ResizingArrayStack<T> {
+    pub fn iter(&'a self) -> Iter<'a, T> {
+        Iter {
+            // first empty
+            ptr: &self.s[self.n],
+            end: &self.s[0],
+            _marker: PhantomData
+        }
+    }
+}
+
 
 #[test]
 fn test_resizing_array_stack_of_strings() {
@@ -148,4 +186,45 @@ fn test_resizing_array_stack() {
         }
     }
 
+}
+
+#[test]
+fn test_resizing_array_stack_iter() {
+    let mut stack: ResizingArrayStack<i32> = Stack::new();
+
+    let result = [3, 3, 1];
+    let mut rit = result.iter();
+
+    for s in vec![1, 3, 5, 0, 1, 0, 3] {
+        if s == 0 {
+            stack.pop();
+        } else {
+            stack.push(s);
+        }
+    }
+
+    for v in stack.iter() {
+        println!("v => {:?}", v);
+        assert_eq!(v, rit.next().unwrap())
+    }
+}
+
+
+#[test]
+fn test_resizing_array_stack_iter_string() {
+    let mut stack: ResizingArrayStack<String> = Stack::new();
+
+    let mut result = "is that or be to".split(' ');
+
+    for s in "to be or not to - be - - that is".split(' ') {
+        if s == "-" {
+            stack.pop();
+        } else {
+            stack.push(s.into());
+        }
+    }
+
+    for v in stack.iter() {
+        assert_eq!(v, result.next().unwrap())
+    }
 }
