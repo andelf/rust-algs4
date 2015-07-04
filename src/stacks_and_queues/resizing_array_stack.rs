@@ -1,5 +1,5 @@
 use std::iter;
-use super::StackOfStrings;
+use super::{StackOfStrings, Stack};
 
 const INITIAL_STACK_CAPACITY: usize = 1;
 
@@ -29,12 +29,7 @@ impl ResizingArrayStackOfStrings {
 
 impl StackOfStrings for ResizingArrayStackOfStrings {
     fn new() -> ResizingArrayStackOfStrings {
-        let storage = iter::repeat(None).take(INITIAL_STACK_CAPACITY).collect();
-
-        ResizingArrayStackOfStrings {
-            s: storage,
-            n: 0
-        }
+        ResizingArrayStackOfStrings::with_capacity(INITIAL_STACK_CAPACITY)
     }
 
     fn is_empty(&self) -> bool {
@@ -62,8 +57,69 @@ impl StackOfStrings for ResizingArrayStackOfStrings {
 }
 
 
+pub struct ResizingArrayStack<T> {
+    s: Vec<Option<T>>,
+    n: usize
+}
+
+impl<T> ResizingArrayStack<T> {
+    pub fn with_capacity(capacity: usize) -> ResizingArrayStack<T> {
+        let mut storage = Vec::with_capacity(capacity);
+        for _ in 0 .. capacity {
+            storage.push(None);
+        }
+
+        ResizingArrayStack {
+            s: storage,
+            n: 0
+        }
+    }
+
+    fn resize(&mut self, capacity: usize) {
+        let mut new_storage = Vec::with_capacity(capacity);
+        for i in 0 .. capacity {
+            if i < self.n {
+                new_storage.push(self.s[i].take())
+            } else {
+                new_storage.push(None);
+            }
+        }
+        self.s = new_storage;
+    }
+}
+
+impl<T> Stack<T> for ResizingArrayStack<T> {
+    fn new() -> ResizingArrayStack<T> {
+        ResizingArrayStack::with_capacity(INITIAL_STACK_CAPACITY)
+    }
+
+    fn is_empty(&self) -> bool {
+        self.n == 0
+    }
+
+    fn push(&mut self, item: T) {
+        let len = self.s.len();
+        if self.n == len {
+            self.resize(2 * len);
+        }
+        self.s[self.n] = Some(item);
+        self.n += 1;
+    }
+
+    fn pop(&mut self) -> T {
+        self.n -= 1;
+        let cell = self.s[self.n].take();
+        let len = self.s.len();
+        if self.n > 0 && self.n == len / 4 {
+            self.resize(len / 2);
+        }
+        cell.unwrap()
+    }
+}
+
+
 #[test]
-fn test_resizing_array_stack() {
+fn test_resizing_array_stack_of_strings() {
     let mut stack: ResizingArrayStackOfStrings = StackOfStrings::new();
 
     let mut result = "to be not that or be".split(' ');
@@ -75,4 +131,21 @@ fn test_resizing_array_stack() {
             stack.push(s.into())
         }
     }
+}
+
+#[test]
+fn test_resizing_array_stack() {
+    let mut stack: ResizingArrayStack<i32> = Stack::new();
+
+    let result = [1, 3, 4, 3, 5, 3];
+    let mut rit = result.iter();
+
+    for s in vec![1, 3, 5, 4, 1, 0, 3, 0, 0, 3, 0, 0, 0, 4] {
+        if s == 0 {
+            assert_eq!(&stack.pop(), rit.next().unwrap())
+        } else {
+            stack.push(s)
+        }
+    }
+
 }
