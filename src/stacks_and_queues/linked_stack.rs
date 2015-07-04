@@ -1,3 +1,4 @@
+use std::iter::Iterator;
 use super::{StackOfStrings, Stack};
 
 struct Node<T> {
@@ -75,10 +76,29 @@ impl<T> Stack<T> for LinkedStack<T> {
     }
 }
 
+pub struct Iter<'a, T: 'a> {
+    ptr: &'a Option<Box<Node<T>>>
+}
 
+unsafe impl<'a, T: Sync> Sync for Iter<'a, T> {}
+unsafe impl<'a, T: Sync> Send for Iter<'a, T> {}
 
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
 
+    fn next(&mut self) -> Option<&'a T> {
+        self.ptr.as_ref().map(|head| {
+            self.ptr = &head.next;
+            &head.item
+        })
+    }
+}
 
+impl<T> LinkedStack<T> {
+    pub fn iter(&self) -> Iter<T> {
+        Iter { ptr: &self.first }
+    }
+}
 
 #[test]
 fn test_linked_stack_of_strings() {
@@ -109,5 +129,25 @@ fn test_linked_stack() {
         } else {
             stack.push(s)
         }
+    }
+}
+
+#[test]
+fn test_linked_stack_iter() {
+    let mut stack: LinkedStack<i32> = Stack::new();
+
+    let result = [3, 3, 1];
+    let mut rit = result.iter();
+
+    for s in vec![1, 3, 5, 0, 1, 0, 3] {
+        if s == 0 {
+            stack.pop();
+        } else {
+            stack.push(s);
+        }
+    }
+
+    for v in stack.iter() {
+        assert_eq!(v, rit.next().unwrap())
     }
 }
