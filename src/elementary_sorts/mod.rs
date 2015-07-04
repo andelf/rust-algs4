@@ -35,6 +35,32 @@ pub fn insertion_sort<T: PartialOrd>(a: &mut [T]) {
     }
 }
 
+pub fn shell_sort<T: PartialOrd>(a: &mut [T]) {
+    let n  = a.len();
+
+    let mut h = 1;
+
+    // 3x+1 increment sequence
+    while h < n / 3 {
+        h = 3 * h + 1;
+    }
+
+    while h >= 1 {
+        for i in h .. n {
+            let mut j = i;
+            loop {
+                if j >= h && a[j] < a[j-h] {
+                    a.swap(j, j-h);
+                    j -= h;
+                } else {
+                    break;
+                }
+            }
+        }
+        h = h/3;
+    }
+}
+
 #[test]
 fn test_selection_sort() {
     extern crate rand;
@@ -57,5 +83,17 @@ fn test_insertion_sort() {
         array[i] = rand::random();
     }
     insertion_sort(&mut array);
+    assert!(is_sorted(&array));
+}
+
+#[test]
+fn test_shell_sort() {
+    extern crate rand;
+
+    let mut array = [0f64; 100];
+    for i in 0 .. 100 {
+        array[i] = rand::random();
+    }
+    shell_sort(&mut array);
     assert!(is_sorted(&array));
 }
