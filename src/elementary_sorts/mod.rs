@@ -1,3 +1,5 @@
+use rand::{thread_rng, Rng};
+
 pub fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
     for i in 1 .. a.len() {
         if a[i] < a[i-1] {
@@ -61,10 +63,20 @@ pub fn shell_sort<T: PartialOrd>(a: &mut [T]) {
     }
 }
 
+pub fn knuth_shuffle<T>(a: &mut [T]) {
+    let mut rng = thread_rng();
+
+    let n = a.len();
+
+    for i in 0 .. n {
+        let r = rng.gen_range(0, i+1);
+        a.swap(i, r);
+    }
+}
+
 #[test]
 fn test_selection_sort() {
-    extern crate rand;
-
+    use rand;
     let mut array = [0f64; 100];
     for i in 0 .. 100 {
         array[i] = rand::random();
@@ -76,8 +88,7 @@ fn test_selection_sort() {
 
 #[test]
 fn test_insertion_sort() {
-    extern crate rand;
-
+    use rand;
     let mut array = [0f64; 100];
     for i in 0 .. 100 {
         array[i] = rand::random();
@@ -88,8 +99,7 @@ fn test_insertion_sort() {
 
 #[test]
 fn test_shell_sort() {
-    extern crate rand;
-
+    use rand;
     let mut array = [0f64; 100];
     for i in 0 .. 100 {
         array[i] = rand::random();
@@ -97,3 +107,13 @@ fn test_shell_sort() {
     shell_sort(&mut array);
     assert!(is_sorted(&array));
 }
+
+#[test]
+fn test_knuth_shuffle() {
+    let array = thread_rng().gen_iter().take(10).collect::<Vec<f64>>();
+    let mut new_array = array.clone();
+    knuth_shuffle(&mut new_array);
+    assert!(array != new_array);
+}
+
+pub mod convex_hull;

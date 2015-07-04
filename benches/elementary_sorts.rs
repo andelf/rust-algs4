@@ -22,7 +22,6 @@ macro_rules! defbench(
                 let mut array = array.clone();
                 $func(&mut array);
             });
-
         }
     )
 );
@@ -31,3 +30,12 @@ macro_rules! defbench(
 defbench!(bench_selection_sort, selection_sort);
 defbench!(bench_insertion_sort, insertion_sort);
 defbench!(bench_shell_sort, shell_sort);
+
+#[bench]
+fn bench_knuth_shuffle(b: &mut Bencher) {
+    let array = thread_rng().gen_iter().take(SIZE).collect::<Vec<f64>>();
+    b.iter(|| {
+        let mut array = array.clone();
+        knuth_shuffle(&mut array);
+    });
+}
