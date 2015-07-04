@@ -29,3 +29,4 @@ macro_rules! defbench(
 
 
 defbench!(bench_selection_sort, selection_sort);
+defbench!(bench_insertion_sort, insertion_sort);
