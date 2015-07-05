@@ -87,30 +87,15 @@ fn sort<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
 
 pub fn quick_sort<T: PartialOrd>(a: &mut [T]) {
     let n = a.len();
+    if n <= 1 {
+        return;
+    }
     // # time waste
     // let mut rng = thread_rng();
     // rng.shuffle(a);
     sort(a, 0, n-1);
 }
 
-
-#[test]
-fn test_quick_sort() {
-    use rand::{thread_rng, Rng};
-    fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
-        for i in 1 .. a.len() {
-            if a[i] < a[i-1] {
-                return false;
-            }
-        }
-        true
-    }
-
-
-    let mut array = thread_rng().gen_iter().take(20).collect::<Vec<u32>>();
-    quick_sort(&mut array);
-    assert!(is_sorted(&array));
-}
 
 #[test]
 fn test_median_of_3() {

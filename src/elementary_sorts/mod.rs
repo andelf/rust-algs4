@@ -1,16 +1,5 @@
 use rand::{thread_rng, Rng};
 
-pub fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
-    for i in 1 .. a.len() {
-        if a[i] < a[i-1] {
-            return false;
-        }
-    }
-    true
-}
-
-
-
 pub fn selection_sort<T: PartialOrd>(a: &mut [T]) {
     let n = a.len();
     for i in 0 .. n {
@@ -72,40 +61,6 @@ pub fn knuth_shuffle<T>(a: &mut [T]) {
         let r = rng.gen_range(0, i+1);
         a.swap(i, r);
     }
-}
-
-#[test]
-fn test_selection_sort() {
-    use rand;
-    let mut array = [0f64; 100];
-    for i in 0 .. 100 {
-        array[i] = rand::random();
-    }
-    selection_sort(&mut array);
-    assert!(is_sorted(&array));
-}
-
-
-#[test]
-fn test_insertion_sort() {
-    use rand;
-    let mut array = [0f64; 100];
-    for i in 0 .. 100 {
-        array[i] = rand::random();
-    }
-    insertion_sort(&mut array);
-    assert!(is_sorted(&array));
-}
-
-#[test]
-fn test_shell_sort() {
-    use rand;
-    let mut array = [0f64; 100];
-    for i in 0 .. 100 {
-        array[i] = rand::random();
-    }
-    shell_sort(&mut array);
-    assert!(is_sorted(&array));
 }
 
 #[test]

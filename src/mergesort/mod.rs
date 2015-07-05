@@ -1,16 +1,6 @@
 use std::cmp;
 use super::elementary_sorts::insertion_sort;
 
-#[allow(dead_code)]
-fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
-    for i in 1 .. a.len() {
-        if a[i] < a[i-1] {
-            return false;
-        }
-    }
-    true
-}
-
 fn merge<T: PartialOrd + Copy>(a: &mut [T], aux: &mut [T], lo: usize, mid: usize, hi: usize) {
     // assert!(is_sorted(&a[lo .. mid+1]));
     // assert!(is_sorted(&a[mid+1 .. hi+1]));
@@ -64,6 +54,9 @@ fn sort<T: PartialOrd + Copy>(a: &mut [T], aux: &mut [T], lo: usize, hi: usize) 
 
 pub fn merge_sort<T: PartialOrd + Copy>(a: &mut [T]) {
     let n = a.len();
+    if n <= 1 {
+        return;
+    }
     let mut aux: Vec<T> = a.iter().map(|&v| v).collect();
     sort(a, &mut aux, 0, n - 1);
 }
@@ -87,21 +80,3 @@ pub fn merge_bu_sort<T: PartialOrd + Copy + ::std::fmt::Debug>(a: &mut [T]) {
 }
 
 pub mod comparator;
-
-#[test]
-fn test_merge_sort() {
-    use rand::{thread_rng, Rng};
-
-    let mut array = thread_rng().gen_iter().take(20).collect::<Vec<u32>>();
-    merge_sort(&mut array);
-    assert!(is_sorted(&array));
-}
-
-#[test]
-fn test_merge_bu_sort() {
-    use rand::{thread_rng, Rng};
-
-    let mut array = thread_rng().gen_iter().take(20).collect::<Vec<u32>>();
-    merge_bu_sort(&mut array);
-    assert!(is_sorted(&array));
-}
