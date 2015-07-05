@@ -4,9 +4,6 @@ use std::cmp::Ordering::{Greater, Less, Equal};
 
 use super::elementary_sorts::insertion_sort;
 
-// TODO: distingush improved version vs original version
-
-
 fn partition<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) -> usize {
     let mut i = lo;
     let mut j = hi + 1;
@@ -116,6 +113,29 @@ pub fn quick_select<T: PartialOrd>(a: &mut [T], k: usize) -> T {
     mem::replace(&mut a[k], unsafe { mem::zeroed() })
 }
 
+
+// for original quick sort
+fn sort_orig<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
+    if hi <= lo { return }
+
+    let j = partition(a, lo, hi);
+
+    if j >= 1 {
+        sort_orig(a, lo, j-1);
+    }
+    sort_orig(a, j+1, hi);
+}
+
+// original quick sort
+pub fn quick_sort_orig<T: PartialOrd>(a: &mut [T]) {
+    let n = a.len();
+    if n <= 1 {
+        return;
+    }
+    sort_orig(a, 0, n-1);
+}
+
+
 fn sort_3way<T: PartialOrd + Copy>(a: &mut [T], lo: usize, hi: usize) {
     if hi <= lo {
         return;
@@ -143,12 +163,13 @@ fn sort_3way<T: PartialOrd + Copy>(a: &mut [T], lo: usize, hi: usize) {
             _ => unimplemented!()
         }
     }
-    if lt > 1 {
+    if lt >= 1 {
         sort_3way(a, lo, lt - 1);
     }
     sort_3way(a, gt + 1, hi);
 }
 
+/// 3-way quicksort
 pub fn quick_sort_3way<T: PartialOrd + Copy>(a: &mut [T]) {
     let n = a.len();
     if n <= 1 {
