@@ -25,8 +25,9 @@ macro_rules! deftest(
     ($name:ident, $func:ident) => (
         #[test]
         fn $name() {
+            let mut rng = thread_rng();
             for sz in vec![0, 1, 2, 3, 10, 20, 1000] {
-                let mut array = thread_rng().gen_iter().take(sz).collect::<Vec<f64>>();
+                let mut array = rng.gen_iter().take(sz).collect::<Vec<f64>>();
                 $func(&mut array);
                 assert!(is_sorted(&array));
             }

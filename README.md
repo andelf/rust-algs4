@@ -17,13 +17,6 @@ algs4partI-008 in Rust.
     cargo bench
 ```
 
-## Week 1: Union-Find
+## Description
 
-Height of forest = 4 > lg N = lg(10)
-
-Size of tree rooted at parent of 2 < twice the size of tree rooted at 2
-
-两个指标：
-
-- 平均到顶点距离要短。
-- average distance to root
+TODO: add file description
