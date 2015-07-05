@@ -1,6 +1,7 @@
 use std::cmp;
 use super::elementary_sorts::insertion_sort;
 
+#[allow(dead_code)]
 fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
     for i in 1 .. a.len() {
         if a[i] < a[i-1] {
@@ -83,6 +84,7 @@ pub fn merge_bu_sort<T: PartialOrd + Copy + ::std::fmt::Debug>(a: &mut [T]) {
     }
 }
 
+pub mod comparator;
 
 #[test]
 fn test_merge_sort() {
