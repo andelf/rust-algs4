@@ -42,14 +42,16 @@ fn merge<T: PartialOrd + Copy>(a: &mut [T], aux: &mut [T], lo: usize, mid: usize
 const CUTOFF: usize = 7;
 
 fn sort<T: PartialOrd + Copy>(a: &mut [T], aux: &mut [T], lo: usize, hi: usize) {
+    // # original:
     // if hi <= lo  {
     //     return;
     // }
-    // Use insertion sort for small subarrays.
+    // # Use insertion sort for small subarrays.
     if hi <= lo + CUTOFF - 1 {
         insertion_sort(&mut a[lo .. hi+1]);
         return;
     }
+    // # end
     let mid = lo + (hi - lo) / 2;
     sort(a, aux, lo, mid);
     sort(a, aux, mid+1, hi);
@@ -90,7 +92,7 @@ pub mod comparator;
 fn test_merge_sort() {
     use rand::{thread_rng, Rng};
 
-    let mut array = thread_rng().gen_iter().take(10).collect::<Vec<u32>>();
+    let mut array = thread_rng().gen_iter().take(20).collect::<Vec<u32>>();
     merge_sort(&mut array);
     assert!(is_sorted(&array));
 }
@@ -99,7 +101,7 @@ fn test_merge_sort() {
 fn test_merge_bu_sort() {
     use rand::{thread_rng, Rng};
 
-    let mut array = thread_rng().gen_iter().take(10).collect::<Vec<u32>>();
+    let mut array = thread_rng().gen_iter().take(20).collect::<Vec<u32>>();
     merge_bu_sort(&mut array);
     assert!(is_sorted(&array));
 }
