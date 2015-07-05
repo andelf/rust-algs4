@@ -9,9 +9,11 @@ use test::Bencher;
 use rand::{thread_rng, Rng};
 use algs4::elementary_sorts::*;
 use algs4::mergesort::*;
+use algs4::quicksort::*;
 
 
 static SIZE: usize = 1000;
+// for small array
 // static SIZE: usize = 10;
 
 macro_rules! defbench(
@@ -34,6 +36,8 @@ defbench!(bench_shell_sort, shell_sort);
 
 defbench!(bench_merge_sort, merge_sort);
 defbench!(bench_merge_bu_sort, merge_bu_sort);
+
+defbench!(bench_quick_sort, quick_sort);
 
 
 #[bench]

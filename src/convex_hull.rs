@@ -19,7 +19,7 @@ pub struct PolarOrder {
 impl Comparator<Point2D> for PolarOrder {
     fn compare(&self, q1: &Point2D, q2: &Point2D) -> Ordering {
 
-        // ugly hack
+        // ugly hack, offset 2 f64 is the start addr of Point2D
         let p: &Point2D = unsafe { mem::transmute((&self._dummy as *const f64).offset(-2)) };
 
         let y = p.y;

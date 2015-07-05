@@ -6,6 +6,7 @@ pub mod stacks_and_queues;
 pub mod elementary_sorts;
 
 pub mod mergesort;
+pub mod quicksort;
 
 pub mod convex_hull;
 
