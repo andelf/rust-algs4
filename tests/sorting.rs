@@ -44,3 +44,21 @@ deftest!(test_merge_sort, merge_sort);
 deftest!(test_merge_bu_sort, merge_bu_sort);
 
 deftest!(test_quick_sort, quick_sort);
+
+// # Non-Sorting
+
+#[test]
+fn test_quick_select() {
+    let mut rng = thread_rng();
+
+    for sz in vec![1, 2, 3, 10, 20, 1000] {
+        let array: Vec<usize> = (0 .. sz).collect();
+
+        for i in 0 .. sz {
+            let mut array = array.clone();
+            rng.shuffle(&mut array);
+            // the (i-1)th item is i
+            assert_eq!(quick_select(&mut array, i), i);
+        }
+    }
+}

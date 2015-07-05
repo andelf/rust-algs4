@@ -1,4 +1,5 @@
 // use rand::{thread_rng, Rng};
+use std::mem;
 use super::elementary_sorts::insertion_sort;
 
 // TODO: distingush improved version vs original version
@@ -42,11 +43,11 @@ fn partition<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) -> usize {
 /// find median of 3, index
 #[allow(dead_code)]
 fn median_of_3<T: PartialOrd>(a: &[T], i: usize, j: usize, k: usize) -> usize {
-    //                           lo, lo + (hi - lo) / 2, hi)
     use std::cmp::Ordering::{Greater, Less, Equal};
 
     let i_j = a[i].partial_cmp(&a[j]).unwrap_or(Equal);
     let j_k = a[j].partial_cmp(&a[k]).unwrap_or(Equal);
+    // FIXME: Pruning
     let i_k = a[i].partial_cmp(&a[k]).unwrap_or(Equal);
 
     // decision tree
@@ -95,6 +96,26 @@ pub fn quick_sort<T: PartialOrd>(a: &mut [T]) {
     // rng.shuffle(a);
     sort(a, 0, n-1);
 }
+
+pub fn quick_select<T: PartialOrd>(a: &mut [T], k: usize) -> T {
+    // skip StdRandom.shuffle(a);
+    let mut lo = 0;
+    let mut hi = a.len() - 1;
+    while hi > lo {
+        let j = partition(a, lo, hi);
+        if j < k {
+            lo = j + 1;
+        } else if j > k {
+            hi = j - 1;
+        } else {
+            break;
+        }
+    }
+    // take the value out
+    // FIXME: better to return a &T ?
+    mem::replace(&mut a[k], unsafe { mem::zeroed() })
+}
+
 
 
 #[test]
