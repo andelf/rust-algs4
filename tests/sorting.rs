@@ -13,7 +13,7 @@ use algs4::quicksort::*;
 
 fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
     for i in 1 .. a.len() {
-        if a[i] <= a[i-1] {
+        if a[i] < a[i-1] {
             return false;
         }
     }
@@ -23,11 +23,14 @@ fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
 
 macro_rules! deftest(
     ($name:ident, $func:ident) => (
+        deftest!($name, $func, f64);
+    );
+    ($name:ident, $func:ident, $typ:ty) => (
         #[test]
         fn $name() {
             let mut rng = thread_rng();
             for sz in vec![0, 1, 2, 3, 10, 20, 1000] {
-                let mut array = rng.gen_iter().take(sz).collect::<Vec<f64>>();
+                let mut array = rng.gen_iter().take(sz).collect::<Vec<$typ>>();
                 $func(&mut array);
                 assert!(is_sorted(&array));
             }
@@ -44,6 +47,10 @@ deftest!(test_merge_sort, merge_sort);
 deftest!(test_merge_bu_sort, merge_bu_sort);
 
 deftest!(test_quick_sort, quick_sort);
+deftest!(test_quick_sort_3way, quick_sort_3way);
+
+// # Special Sorting
+deftest!(test_quick_sort_3way_on_duplicated_array, quick_sort_3way, u8);
 
 // # Non-Sorting
 

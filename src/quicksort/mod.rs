@@ -1,5 +1,7 @@
 // use rand::{thread_rng, Rng};
 use std::mem;
+use std::cmp::Ordering::{Greater, Less, Equal};
+
 use super::elementary_sorts::insertion_sort;
 
 // TODO: distingush improved version vs original version
@@ -43,8 +45,6 @@ fn partition<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) -> usize {
 /// find median of 3, index
 #[allow(dead_code)]
 fn median_of_3<T: PartialOrd>(a: &[T], i: usize, j: usize, k: usize) -> usize {
-    use std::cmp::Ordering::{Greater, Less, Equal};
-
     let i_j = a[i].partial_cmp(&a[j]).unwrap_or(Equal);
     let j_k = a[j].partial_cmp(&a[k]).unwrap_or(Equal);
     // FIXME: Pruning
@@ -116,6 +116,46 @@ pub fn quick_select<T: PartialOrd>(a: &mut [T], k: usize) -> T {
     mem::replace(&mut a[k], unsafe { mem::zeroed() })
 }
 
+fn sort_3way<T: PartialOrd + Copy>(a: &mut [T], lo: usize, hi: usize) {
+    if hi <= lo {
+        return;
+    }
+    let mut lt = lo;
+    let mut gt = hi;
+    let mut i = lo;
+    // FIXME: this needs Copy
+    let v = a[lo];
+
+    while i <= gt {
+        match a[i].partial_cmp(&v) {
+            Some(Less) => {
+                a.swap(lt, i);
+                lt += 1;
+                i += 1;
+            },
+            Some(Greater) => {
+                a.swap(i, gt);
+                gt -= 1;
+            },
+            Some(Equal) => {
+                i += 1;
+            },
+            _ => unimplemented!()
+        }
+    }
+    if lt > 1 {
+        sort_3way(a, lo, lt - 1);
+    }
+    sort_3way(a, gt + 1, hi);
+}
+
+pub fn quick_sort_3way<T: PartialOrd + Copy>(a: &mut [T]) {
+    let n = a.len();
+    if n <= 1 {
+        return;
+    }
+    sort_3way(a, 0, n-1);
+}
 
 
 #[test]
