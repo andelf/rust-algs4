@@ -7,6 +7,8 @@ pub mod elementary_sorts;
 
 pub mod mergesort;
 
+pub mod convex_hull;
+
 #[test]
 fn it_works() {
 }

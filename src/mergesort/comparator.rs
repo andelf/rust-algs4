@@ -4,6 +4,10 @@ use std::cmp::Ordering;
 
 pub trait Comparator<T> {
     fn compare(&self, v: &T, w: &T) -> Ordering;
+
+    fn less(&self, v: &T, w: &T) -> bool {
+        self.compare(v, w) == Ordering::Less
+    }
 }
 
 impl<T, F> Comparator<T> for F where F: Send + Sync + Fn(&T, &T) -> Ordering {
@@ -17,7 +21,7 @@ pub fn insertion_sort<T: Ord, C: Comparator<T>>(a: &mut [T], comparator: C) {
     let n = a.len();
     for i in 0 .. n {
         for j in (1 .. i + 1).rev() {
-            if comparator.compare(&a[j], &a[j-1]) == Ordering::Less {
+            if comparator.less(&a[j], &a[j-1]) {
                 a.swap(j, j-1);
             }
         }

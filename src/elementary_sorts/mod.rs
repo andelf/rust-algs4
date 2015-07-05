@@ -115,5 +115,3 @@ fn test_knuth_shuffle() {
     knuth_shuffle(&mut new_array);
     assert!(array != new_array);
 }
-
-pub mod convex_hull;
