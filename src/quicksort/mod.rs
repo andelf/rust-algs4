@@ -4,6 +4,7 @@ use std::cmp::Ordering::{Greater, Less, Equal};
 
 use super::elementary_sorts::insertion_sort;
 
+/// quicksort partitioning
 fn partition<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) -> usize {
     let mut i = lo;
     let mut j = hi + 1;
@@ -61,6 +62,7 @@ fn median_of_3<T: PartialOrd>(a: &[T], i: usize, j: usize, k: usize) -> usize {
 // Cutoff to insertion sort for ≈ 10 items.
 const CUTOFF: usize = 10;
 
+/// quicksort optimised
 fn sort<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
     // # original:
     // if hi <= lo { return }
@@ -83,6 +85,7 @@ fn sort<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
     sort(a, j+1, hi);
 }
 
+/// quicksort optimised
 pub fn quick_sort<T: PartialOrd>(a: &mut [T]) {
     let n = a.len();
     if n <= 1 {
@@ -94,6 +97,7 @@ pub fn quick_sort<T: PartialOrd>(a: &mut [T]) {
     sort(a, 0, n-1);
 }
 
+/// quick-select
 pub fn quick_select<T: PartialOrd>(a: &mut [T], k: usize) -> T {
     // skip StdRandom.shuffle(a);
     let mut lo = 0;
@@ -126,7 +130,7 @@ fn sort_orig<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
     sort_orig(a, j+1, hi);
 }
 
-// original quick sort
+/// original quick sort
 pub fn quick_sort_orig<T: PartialOrd>(a: &mut [T]) {
     let n = a.len();
     if n <= 1 {

@@ -44,12 +44,12 @@ defbench!(bench_merge_sort, merge_sort);
 defbench!(bench_merge_bu_sort, merge_bu_sort);
 
 defbench!(bench_quick_sort, quick_sort);
-defbench!(bench_quick_sort_orig, quick_sort_orig);
-defbench!(bench_quick_sort_3way, quick_sort_3way);
+// defbench!(bench_quick_sort_orig, quick_sort_orig);
+// defbench!(bench_quick_sort_3way, quick_sort_3way);
 
-// :( 3way sort does not exceed
-defbench!(bench_quick_sort_orig_on_dup_keys, quick_sort_orig, u8);
-defbench!(bench_quick_sort_3way_on_dup_keys, quick_sort_3way, u8);
+// // :( 3way sort does not exceed
+// defbench!(bench_quick_sort_orig_on_dup_keys, quick_sort_orig, u8);
+// defbench!(bench_quick_sort_3way_on_dup_keys, quick_sort_3way, u8);
 
 
 #[bench]
