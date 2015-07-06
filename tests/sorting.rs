@@ -52,7 +52,6 @@ deftest!(test_quick_sort_3way, quick_sort_3way);
 
 // # Special Sorting
 deftest!(test_quick_sort_3way_on_u8_array, quick_sort_3way, u8);
-deftest!(test_quick_sort_3way_on_bool_array, quick_sort_3way, bool);
 
 // # Non-Sorting
 

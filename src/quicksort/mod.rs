@@ -1,6 +1,5 @@
 // use rand::{thread_rng, Rng};
 use std::mem;
-use std::cmp::Ordering::{Greater, Less, Equal};
 
 use super::elementary_sorts::insertion_sort;
 
@@ -42,19 +41,28 @@ fn partition<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) -> usize {
 
 /// find median of 3, index
 #[allow(dead_code)]
+#[inline]
 fn median_of_3<T: PartialOrd>(a: &[T], i: usize, j: usize, k: usize) -> usize {
-    let i_j = a[i].partial_cmp(&a[j]).unwrap_or(Equal);
-    let j_k = a[j].partial_cmp(&a[k]).unwrap_or(Equal);
-    // FIXME: Pruning
-    let i_k = a[i].partial_cmp(&a[k]).unwrap_or(Equal);
-
-    // decision tree
-    match (i_j, j_k, i_k) {
-        (Greater, Greater, _)    | (Less, Less, _)          => j,
-        (Greater, Less, Less)    | (Less, Greater, Greater) => i,
-        (Greater, Less, Greater) | (Less, Greater, Less)    => k,
-        (Equal, _, _)            | (_, _, Equal)            => i,
-        _                                                   => j
+    if a[i] >= a[j] {
+        if a[j] >= a[k] {
+            j
+        } else {
+            if a[i] >= a[k] {
+                k
+            } else {
+                i
+            }
+        }
+    } else {
+        if a[j] >= a[k] {
+            if a[i] >= a[k] {
+                i
+            } else {
+                k
+            }
+        } else {
+            j
+        }
     }
 }
 
@@ -64,22 +72,19 @@ const CUTOFF: usize = 10;
 
 /// quicksort optimised
 fn sort<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
-    // # original:
-    // if hi <= lo { return }
     // # small subarrays improve:
     if hi <= lo + CUTOFF - 1 {
         insertion_sort(&mut a[lo .. hi+1]);
         return ;
     }
-    // # end
 
-    // waste of time under big arrays
+    // # awaste of time under big arrays:
     // let m = median_of_3(a, lo, lo + (hi - lo)/2, hi);
     // a.swap(lo, m);
 
     let j = partition(a, lo, hi);
     // BUG FIXED: (in original code) if j == 0, j - 1 overflows
-    if j > 0 {
+    if j > 1 {
         sort(a, lo, j-1);
     }
     sort(a, j+1, hi);
@@ -88,13 +93,12 @@ fn sort<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
 /// quicksort optimised
 pub fn quick_sort<T: PartialOrd>(a: &mut [T]) {
     let n = a.len();
-    if n <= 1 {
-        return;
-    }
     // # time waste
     // let mut rng = thread_rng();
     // rng.shuffle(a);
-    sort(a, 0, n-1);
+    if n > 1 {
+        sort(a, 0, n-1)
+    }
 }
 
 /// quick-select
@@ -133,10 +137,9 @@ fn sort_orig<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) {
 /// original quick sort
 pub fn quick_sort_orig<T: PartialOrd>(a: &mut [T]) {
     let n = a.len();
-    if n <= 1 {
-        return;
+    if n > 1 {
+        sort_orig(a, 0, n-1)
     }
-    sort_orig(a, 0, n-1);
 }
 
 
@@ -151,20 +154,15 @@ fn sort_3way<T: PartialOrd + Copy>(a: &mut [T], lo: usize, hi: usize) {
     let v = a[lo];
 
     while i <= gt {
-        match a[i].partial_cmp(&v) {
-            Some(Less) => {
-                a.swap(lt, i);
-                lt += 1;
-                i += 1;
-            },
-            Some(Greater) => {
-                a.swap(i, gt);
-                gt -= 1;
-            },
-            Some(Equal) => {
-                i += 1;
-            },
-            _ => unimplemented!()
+        if a[i] < v {
+            a.swap(lt, i);
+            lt += 1;
+            i += 1;
+        } else if a[i] > v{
+            a.swap(i, gt);
+            gt -= 1;
+        } else {
+            i += 1;
         }
     }
     if lt >= 1 {
@@ -176,10 +174,9 @@ fn sort_3way<T: PartialOrd + Copy>(a: &mut [T], lo: usize, hi: usize) {
 /// 3-way quicksort
 pub fn quick_sort_3way<T: PartialOrd + Copy>(a: &mut [T]) {
     let n = a.len();
-    if n <= 1 {
-        return;
+    if n > 1 {
+        sort_3way(a, 0, n-1)
     }
-    sort_3way(a, 0, n-1);
 }
 
 
