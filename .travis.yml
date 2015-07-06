@@ -10,3 +10,5 @@ script:
   - cargo build -v
   - cargo test -- --nocapture
   - cargo bench -v
+after_script:
+  - cargo run --example percolation 20 1000

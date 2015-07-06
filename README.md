@@ -22,7 +22,7 @@ cargo bench
 ### Programming Assignment 1: Percolation
 
 ```
-> cargo run --example percolation 20 100
+> cargo run --example percolation 20 1000
      Running `target/debug/examples/percolation 20 1000`
 mean                    = 0.59409
 stddev                  = 0.0490816249313926
