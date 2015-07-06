@@ -170,6 +170,10 @@ fn main() {
     let n: usize = args.next().unwrap().parse().unwrap();
     let t: usize = args.next().unwrap().parse().unwrap();
 
+    if t < 30 {
+        println!("Warning: T is not sufficiently large! (at least 30).");
+    }
+
     let stats = PercolationStats::new(n, t);
     println!("{:23} = {}", "mean", stats.mean());
     println!("{:23} = {}", "stddev", stats.std_dev());
