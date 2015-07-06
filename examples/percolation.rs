@@ -71,6 +71,7 @@ impl Percolation {
 
     /// open site (row i, column j) if it is not open already
     pub fn open(&mut self, i: usize, j: usize) {
+        assert!(i >= 1 && i <= self.n && j >= 1 && j <= self.n, "(i, j) are out of bounds");
         let idx = self.idx_of(i, j);
         self.opened[idx] = true;
 

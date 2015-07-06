@@ -158,7 +158,7 @@ fn sort_3way<T: PartialOrd + Copy>(a: &mut [T], lo: usize, hi: usize) {
             a.swap(lt, i);
             lt += 1;
             i += 1;
-        } else if a[i] > v{
+        } else if a[i] > v {
             a.swap(i, gt);
             gt -= 1;
         } else {

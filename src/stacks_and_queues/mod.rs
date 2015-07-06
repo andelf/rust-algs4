@@ -83,15 +83,17 @@ pub trait Bag<T> {
 
 // Programming Assignment 2: Randomized Queues and Deques
 // Deque
+pub mod linked_deque;
+
 pub trait Deque<T> {
     fn new() -> Self;
     fn is_empty(&self) -> bool;
     fn size(&self) -> usize;
     fn add_first(&mut self, item: T);
     fn add_last(&mut self, item: T);
-    fn remove_first(&mut self) -> T;
-    fn remove_last(&mut self) -> T;
-    fn iter(&self) -> Iterator<Item=T>;
+    fn remove_first(&mut self) -> Option<T>;
+    fn remove_last(&mut self) -> Option<T>;
+    // fn iter(&self) -> Iterator<Item=&T>;
 }
 
 // RandomizeQueue
