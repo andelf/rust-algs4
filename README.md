@@ -12,9 +12,21 @@ algs4partI-008 in Rust.
 ## How to
 
 ```
-    cargo build
-    cargo test
-    cargo bench
+cargo build
+cargo test
+cargo bench
+```
+
+## Assignments:
+
+### Programming Assignment 1: Percolation
+
+```
+> cargo run --example percolation 20 100
+     Running `target/debug/examples/percolation 20 1000`
+mean                    = 0.59409
+stddev                  = 0.0490816249313926
+95% confidence interval = 0.591047889369512, 0.597132110630488
 ```
 
 ## Description
