@@ -1,7 +1,6 @@
 use std::mem;
 use std::ptr;
 use std::fmt;
-use std::iter::{Iterator, ExactSizeIterator};
 use super::Deque;
 
 struct Rawlink<T> {
@@ -142,7 +141,7 @@ impl<T> Deque<T> for LinkedDeque<T> {
 }
 
 impl<T> LinkedDeque<T> {
-    fn iter<'a>(&'a self) -> Iter<'a, T> {
+    pub fn iter<'a>(&'a self) -> Iter<'a, T> {
         Iter {
             current: self.first.as_ref(),
             nelem: self.size()
@@ -171,7 +170,7 @@ impl<T: fmt::Display> fmt::Display for LinkedDeque<T> {
     }
 }
 
-// TODO impl DoubleEndedIterator, ExactSizeIterator
+// TODO impl DoubleEndedIterator
 pub struct Iter<'a, T: 'a> {
     current: Option<&'a Box<Node<T>>>,
     nelem: usize,
