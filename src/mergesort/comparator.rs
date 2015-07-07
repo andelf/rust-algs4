@@ -17,7 +17,7 @@ impl<T, F> Comparator<T> for F where F: Send + Sync + Fn(&T, &T) -> Ordering {
 }
 
 
-pub fn insertion_sort<T: Ord, C: Comparator<T>>(a: &mut [T], comparator: C) {
+pub fn insertion_sort<T: PartialOrd, C: Comparator<T>>(a: &mut [T], comparator: C) {
     let n = a.len();
     for i in 0 .. n {
         for j in (1 .. i + 1).rev() {

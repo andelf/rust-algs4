@@ -13,8 +13,6 @@ pub struct PolarOrder {
     _dummy: f64,              // dummy position
 }
 
-
-
 // TODO
 impl Comparator<Point2D> for PolarOrder {
     fn compare(&self, q1: &Point2D, q2: &Point2D) -> Ordering {
