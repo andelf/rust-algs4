@@ -95,7 +95,7 @@ pub trait Deque<T> {
     fn remove_last(&mut self) -> Option<T>;
 }
 
-// RandomizeQueue
+// RandomizedQueue
 pub mod resizing_array_randomized_queue;
 
 pub trait RandomizedQueue<T> {
