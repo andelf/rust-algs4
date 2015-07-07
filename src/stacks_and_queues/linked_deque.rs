@@ -1,6 +1,7 @@
 use std::mem;
 use std::ptr;
 use std::fmt;
+use std::iter::{Iterator, ExactSizeIterator};
 use super::Deque;
 
 struct Rawlink<T> {
@@ -77,11 +78,11 @@ impl<T> Deque<T> for LinkedDeque<T> {
 
         if old_first.is_some() {
             old_first.as_mut().unwrap().prev = Rawlink::some(&mut first);
+            // move in
+            first.next = old_first;
         } else {
             self.last = Rawlink::some(&mut first);
         }
-        // move in
-        first.next = old_first;
 
         self.first = Some(first)
     }
@@ -89,11 +90,12 @@ impl<T> Deque<T> for LinkedDeque<T> {
     fn add_last(&mut self, item: T) {
         if self.first.is_some() {
             let old_last = self.last.take();
-            let last = Box::new(Node {
+            let mut last = Box::new(Node {
                 item: item,
                 next: None,
                 prev: Rawlink::none(),
             });
+            self.last = Rawlink::some(&mut last);
             unsafe {
                 (*old_last.p).next = Some(last);
             }
@@ -136,10 +138,16 @@ impl<T> Deque<T> for LinkedDeque<T> {
 
         Some(last.item)
     }
-    // fn iter(&self) -> Iterator<Item=&T> {
-    //     unimplemented!()
-    // }
 
+}
+
+impl<T> LinkedDeque<T> {
+    fn iter<'a>(&'a self) -> Iter<'a, T> {
+        Iter {
+            current: self.first.as_ref(),
+            nelem: self.size()
+        }
+    }
 }
 
 impl<T: fmt::Display> fmt::Display for LinkedDeque<T> {
@@ -163,6 +171,36 @@ impl<T: fmt::Display> fmt::Display for LinkedDeque<T> {
     }
 }
 
+// TODO impl DoubleEndedIterator, ExactSizeIterator
+pub struct Iter<'a, T: 'a> {
+    current: Option<&'a Box<Node<T>>>,
+    nelem: usize,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<&'a T> {
+        if self.nelem == 0 {
+            return None;
+        }
+        let old_current = self.current.take();
+
+        self.current = (**old_current.unwrap()).next.as_ref();
+        self.nelem -= 1;
+        Some(&old_current.as_ref().unwrap().item)
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.nelem, Some(self.nelem))
+    }
+}
+
+impl <'a, T> ExactSizeIterator for Iter<'a, T> {
+    fn len(&self) -> usize {
+        self.nelem
+    }
+}
 
 
 #[test]
@@ -216,4 +254,27 @@ fn test_linked_deque_size() {
     }
 
     assert!(deque.is_empty());
+}
+
+#[test]
+fn test_linked_deque_iter() {
+    let mut deque: LinkedDeque<i32> = Deque::new();
+
+    assert!(deque.is_empty());
+    for i in 0..10 {
+        if i % 2 == 0 {
+            deque.add_first(i);
+        } else {
+            deque.add_last(i);
+        }
+    }
+
+    let mut n = 0i32;
+    let it = deque.iter();
+    assert_eq!(it.len(), 10);
+
+    for _ in it {
+        n += 1;
+    }
+    assert_eq!(n, 10);
 }

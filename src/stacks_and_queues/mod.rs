@@ -93,7 +93,6 @@ pub trait Deque<T> {
     fn add_last(&mut self, item: T);
     fn remove_first(&mut self) -> Option<T>;
     fn remove_last(&mut self) -> Option<T>;
-    // fn iter(&self) -> Iterator<Item=&T>;
 }
 
 // RandomizeQueue
