@@ -22,12 +22,17 @@ cargo bench
 ### Programming Assignment 1: Percolation
 
 ```
-> cargo run --example percolation 20 1000
-     Running `target/debug/examples/percolation 20 1000`
-mean                    = 0.59409
-stddev                  = 0.0490816249313926
-95% confidence interval = 0.591047889369512, 0.597132110630488
+ᐅ cargo run --example percolation 2 1000
+     Running `target/debug/examples/percolation 2 1000`
+mean                    = 0.67175
+stddev                  = 0.1159865957358461
+95% confidence interval = 0.6645610763167408, 0.6789389236832591
 ```
+
+### Programming Assignment 2: Randomized Queues and Deques
+
+- ``Deque``: ``src/stacks_and_queues/linked_deque.rs``
+- ``RandomizedQueue``: TODO
 
 ## Description
 

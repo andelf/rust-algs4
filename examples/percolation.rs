@@ -92,6 +92,7 @@ impl Percolation {
         false
     }
 
+    #[allow(dead_code)]
     fn dump(&self) {
         for i in 0 .. self.n * self.n {
             if self.opened[i] {
@@ -118,7 +119,7 @@ impl PercolationStats {
         let mut rng = thread_rng();
         let mut xs = Vec::new();
         let n_sites = (n as f64) * (n as f64);
-        for i in 0 .. t {
+        for _ in 0 .. t {
             let mut sites = Percolation::new(n);
             let mut cnt = 0f64;
             loop {
