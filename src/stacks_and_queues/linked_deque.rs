@@ -3,8 +3,6 @@ use std::ptr;
 use std::fmt;
 use super::Deque;
 
-// copy semantices
-//#[derive(Copy, Clone)]
 struct Rawlink<T> {
     p: *mut T
 }
@@ -38,7 +36,7 @@ impl<T> Node<T> {
 
     fn size(&self) -> usize {
         let mut p = self.next.as_ref();
-        let mut sz = 0;
+        let mut sz = 1;
         while p.is_some() {
             p = p.unwrap().next.as_ref();
             sz += 1;
@@ -168,24 +166,51 @@ impl<T: fmt::Display> fmt::Display for LinkedDeque<T> {
 
 
 #[test]
-fn test_linked_deque() {
+fn test_linked_deque_add_remove() {
     let mut deque: LinkedDeque<i32> = Deque::new();
 
     assert!(deque.is_empty());
     assert_eq!(deque.remove_first(), None);
     assert_eq!(deque.remove_last(), None);
 
-    let result = vec![4, 0, 3, 2];
+    let result = vec![4, 0, 5, 2, 3];
     let mut rit = result.iter();
     // -1 remove last
     // -2 remove first
     // extra 2 more -1 -2 will result None
-    for s in vec![4, 2, 3, 0, -1, -2, -2, -1, -1, -2] {
+    for s in vec![4, 2, 3, 0, -1, -2, 5, -2, -1, -1, -2] {
         if s == -2 {
             assert_eq!(deque.remove_first(), rit.next().map(|&v| v));
         } else if s == -1 {
             assert_eq!(deque.remove_last(), rit.next().map(|&v| v));
         } else {
+            deque.add_first(s);
+        }
+    }
+
+    assert!(deque.is_empty());
+}
+
+
+#[test]
+fn test_linked_deque_size() {
+    let mut deque: LinkedDeque<i32> = Deque::new();
+
+    assert!(deque.is_empty());
+
+    let result = vec![0, 1, 2, 3, 4, 3, 2, 3, 2, 1, 0, 0];
+    let mut rit = result.iter();
+    // -1 remove last
+    // -2 remove first
+    for s in vec![4, 2, 3, 0, -1, -2, 5, -1, -1, -2] {
+        if s == -2 {
+            assert_eq!(deque.size(), *rit.next().unwrap());
+            deque.remove_first();
+        } else if s == -1 {
+            assert_eq!(deque.size(), *rit.next().unwrap());
+            deque.remove_last();
+        } else {
+            assert_eq!(deque.size(), *rit.next().unwrap());
             deque.add_first(s);
         }
     }
