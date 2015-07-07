@@ -96,11 +96,13 @@ pub trait Deque<T> {
 }
 
 // RandomizeQueue
+pub mod resizing_array_randomized_queue;
+
 pub trait RandomizedQueue<T> {
     fn new() -> Self;
     fn is_empty(&self) -> bool;
     fn size(&self) -> usize;
     fn enqueue(&mut self, item: T);
-    fn dequeue(&mut self) -> T;
-    fn sample(&self) -> &T;
+    fn dequeue(&mut self) -> Option<T>;
+    fn sample(&self) -> Option<&T>;
 }
