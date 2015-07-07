@@ -1,7 +1,10 @@
 use std::mem;
 use std::ptr;
+use std::fmt;
 use super::Deque;
 
+// copy semantices
+//#[derive(Copy, Clone)]
 struct Rawlink<T> {
     p: *mut T
 }
@@ -44,6 +47,7 @@ impl<T> Node<T> {
     }
 }
 
+/// linked double queue
 pub struct LinkedDeque<T> {
     first: Option<Box<Node<T>>>,
     last: Rawlink<Node<T>>
@@ -57,7 +61,7 @@ impl<T> Deque<T> for LinkedDeque<T> {
         }
     }
     fn is_empty(&self) -> bool {
-        true
+        self.first.is_none()
     }
     fn size(&self) -> usize {
         match self.first {
@@ -75,6 +79,8 @@ impl<T> Deque<T> for LinkedDeque<T> {
 
         if old_first.is_some() {
             old_first.as_mut().unwrap().prev = Rawlink::some(&mut first);
+        } else {
+            self.last = Rawlink::some(&mut first);
         }
         // move in
         first.next = old_first;
@@ -83,17 +89,33 @@ impl<T> Deque<T> for LinkedDeque<T> {
     }
 
     fn add_last(&mut self, item: T) {
-        unimplemented!()
+        if self.first.is_some() {
+            let old_last = self.last.take();
+            let last = Box::new(Node {
+                item: item,
+                next: None,
+                prev: Rawlink::none(),
+            });
+            unsafe {
+                (*old_last.p).next = Some(last);
+            }
+
+        } else {
+            self.add_first(item)
+        }
     }
 
     fn remove_first(&mut self) -> Option<T> {
         let old_first = self.first.take();
-        let (item, first, _) = old_first.unwrap().into_item_and_pointers();
-        self.first = first;
-        if self.is_empty() {
-            self.last = Rawlink::none()
+        if old_first.is_some() {
+            let (item, mut first, _) = old_first.unwrap().into_item_and_pointers();
+            // update new first's prev field
+            first.as_mut().map(|v| v.prev = Rawlink::none());
+            self.first = first;
+            Some(item)
+        } else {
+            None
         }
-        Some(item)
     }
 
     fn remove_last(&mut self) -> Option<T> {
@@ -101,16 +123,20 @@ impl<T> Deque<T> for LinkedDeque<T> {
         if old_last.p.is_null() {
             return None;
         }
-        let last_but_one = unsafe { mem::transmute::<_, &mut Node<T>>(old_last.p) };
+        let last_ref_mut = unsafe { mem::transmute::<_, &mut Node<T>>(old_last.p) };
 
-        let last: Node<T> = mem::replace(last_but_one, unsafe { mem::zeroed() });
+        let last: Node<T> = mem::replace(last_ref_mut, unsafe { mem::zeroed() });
 
-        unsafe {
-            (*last.prev.p).next = None;
+        if last.prev.p.is_null() {
+            self.first = None;
+        } else {
+            unsafe {
+                (*last.prev.p).next = None;
+            }
         }
+        self.last = last.prev;
 
         Some(last.item)
-
     }
     // fn iter(&self) -> Iterator<Item=&T> {
     //     unimplemented!()
@@ -118,18 +144,51 @@ impl<T> Deque<T> for LinkedDeque<T> {
 
 }
 
+impl<T: fmt::Display> fmt::Display for LinkedDeque<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self.first {
+            None    => {
+                try!(write!(f, "<empty deque>"));
+            },
+            Some(ref l) => {
+                try!(write!(f, "("));
+                let mut p = Some(l);
+                while p.is_some() {
+                    try!(write!(f, "{},", p.unwrap().item));
+                    p = p.unwrap().next.as_ref();
+                }
+                try!(write!(f, ")"));
+
+            }
+        }
+        Ok(())
+    }
+}
+
+
 
 #[test]
 fn test_linked_deque() {
-    let mut deque: LinkedDeque<String> = Deque::new();
+    let mut deque: LinkedDeque<i32> = Deque::new();
 
-    let mut result = "to be not that or be".split(' ');
+    assert!(deque.is_empty());
+    assert_eq!(deque.remove_first(), None);
+    assert_eq!(deque.remove_last(), None);
 
-    for s in "to be or not to - be - - that - - - is".split(' ') {
-        if s == "-" {
-            assert_eq!(deque.remove_first(), Some(result.next().unwrap().into()))
+    let result = vec![4, 0, 3, 2];
+    let mut rit = result.iter();
+    // -1 remove last
+    // -2 remove first
+    // extra 2 more -1 -2 will result None
+    for s in vec![4, 2, 3, 0, -1, -2, -2, -1, -1, -2] {
+        if s == -2 {
+            assert_eq!(deque.remove_first(), rit.next().map(|&v| v));
+        } else if s == -1 {
+            assert_eq!(deque.remove_last(), rit.next().map(|&v| v));
         } else {
-            deque.add_first(s.into())
+            deque.add_first(s);
         }
     }
+
+    assert!(deque.is_empty());
 }
