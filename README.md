@@ -31,8 +31,32 @@ stddev                  = 0.1159865957358461
 
 ### Programming Assignment 2: Randomized Queues and Deques
 
-- ``Deque``: ``src/stacks_and_queues/linked_deque.rs``
-- ``RandomizedQueue``: TODO
+- ``Dequeue``: ``src/stacks_and_queues/linked_deque.rs``
+- ``Randomized queue``: ``src/stacks_and_queues/resizing_array_randomized_queue.rs``
+- ``Subset client``: ``examples/subset.rs``
+
+```
+ᐅ echo A B C D E F G H I | cargo run --example subset 3
+     Running `target/debug/examples/subset 3`
+D
+G
+C
+ᐅ echo A B C D E F G H I | cargo run --example subset 3
+     Running `target/debug/examples/subset 3`
+D
+E
+H
+ᐅ echo AA BB BB BB BB BB CC CC | cargo run --example subset 8
+     Running `target/debug/examples/subset 8`
+BB
+CC
+BB
+BB
+CC
+AA
+BB
+BB
+```
 
 ## Description
 
