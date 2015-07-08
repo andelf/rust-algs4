@@ -58,6 +58,32 @@ BB
 BB
 ```
 
+### Programming Assignment 3: Pattern Recognition
+
+- ``Program``: ``examples/collinear.rs``
+
+```
+ᐅ cat /path/to/collinear/input6.txt | cargo run --example collinear
+     Running `target/debug/examples/collinear`
+# Brute force
+(21000, 10000) -> (32000, 10000) -> (18000, 10000) -> (19000, 10000)
+(14000, 10000) -> (32000, 10000) -> (18000, 10000) -> (19000, 10000)
+(14000, 10000) -> (21000, 10000) -> (18000, 10000) -> (19000, 10000)
+(14000, 10000) -> (21000, 10000) -> (32000, 10000) -> (19000, 10000)
+(14000, 10000) -> (21000, 10000) -> (32000, 10000) -> (18000, 10000)
+# A faster, sorting-based solution
+(14000, 10000) -> (18000, 10000) -> (19000, 10000) -> (21000, 10000) -> (32000, 10000)
+
+ᐅ cat /path/to/collinear/input8.txt | cargo run --example collinear
+     Running `target/debug/examples/collinear`
+# Brute force
+(7000, 3000) -> (3000, 7000) -> (0, 10000) -> (10000, 0)
+(6000, 7000) -> (14000, 15000) -> (3000, 4000) -> (20000, 21000)
+# A faster, sorting-based solution
+(10000, 0) -> (7000, 3000) -> (3000, 7000) -> (0, 10000)
+(3000, 4000) -> (6000, 7000) -> (14000, 15000) -> (20000, 21000)
+```
+
 ## Description
 
 TODO: add file description
