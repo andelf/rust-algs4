@@ -84,6 +84,14 @@ impl fmt::Display for Point {
     }
 }
 
+impl fmt::Debug for Point {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        try!(write!(f, "({}, {})", self.x, self.y));
+        Ok(())
+    }
+}
+
+
 // examines 4 points at a time and checks whether they all lie on the same line segment,
 // printing out any such line segments to standard output and drawing them using standard drawing.
 // To check whether the 4 points p, q, r, and s are collinear, check whether the slopes between
@@ -122,12 +130,15 @@ fn sorting_based(points: &[Point]) {
     let mut result: Vec<Vec<Point>> = Vec::new();
 
     for i in 1 .. n {
-        // 0th is our origin
+        // 0th is the origin
         points.swap(0, i);
 
         let mut points = points.clone();
         let p = points[0].clone();
 
+        //
+        quick_sort(&mut points[1..]);
+        // insertion sort is stable
         insertion_sort(&mut points[1..], p.SLOPE_ORDER());
 
         let mut n = 0usize;
@@ -136,36 +147,40 @@ fn sorting_based(points: &[Point]) {
         let mut prev_slope = 99999.9;
 
         for (idx, slope) in points.iter().map(|q| p.slope_to(q)).enumerate() {
+            if idx == 0 {
+                continue;
+            }
             if slope == prev_slope {
                 n += 1;
                 coll_points_idx.push(idx);
             } else {
-                if n >= 3 {
+                // if more than 4 points in seq
+                if n >= 4 {
                     let mut line: Vec<Point> = coll_points_idx.iter().map(|&i| points[i].clone()).collect();
                     quick_sort(&mut line);
                     if !result.contains(&line) {
                         result.push(line)
                     }
                 }
-                n = 0;
+                // every time we went here, we already have 2 points.
+                n = 2;
                 coll_points_idx = vec![0, idx];
             }
             prev_slope = slope;
         }
         // FIXME: duplicated logic
-        if n >= 3 {
+        if n >= 4 {
             let mut line: Vec<Point> = coll_points_idx.iter().map(|&i| points[i].clone()).collect();
             quick_sort(&mut line);
-            // FIXME: not work!
             if !result.contains(&line) {
                 result.push(line)
             }
         }
-        for line in result.iter() {
-            let desc = line.iter().map(|i| format!("{}", i)).collect::<Vec<String>>().connect(" -> ");
-            println!("{}", desc);
+    }
+    for line in result.iter() {
+        let desc = line.iter().map(|i| format!("{}", i)).collect::<Vec<String>>().connect(" -> ");
+        println!("{}", desc);
 
-        }
     }
 }
 
