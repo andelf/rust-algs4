@@ -10,6 +10,8 @@ pub mod quicksort;
 
 pub mod convex_hull;
 
+pub mod priority_queues;
+
 #[test]
 fn it_works() {
 }
