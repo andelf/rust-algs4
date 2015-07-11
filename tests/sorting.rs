@@ -9,6 +9,7 @@ use rand::{thread_rng, Rng};
 use algs4::elementary_sorts::*;
 use algs4::mergesort::*;
 use algs4::quicksort::*;
+use algs4::priority_queues::heapsort::heap_sort;
 
 
 fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {
@@ -50,6 +51,8 @@ deftest!(test_quick_sort, quick_sort);
 deftest!(test_quick_sort_orig, quick_sort_orig);
 deftest!(test_quick_sort_3way, quick_sort_3way);
 
+deftest!(test_heap_sort, heap_sort);
+
 // # Special Sorting
 deftest!(test_quick_sort_3way_on_u8_array, quick_sort_3way, u8);
 
@@ -59,7 +62,7 @@ deftest!(test_quick_sort_3way_on_u8_array, quick_sort_3way, u8);
 fn test_quick_select() {
     let mut rng = thread_rng();
 
-    for sz in vec![1, 2, 3, 10, 20, 1000] {
+    for sz in vec![1, 2, 10, 20] {
         let array: Vec<usize> = (0 .. sz).collect();
 
         for i in 0 .. sz {

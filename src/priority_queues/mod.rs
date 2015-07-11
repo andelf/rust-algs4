@@ -40,3 +40,5 @@ pub trait MInPQ<Key: PartialEq> {
 pub mod unordered;
 
 pub mod binary_heaps;
+
+pub mod heapsort;

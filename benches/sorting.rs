@@ -10,6 +10,7 @@ use rand::{thread_rng, Rng};
 use algs4::elementary_sorts::*;
 use algs4::mergesort::*;
 use algs4::quicksort::*;
+use algs4::priority_queues::heapsort::heap_sort;
 
 
 static SIZE: usize = 1000;
@@ -51,6 +52,7 @@ defbench!(bench_quick_sort_3way, quick_sort_3way);
 defbench!(bench_quick_sort_orig_on_dup_keys, quick_sort_orig, u8);
 defbench!(bench_quick_sort_3way_on_dup_keys, quick_sort_3way, u8);
 
+defbench!(bench_heap_sort, heap_sort);
 
 #[bench]
 fn bench_knuth_shuffle(b: &mut Bencher) {
