@@ -1,3 +1,5 @@
+#![feature(move_from, map_in_place)]
+
 extern crate rand;
 
 pub mod union_find;
