@@ -14,6 +14,8 @@ pub mod convex_hull;
 
 pub mod priority_queues;
 
+pub mod symbol_tables;
+
 #[test]
 fn it_works() {
 }
