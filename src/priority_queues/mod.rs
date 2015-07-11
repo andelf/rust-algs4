@@ -9,7 +9,7 @@ pub trait MaxPQ<Key: PartialEq> {
     /// insert a key into the priority queue
     fn insert(&mut self, v: Key);
     /// return and remove the largest key
-    fn del_max(&mut self) -> Key;
+    fn del_max(&mut self) -> Option<Key>;
     /// is the priority queue empty?
     fn is_empty(&self) -> bool;
     /// return the largest key
@@ -27,7 +27,7 @@ pub trait MInPQ<Key: PartialEq> {
     /// insert a key into the priority queue
     fn insert(&mut self, v: Key);
     /// return and remove the smallest key
-    fn del_min(&mut self) -> Key;
+    fn del_min(&mut self) -> Option<Key>;
     /// is the priority queue empty?
     fn is_empty(&self) -> bool;
     /// return the largest key

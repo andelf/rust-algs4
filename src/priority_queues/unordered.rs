@@ -39,7 +39,10 @@ impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
         self.n += 1
     }
     /// return and remove the largest key
-    fn del_max(&mut self) -> Key {
+    fn del_max(&mut self) -> Option<Key> {
+        if self.is_empty() {
+            return None;
+        }
         let mut max = 0;
         for i in 0 .. self.n {
             if self.pq[max] < self.pq[i] {
@@ -49,9 +52,10 @@ impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
         }
         self.pq.swap(max, self.n-1);
         self.n -= 1;
-        self.pq[self.n].take().unwrap()
+        self.pq[self.n].take()
     }
     /// is the priority queue empty?
+    #[inline]
     fn is_empty(&self) -> bool {
         self.n == 0
     }
@@ -75,20 +79,20 @@ fn test_unordered_priority_queue() {
     pq.insert('E');
 
     assert_eq!(pq.size(), 3);
-    assert_eq!(pq.del_max(), 'Q');
+    assert_eq!(pq.del_max().unwrap(), 'Q');
     assert_eq!(pq.size(), 2);
 
     pq.insert('X');
     pq.insert('A');
     pq.insert('M');
 
-    assert_eq!(pq.del_max(), 'X');
+    assert_eq!(pq.del_max().unwrap(), 'X');
 
     pq.insert('P');
     pq.insert('L');
     pq.insert('E');
 
-    assert_eq!(pq.del_max(), 'P');
+    assert_eq!(pq.del_max().unwrap(), 'P');
 
     assert_eq!(pq.size(), 6);
 }
