@@ -3,19 +3,19 @@ use super::MaxPQ;
 
 const INITIAL_PRIORITY_QUEUE_CAPACITY: usize = 512;
 
-pub struct BinaryHeapPQ<Key> {
+pub struct BinaryHeapMaxPQ<Key> {
     pq: Vec<Option<Key>>,
     n: usize
 }
 
 
-impl<Key: PartialOrd> BinaryHeapPQ<Key> {
-    pub fn with_capacity(capacity: usize) -> BinaryHeapPQ<Key> {
+impl<Key: PartialOrd> BinaryHeapMaxPQ<Key> {
+    pub fn with_capacity(capacity: usize) -> BinaryHeapMaxPQ<Key> {
         let mut pq = Vec::with_capacity(capacity + 1);
         unsafe {
             pq.set_len(capacity + 1);
         }
-        BinaryHeapPQ {
+        BinaryHeapMaxPQ {
             pq: pq,
             n: 0
         }
@@ -28,8 +28,6 @@ impl<Key: PartialOrd> BinaryHeapPQ<Key> {
             k = k/2;
         }
     }
-
-
 
     fn sink(&mut self, k: usize) {
         let mut k = k;
@@ -47,10 +45,10 @@ impl<Key: PartialOrd> BinaryHeapPQ<Key> {
     }
 }
 
-impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapPQ<Key> {
+impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapMaxPQ<Key> {
     /// create an empty priority queue
     fn new() -> Self {
-        BinaryHeapPQ::with_capacity(INITIAL_PRIORITY_QUEUE_CAPACITY)
+        BinaryHeapMaxPQ::with_capacity(INITIAL_PRIORITY_QUEUE_CAPACITY)
     }
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
@@ -92,7 +90,7 @@ impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapPQ<Key> {
 
 #[test]
 fn test_binary_priority_queue() {
-    let mut pq: BinaryHeapPQ<char> = MaxPQ::new();
+    let mut pq: BinaryHeapMaxPQ<char> = MaxPQ::new();
 
     pq.insert('P');
     pq.insert('Q');
@@ -116,4 +114,15 @@ fn test_binary_priority_queue() {
     assert_eq!(pq.del_max().unwrap(), 'P');
 
     assert_eq!(pq.size(), 6);
+}
+
+#[test]
+fn test_empty() {
+    let mut pq: BinaryHeapMaxPQ<char> = MaxPQ::new();
+    pq.insert('P');
+    assert_eq!(pq.is_empty(), false);
+    assert_eq!(pq.size(), 1);
+    pq.del_max();
+    assert_eq!(pq.size(), 0);
+    assert_eq!(pq.is_empty(), true);
 }
