@@ -1,4 +1,4 @@
-use std::iter::Iterator;
+// use std::iter::Iterator;
 
 // Symbol Tables
 pub trait ST<K, V> {
@@ -22,6 +22,9 @@ pub trait ST<K, V> {
     fn is_empty(&self) -> bool;
     /// number of key-value pairs in the table
     fn size(&self) -> usize;
-    /// all the keys in the table
-    fn keys() -> Iterator<Item=K>;
+    // all the keys in the table
+    // fn keys() -> Iterator<Item=K>;
 }
+
+
+pub mod linked_st;
