@@ -1,30 +1,56 @@
 use super::MaxPQ;
 
 
-const INITIAL_PRIORITY_QUEUE_CAPACITY: usize = 1024;
+const INITIAL_PRIORITY_QUEUE_CAPACITY: usize = 512;
 
-pub struct UnorderedMaxPQ<Key> {
+pub struct BinaryHeapPQ<Key> {
     pq: Vec<Option<Key>>,
     n: usize
 }
 
-impl<Key: PartialOrd> UnorderedMaxPQ<Key> {
-    pub fn with_capacity(capacity: usize) -> UnorderedMaxPQ<Key> {
-        let mut pq = Vec::with_capacity(capacity);
+
+impl<Key: PartialOrd> BinaryHeapPQ<Key> {
+    pub fn with_capacity(capacity: usize) -> BinaryHeapPQ<Key> {
+        let mut pq = Vec::with_capacity(capacity + 1);
         unsafe {
-            pq.set_len(capacity);
+            pq.set_len(capacity + 1);
         }
-        UnorderedMaxPQ {
+        BinaryHeapPQ {
             pq: pq,
             n: 0
         }
     }
+
+    fn swim(&mut self, k: usize) {
+        let mut k = k;
+        while k > 1 && self.pq[k/2] < self.pq[k] {
+            self.pq.swap(k, k/2);
+            k = k/2;
+        }
+    }
+
+
+
+    fn sink(&mut self, k: usize) {
+        let mut k = k;
+        while 2*k <= self.n {
+            let mut j = 2*k;
+            if j < self.n && self.pq[j] < self.pq[j+1] {
+                j += 1;
+            }
+            if self.pq[k] >= self.pq[j] {
+                break;
+            }
+            self.pq.swap(k, j);
+            k = j;
+        }
+    }
 }
 
-impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
+impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapPQ<Key> {
     /// create an empty priority queue
     fn new() -> Self {
-        UnorderedMaxPQ::with_capacity(INITIAL_PRIORITY_QUEUE_CAPACITY)
+        BinaryHeapPQ::with_capacity(INITIAL_PRIORITY_QUEUE_CAPACITY)
     }
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
@@ -35,24 +61,18 @@ impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
     }
     /// insert a key into the priority queue
     fn insert(&mut self, x: Key) {
-        self.pq[self.n] = Some(x);
-        self.n += 1
+        self.n += 1;
+        let n = self.n;
+        self.pq[n] = Some(x);
+        self.swim(n);
     }
     /// return and remove the largest key
     fn del_max(&mut self) -> Option<Key> {
-        if self.is_empty() {
-            return None;
-        }
-        let mut max = 0;
-        for i in 0 .. self.n {
-            if self.pq[max] < self.pq[i] {
-                max = i;
-            }
-
-        }
-        self.pq.swap(max, self.n-1);
+        let max = self.pq[1].take();
+        self.pq.swap(1, self.n);
         self.n -= 1;
-        self.pq[self.n].take()
+        self.sink(1);
+        max
     }
     /// is the priority queue empty?
     #[inline]
@@ -61,11 +81,7 @@ impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
     }
     /// return the largest key
     fn max(&self) -> Option<&Key> {
-        if self.is_empty() {
-            None
-        } else {
-            self.pq[self.n - 1].as_ref()
-        }
+        self.pq[1].as_ref()
     }
     /// number of entries in the priority queue
     fn size(&self) -> usize {
@@ -75,14 +91,15 @@ impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
 
 
 #[test]
-fn test_unordered_priority_queue() {
-    let mut pq: UnorderedMaxPQ<char> = MaxPQ::new();
+fn test_binary_priority_queue() {
+    let mut pq: BinaryHeapPQ<char> = MaxPQ::new();
 
     pq.insert('P');
     pq.insert('Q');
     pq.insert('E');
 
     assert_eq!(pq.size(), 3);
+    println!("==> {:?}", pq.pq);
     assert_eq!(pq.del_max().unwrap(), 'Q');
     assert_eq!(pq.size(), 2);
 

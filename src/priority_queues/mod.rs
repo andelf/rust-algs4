@@ -13,7 +13,7 @@ pub trait MaxPQ<Key: PartialEq> {
     /// is the priority queue empty?
     fn is_empty(&self) -> bool;
     /// return the largest key
-    fn max(&self) -> &Key;
+    fn max(&self) -> Option<&Key>;
     /// number of entries in the priority queue
     fn size(&self) -> usize;
 }
@@ -38,3 +38,5 @@ pub trait MInPQ<Key: PartialEq> {
 
 
 pub mod unordered;
+
+pub mod binary_heaps;
