@@ -12,6 +12,8 @@ pub trait ST<K, V> {
     /// (null if key is absent)
     /// a[key]
     fn get(&self, key: &K) -> Option<&V>;
+    // FIXME: helper for a[key] =  val
+    // fn get_mut(&mut self, key: &K) -> Option<&mut V>;
     /// remove key (and its value) from table
     fn delete(&mut self, key: &K);
     /// is there a value paired with key?

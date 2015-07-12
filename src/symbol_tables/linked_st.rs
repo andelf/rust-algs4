@@ -1,4 +1,5 @@
 // use std::iter::Iterator;
+use std::ops::Index;
 use std::collections::LinkedList;
 use super::ST;
 
@@ -27,6 +28,16 @@ impl<K: Eq, V> ST<K,V> for LinkedST<K, V> {
         }
         None
     }
+
+    // FIXME: can't be used to add new pairs
+    // fn get_mut(&mut self, key: &K) -> Option<&mut V> {
+    //     for pairs in self.t.iter_mut() {
+    //         if &pairs.0 == key {
+    //             return Some(&mut pairs.1)
+    //         }
+    //     }
+    //     None
+    // }
 
     fn delete(&mut self, key: &K) {
         let mut i = 0;
@@ -63,6 +74,21 @@ impl<K: Eq, V> ST<K,V> for LinkedST<K, V> {
 }
 
 
+impl<K: Eq, V> Index<K> for LinkedST<K, V> {
+    type Output = V;
+
+    fn index<'a>(&'a self, index: K) -> &'a Self::Output {
+        self.get(&index).unwrap()
+    }
+}
+
+// impl<K: Eq, V> IndexMut<K> for LinkedST<K, V> {
+//     fn index_mut<'a>(&'a mut self, index: K) -> &'a mut Self::Output {
+//         self.get_mut(&index).unwrap()
+//     }
+//  }
+
+
 #[test]
 fn test_linked_symbol_table() {
     let mut st: LinkedST<char,usize> = ST::new();
@@ -73,6 +99,8 @@ fn test_linked_symbol_table() {
 
     assert_eq!(st.get(&'X'), Some(&7));
     assert_eq!(st.get(&'E'), Some(&12));
+    assert_eq!(st['E'], 12);
     assert_eq!(st.size(), 13);
+    // st['Z'] = 233;
     assert_eq!(st.is_empty(), false);
 }
