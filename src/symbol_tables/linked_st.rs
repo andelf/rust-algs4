@@ -17,6 +17,12 @@ impl<K: Eq, V> ST<K,V> for LinkedST<K, V> {
     }
 
     fn put(&mut self, key: K, val: V) {
+        for &mut (ref mut k, ref mut v) in self.t.iter_mut() {
+            if k == &key {
+                *v = val;
+                return;
+            }
+        }
         self.t.push_front((key,val))
     }
 
@@ -100,7 +106,8 @@ fn test_linked_symbol_table() {
     assert_eq!(st.get(&'X'), Some(&7));
     assert_eq!(st.get(&'E'), Some(&12));
     assert_eq!(st['E'], 12);
-    assert_eq!(st.size(), 13);
+    println!("got => {:?}", st.t);
+    assert_eq!(st.size(), 10);
     // st['Z'] = 233;
     assert_eq!(st.is_empty(), false);
 }
