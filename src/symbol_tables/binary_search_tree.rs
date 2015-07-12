@@ -1,14 +1,6 @@
 use std::iter;
 use std::fmt;
 use std::cmp::Ordering;
-// pub trait BST<K: Ord, V> {
-//     fn put(&mut self, key: K, val: V);
-//     fn get(&self, key: K) -> Option<&V>;
-//     fn delete(&mut self, key: &key);
-//     // fn keys()
-// }
-
-
 
 pub struct Node<K, V> {
     key: K,
@@ -31,10 +23,10 @@ impl<K, V> Node<K, V> {
 impl<K: fmt::Debug, V: fmt::Debug> Node<K, V> {
     fn dump(&self, depth: usize, f: &mut fmt::Formatter) {
         if depth == 0 {
-            writeln!(f, "{:?}[{:?}]", self.key, self.val);
+            writeln!(f, "{:?}[{:?}]", self.key, self.val).unwrap();
         } else {
             writeln!(f, "{}+--{:?}[{:?}]", iter::repeat("|  ").take(depth-1).collect::<Vec<&str>>().concat(),
-                     self.key, self.val);
+                     self.key, self.val).unwrap();
         }
         if self.left.is_some() {
             self.left.as_ref().unwrap().dump(depth + 1, f);

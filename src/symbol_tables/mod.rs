@@ -28,6 +28,36 @@ pub trait ST<K, V> {
     // fn keys() -> Iterator<Item=K>;
 }
 
+pub trait OrderedST<K, V>: ST<K, V> {
+    /// smallest key
+    fn min(&self) -> Option<&K>;
+
+    /// largest key
+    fn max(&self) -> Option<&K>;
+
+    /// largest key less than or equal to key
+    fn floor(&self, key: &K) -> Option<&K>;
+
+    /// smallest key greater than or equal to key
+    fn ceiling(&self, key: &K) -> Option<&K>;
+
+    /// number of keys less than key
+    fn rank(&self, key: &K) -> usize;
+
+    /// key of rank k
+    fn select(&self, k: usize) -> Option<&K>;
+
+    /// delete smallest key
+    fn delete_min(&mut self);
+
+    /// delete largest key
+    fn delete_max(&mut self);
+
+    /// number of keys in [lo..hi]
+    fn size_of_key_range(&self, lo: &K, hi: &K) -> usize {
+        self.rank(hi) - self.rank(lo) + 1
+    }
+}
 
 pub mod linked_st;
 
