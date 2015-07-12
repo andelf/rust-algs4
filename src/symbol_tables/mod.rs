@@ -32,3 +32,5 @@ pub trait ST<K, V> {
 pub mod linked_st;
 
 pub mod ordered_array_st;
+
+pub mod binary_search_tree;
