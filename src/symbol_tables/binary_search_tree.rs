@@ -1,6 +1,7 @@
 use std::iter;
 use std::fmt;
 use std::cmp::Ordering;
+use super::{ST, OrderedST};
 
 pub struct Node<K, V> {
     key: K,
@@ -64,12 +65,12 @@ pub struct BST<K, V> {
     root: Option<Box<Node<K, V>>>
 }
 
-impl<K: Ord, V> BST<K, V> {
-    pub fn new() -> BST<K, V> {
+impl<K: Ord, V> ST<K, V> for BST<K, V> {
+    fn new() -> BST<K, V> {
         BST { root: None }
     }
 
-    pub fn get(&self, key: K) -> Option<&V> {
+    fn get(&self, key: &K) -> Option<&V> {
         let mut x = self.root.as_ref();
         while x.is_some() {
             match key.cmp(&x.unwrap().key) {
@@ -87,16 +88,22 @@ impl<K: Ord, V> BST<K, V> {
         None
     }
 
-    pub fn put(&mut self, key: K, val: V) {
+    fn put(&mut self, key: K, val: V) {
         let root = self.root.take();
         self.root = put(root, key, val);
-        // if self.root.is_none() {
-        //     self.root = Some(Box::new(Node::new(key, val)))
-        // } else {
-
-        // }
     }
-//     fn delete(&mut self, key: &key);
+
+    fn delete(&mut self, key: &K) {
+        unimplemented!()
+    }
+
+    fn is_empty(&self) -> bool {
+        self.root.is_none()
+    }
+    /// number of key-value pairs in the table
+    fn size(&self) -> usize {
+        unimplemented!()
+    }
 }
 
 impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for BST<K, V> {
