@@ -44,6 +44,18 @@ impl<K: Ord, V> OrderedArrayST<K, V> {
             }
         }
     }
+
+    fn get_mut(&mut self, key: &K) -> Option<&mut V> {
+        if self.is_empty() {
+            return None;
+        }
+        let i = self.rank(key);
+        if i < self.pairs.len() && &self.pairs[i].0 == key {
+            Some(&mut self.pairs[i].1)
+        } else {
+            None
+        }
+    }
 }
 
 impl<K: Ord, V> ST<K,V> for OrderedArrayST<K, V> {
@@ -53,10 +65,10 @@ impl<K: Ord, V> ST<K,V> for OrderedArrayST<K, V> {
         }
     }
 
-    // FIXME: bad implementation
     fn put(&mut self, key: K, val: V) {
-        if self.get(&key).is_some() {
-            self.delete(&key);
+        if let Some(v) = self.get_mut(&key) {
+            *v = val;
+            return;
         }
         self.pairs.push((key, val));
         self.insertion_sort_by_key();
