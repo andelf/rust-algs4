@@ -106,6 +106,76 @@ impl<K: Ord, V> ST<K, V> for BST<K, V> {
     }
 }
 
+fn floor<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a Node<K,V>> {
+    if x.is_none() {
+        return None;
+    }
+
+    match key.cmp(&x.unwrap().key) {
+        Ordering::Equal => {
+            return Some(&(**x.unwrap()));
+        },
+        Ordering::Less => {
+            return floor(x.unwrap().left.as_ref(), key);
+        },
+        _ => (),
+    }
+
+    let t = floor(x.unwrap().right.as_ref(), key);
+    if t.is_some() {
+        return t
+    } else {
+        return Some(x.unwrap())
+    }
+}
+
+impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
+    /// smallest key
+    fn min(&self) -> Option<&K> {
+        unimplemented!()
+    }
+
+    /// largest key
+    fn max(&self) -> Option<&K> {
+        unimplemented!()
+    }
+
+    /// largest key less than or equal to key
+    fn floor(&self, key: &K) -> Option<&K> {
+        let x = floor(self.root.as_ref(), key);
+        if x.is_none() {
+            None
+        } else {
+            Some(&x.unwrap().key)
+        }
+    }
+
+    /// smallest key greater than or equal to key
+    fn ceiling(&self, key: &K) -> Option<&K> {
+        unimplemented!()
+    }
+
+    /// number of keys less than key
+    fn rank(&self, key: &K) -> usize {
+        unimplemented!()
+    }
+
+    /// key of rank k
+    fn select(&self, k: usize) -> Option<&K> {
+        unimplemented!()
+    }
+
+    /// delete smallest key
+    fn delete_min(&mut self) {
+        unimplemented!()
+    }
+
+    /// delete largest key
+    fn delete_max(&mut self) {
+        unimplemented!()
+    }
+}
+
 impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for BST<K, V> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.root.is_none() {
@@ -127,5 +197,6 @@ fn test_binary_search_tree() {
     }
 
     //println!("{:?}", t);
-    assert_eq!(t.get('E'),  Some(&6));
+    assert_eq!(t.get(&'E'),  Some(&6));
+    assert_eq!(t.floor(&'O'), Some(&'M'));
 }
