@@ -19,6 +19,17 @@ impl<K, V> Node<K, V> {
             right: None
         }
     }
+
+    fn size(&self) -> usize {
+        let mut ret = 1;
+        if self.left.is_some() {
+            ret += self.left.as_ref().unwrap().size()
+        }
+        if self.right.is_some() {
+            ret += self.right.as_ref().unwrap().size()
+        }
+        ret
+    }
 }
 
 impl<K: fmt::Debug, V: fmt::Debug> Node<K, V> {
@@ -100,9 +111,14 @@ impl<K: Ord, V> ST<K, V> for BST<K, V> {
     fn is_empty(&self) -> bool {
         self.root.is_none()
     }
+
     /// number of key-value pairs in the table
     fn size(&self) -> usize {
-        unimplemented!()
+        if self.is_empty() {
+            0
+        } else {
+            self.root.as_ref().unwrap().size()
+        }
     }
 }
 
@@ -157,7 +173,26 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
 
     /// number of keys less than key
     fn rank(&self, key: &K) -> usize {
-        unimplemented!()
+        fn rank_helper<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> usize {
+            if x.is_none() {
+                return 0;
+            }
+
+            match key.cmp(&x.unwrap().key) {
+                Ordering::Less => {
+                    rank_helper(x.unwrap().left.as_ref(), key)
+                },
+                Ordering::Greater => {
+                    1 + x.as_ref().unwrap().left.as_ref().map(|ref n| n.size()).unwrap_or(0) +
+                        rank_helper(x.unwrap().right.as_ref(), key)
+                }
+                Ordering::Equal => {
+                    x.as_ref().unwrap().left.as_ref().map(|ref n| n.size()).unwrap_or(0)
+                }
+            }
+        }
+
+        rank_helper(self.root.as_ref(), key)
     }
 
     /// key of rank k
@@ -196,7 +231,10 @@ fn test_binary_search_tree() {
         t.put(c, i);
     }
 
-    //println!("{:?}", t);
+    println!("{:?}", t);
     assert_eq!(t.get(&'E'),  Some(&6));
     assert_eq!(t.floor(&'O'), Some(&'M'));
+    assert_eq!(t.size(), 9);
+    assert_eq!(t.rank(&'E'), 2);
+    assert_eq!(t.rank(&'M'), 4);
 }
