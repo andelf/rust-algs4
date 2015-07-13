@@ -36,18 +36,18 @@ impl<K, V> Node<K, V> {
 }
 
 impl<K: fmt::Debug, V: fmt::Debug> Node<K, V> {
-    fn dump(&self, depth: usize, f: &mut fmt::Formatter) {
+    fn dump(&self, depth: usize, f: &mut fmt::Formatter, symbol: char) {
         if depth == 0 {
             writeln!(f, "{:?}[{:?}]", self.key, self.val).unwrap();
         } else {
-            writeln!(f, "{}+--{:?}[{:?}]", iter::repeat("|  ").take(depth-1).collect::<Vec<&str>>().concat(),
-                     self.key, self.val).unwrap();
+            writeln!(f, "{}{}--{:?}[{:?}]", iter::repeat("|  ").take(depth-1).collect::<Vec<&str>>().concat(),
+                     symbol, self.key, self.val).unwrap();
         }
         if self.left.is_some() {
-            self.left.as_ref().unwrap().dump(depth + 1, f);
+            self.left.as_ref().unwrap().dump(depth + 1, f, '+');
         }
         if self.right.is_some() {
-            self.right.as_ref().unwrap().dump(depth + 1, f);
+            self.right.as_ref().unwrap().dump(depth + 1, f, '`');
         }
     }
 }
@@ -74,6 +74,55 @@ fn put<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: K, val: V) -> Option<Box<Node<
     x
 }
 
+
+fn min<K: Ord, V>(x: &mut Option<Box<Node<K,V>>>) -> &mut Option<Box<Node<K,V>>> {
+    if x.is_none() {
+        return x;
+    }
+    if x.as_ref().unwrap().left.is_none() {
+        x
+    } else {
+        min(&mut x.as_mut().unwrap().left)
+    }
+}
+
+fn delete<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: &K) -> Option<Box<Node<K,V>>> {
+    if x.is_none() {
+        return None;
+    }
+
+    let mut x = x;
+    match key.cmp(&x.as_ref().unwrap().key) {
+        Ordering::Less => {
+            let left = x.as_mut().unwrap().left.take();
+            x.as_mut().unwrap().left = delete(left, key);
+            return x;
+        },
+        Ordering::Greater => {
+            let right = x.as_mut().unwrap().right.take();
+            x.as_mut().unwrap().right = delete(right, key);
+            return x;
+        },
+        Ordering::Equal => {
+            if x.as_ref().unwrap().right.is_none() {
+                return x.as_mut().unwrap().left.take();
+            }
+            if x.as_ref().unwrap().left.is_none() {
+                return x.as_mut().unwrap().right.take();
+            }
+
+            // Save top
+            let mut t = x;
+
+            // split right into right without min, and the min
+            let (mut right, mut right_min) = delete_min(t.as_mut().unwrap().right.take());
+            x = right_min;
+            x.as_mut().unwrap().right = right;
+            x.as_mut().unwrap().left = t.as_mut().unwrap().left.take();
+            x
+        }
+    }
+}
 
 pub struct BST<K, V> {
     root: Option<Box<Node<K, V>>>
@@ -103,12 +152,11 @@ impl<K: Ord, V> ST<K, V> for BST<K, V> {
     }
 
     fn put(&mut self, key: K, val: V) {
-        let root = self.root.take();
-        self.root = put(root, key, val);
+        self.root = put(self.root.take(), key, val);
     }
 
     fn delete(&mut self, key: &K) {
-        unimplemented!()
+        self.root = delete(self.root.take(), key);
     }
 
     fn is_empty(&self) -> bool {
@@ -145,6 +193,23 @@ fn floor<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a No
         return t
     } else {
         return Some(x.unwrap())
+    }
+}
+
+// delete_min helper
+// returns: top, deleted
+fn delete_min<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, Option<Box<Node<K,V>>>) {
+    let mut x = x;
+    if x.is_none() {
+        return (None, None);
+    }
+    match x.as_mut().unwrap().left.take() {
+        None           => (x.as_mut().unwrap().right.take(), x),
+        left @ Some(_) => {
+            let (t, deleted) = delete_min(left);
+            x.as_mut().unwrap().left = t;
+            (x, deleted)
+        }
     }
 }
 
@@ -205,7 +270,7 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
 
     /// delete smallest key
     fn delete_min(&mut self) {
-        unimplemented!()
+        self.root = delete_min(self.root.take()).0;
     }
 
     /// delete largest key
@@ -237,13 +302,64 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for BST<K, V> {
         if self.root.is_none() {
             write!(f, "<empty tree>")
         } else {
-            self.root.as_ref().unwrap().dump(0, f);
+            self.root.as_ref().unwrap().dump(0, f, ' ');
             Ok(())
         }
     }
 }
 
+#[test]
+fn test_binary_search_tree_delete_min() {
+    let mut t = BST::<char, ()>::new();
+    for c in "SEARCHEXAMP".chars() {
+        t.put(c, ());
+    }
 
+    let sz0 = t.size();
+    assert!(t.get(&'A').is_some());
+    t.delete_min();             // assume delete 'A'
+    assert_eq!(t.get(&'A'), None);
+    assert_eq!(t.size(), sz0 - 1);
+}
+
+#[test]
+fn test_binary_search_tree_delete_case0() {
+    let mut t = BST::<char, ()>::new();
+    for c in "SEARCHEXAM".chars() {
+        t.put(c, ());
+    }
+
+    let sz0 = t.size();
+    t.delete(&'C');
+    assert_eq!(t.get(&'C'), None);
+    assert_eq!(t.size(), sz0 - 1);
+}
+
+#[test]
+fn test_binary_search_tree_delete_case1() {
+    let mut t = BST::<char, ()>::new();
+    for c in "SEARCHEXAM".chars() {
+        t.put(c, ());
+    }
+
+    let sz0 = t.size();
+    t.delete(&'R');
+    assert_eq!(t.get(&'R'), None);
+    assert_eq!(t.size(), sz0 - 1);
+}
+
+#[test]
+fn test_binary_search_tree_delete_case2() {
+    let mut t = BST::<char, ()>::new();
+    for c in "SEARCHEXAM".chars() {
+        t.put(c, ());
+    }
+
+    let sz0 = t.size();
+    t.delete(&'E');
+    assert_eq!(t.get(&'E'), None);
+    assert_eq!(t.size(), sz0 - 1);
+}
 
 #[test]
 fn test_binary_search_tree() {
@@ -254,7 +370,7 @@ fn test_binary_search_tree() {
         t.put(c, i);
     }
 
-    println!("{:?}", t);
+    // println!("{:?}", t);
     assert_eq!(t.get(&'E'),  Some(&6));
     assert_eq!(t.floor(&'O'), Some(&'M'));
     assert_eq!(t.size(), 9);
