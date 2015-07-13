@@ -81,7 +81,9 @@ pub struct ResizingArrayQueue<T> {
 impl<T> ResizingArrayQueue<T> {
     pub fn with_capacity(capacity: usize) -> ResizingArrayQueue<T> {
         let mut storage = Vec::with_capacity(capacity);
-        unsafe { storage.set_len(capacity) };
+        for i in 0 .. capacity {
+            storage.push(None);
+        }
 
         ResizingArrayQueue {
             q: storage,
@@ -93,15 +95,19 @@ impl<T> ResizingArrayQueue<T> {
     fn resize(&mut self, capacity: usize) {
         let cap = self.q.len();
         let mut new_storage: Vec<Option<T>> = Vec::with_capacity(capacity);
-        unsafe { new_storage.set_len(capacity) };
 
         let tail = if self.tail > self.head {
             self.tail
         } else {
             self.tail + cap
         };
-        for i in self.head .. tail{
-            new_storage[i] = self.q[i % cap].take();
+        for i in 0 .. capacity {
+            if i >= self.head && i < tail {
+                new_storage.push(self.q[i % cap].take());
+            } else {
+                new_storage.push(None);
+            }
+
         }
         self.q = new_storage;
         self.tail = tail
