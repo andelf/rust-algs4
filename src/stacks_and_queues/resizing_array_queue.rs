@@ -1,4 +1,5 @@
 use std::iter;
+use std::fmt;
 use super::{QueueOfStrings, Queue};
 
 const INITIAL_QUEUE_CAPACITY: usize = 2;
@@ -131,6 +132,25 @@ impl<T> Queue<T> for ResizingArrayQueue<T> {
         let item = self.q[self.head % cap].take();
         self.head = (self.head + 1) % cap;
         item.unwrap()
+    }
+}
+
+// FIXME: can't handle ResizingArrayQueue<&Option<char>>
+impl<T: fmt::Debug> fmt::Debug for ResizingArrayQueue<T> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        if self.head < self.tail {
+            for item in self.q[self.head .. self.tail].iter() {
+                try!(write!(f, "{:?}, ", item.as_ref().unwrap()));
+            }
+        } else {
+            for item in self.q[self.head ..].iter() {
+                try!(write!(f, "{:?}, ", item));
+            }
+            for item in self.q[.. self.tail].iter() {
+                try!(write!(f, "{:?}, ", item));
+            }
+        }
+        Ok(())
     }
 }
 
