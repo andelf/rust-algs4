@@ -75,17 +75,6 @@ fn put<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: K, val: V) -> Option<Box<Node<
 }
 
 
-fn min<K: Ord, V>(x: &mut Option<Box<Node<K,V>>>) -> &mut Option<Box<Node<K,V>>> {
-    if x.is_none() {
-        return x;
-    }
-    if x.as_ref().unwrap().left.is_none() {
-        x
-    } else {
-        min(&mut x.as_mut().unwrap().left)
-    }
-}
-
 fn delete<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: &K) -> Option<Box<Node<K,V>>> {
     if x.is_none() {
         return None;
@@ -115,7 +104,7 @@ fn delete<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: &K) -> Option<Box<Node<K,V>
             let mut t = x;
 
             // split right into right without min, and the min
-            let (mut right, mut right_min) = delete_min(t.as_mut().unwrap().right.take());
+            let (right, right_min) = delete_min(t.as_mut().unwrap().right.take());
             x = right_min;
             x.as_mut().unwrap().right = right;
             x.as_mut().unwrap().left = t.as_mut().unwrap().left.take();
