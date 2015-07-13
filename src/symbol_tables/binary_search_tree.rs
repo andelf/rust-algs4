@@ -185,6 +185,29 @@ fn floor<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a No
     }
 }
 
+fn ceiling<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a Node<K,V>> {
+    if x.is_none() {
+        return None;
+    }
+
+    match key.cmp(&x.unwrap().key) {
+        Ordering::Equal => {
+            return Some(&(**x.unwrap()));
+        },
+        Ordering::Greater => {
+            return ceiling(x.unwrap().right.as_ref(), key);
+        },
+        _ => (),
+    }
+
+    let t = ceiling(x.unwrap().left.as_ref(), key);
+    if t.is_some() {
+        return t
+    } else {
+        return Some(x.unwrap())
+    }
+}
+
 // delete_min helper
 // returns: top, deleted
 fn delete_min<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, Option<Box<Node<K,V>>>) {
@@ -202,15 +225,52 @@ fn delete_min<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, 
     }
 }
 
+// delete_max helper
+// returns: top, deleted
+fn delete_max<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, Option<Box<Node<K,V>>>) {
+    let mut x = x;
+    if x.is_none() {
+        return (None, None);
+    }
+    match x.as_mut().unwrap().right.take() {
+        None            => (x.as_mut().unwrap().left.take(), x),
+        right @ Some(_) => {
+            let (t, deleted) = delete_max(right);
+            x.as_mut().unwrap().right = t;
+            (x, deleted)
+        }
+    }
+}
+
+fn find_max<K: Ord, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
+    if x.is_none() {
+        return None;
+    }
+    match x.as_ref().unwrap().right.as_ref() {
+        None            => x,
+        right @ Some(_) => find_max(right)
+    }
+}
+
+fn find_min<K: Ord, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
+    if x.is_none() {
+        return None;
+    }
+    match x.as_ref().unwrap().left.as_ref() {
+        None           => x,
+        left @ Some(_) => find_min(left)
+    }
+}
+
 impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
     /// smallest key
     fn min(&self) -> Option<&K> {
-        unimplemented!()
+        find_min(self.root.as_ref()).map(|n| &n.key)
     }
 
     /// largest key
     fn max(&self) -> Option<&K> {
-        unimplemented!()
+        find_max(self.root.as_ref()).map(|n| &n.key)
     }
 
     /// largest key less than or equal to key
@@ -225,7 +285,12 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
 
     /// smallest key greater than or equal to key
     fn ceiling(&self, key: &K) -> Option<&K> {
-        unimplemented!()
+        let x = ceiling(self.root.as_ref(), key);
+        if x.is_none() {
+            None
+        } else {
+            Some(&x.unwrap().key)
+        }
     }
 
     /// number of keys less than key
@@ -264,7 +329,7 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
 
     /// delete largest key
     fn delete_max(&mut self) {
-        unimplemented!()
+        self.root = delete_max(self.root.take()).0;
     }
 }
 
@@ -308,6 +373,20 @@ fn test_binary_search_tree_delete_min() {
     assert!(t.get(&'A').is_some());
     t.delete_min();             // assume delete 'A'
     assert_eq!(t.get(&'A'), None);
+    assert_eq!(t.size(), sz0 - 1);
+}
+
+#[test]
+fn test_binary_search_tree_delete_max() {
+    let mut t = BST::<char, ()>::new();
+    for c in "SEARCHEXAMP".chars() {
+        t.put(c, ());
+    }
+
+    let sz0 = t.size();
+    assert!(t.get(&'X').is_some());
+    t.delete_max();             // assume delete 'X'
+    assert_eq!(t.get(&'X'), None);
     assert_eq!(t.size(), sz0 - 1);
 }
 
@@ -362,9 +441,12 @@ fn test_binary_search_tree() {
     // println!("{:?}", t);
     assert_eq!(t.get(&'E'),  Some(&6));
     assert_eq!(t.floor(&'O'), Some(&'M'));
+    assert_eq!(t.ceiling(&'Q'), Some(&'R'));
     assert_eq!(t.size(), 9);
     assert_eq!(t.rank(&'E'), 2);
     assert_eq!(t.rank(&'M'), 4);
+    assert_eq!(t.max(), Some(&'X'));
+    assert_eq!(t.min(), Some(&'A'));
     // inorder visite
     assert_eq!(String::from_iter(t.keys().map(|&c| c)), "ACEHMPRSX");
 }
