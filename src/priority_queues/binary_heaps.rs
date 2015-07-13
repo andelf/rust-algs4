@@ -1,7 +1,7 @@
 use super::{MaxPQ, MinPQ};
 
 
-const INITIAL_PRIORITY_QUEUE_CAPACITY: usize = 512;
+const INITIAL_PRIORITY_QUEUE_CAPACITY: usize = 1;
 
 pub struct BinaryHeapMaxPQ<Key> {
     pq: Vec<Option<Key>>,
@@ -10,7 +10,7 @@ pub struct BinaryHeapMaxPQ<Key> {
 
 
 impl<Key: PartialOrd> BinaryHeapMaxPQ<Key> {
-    pub fn with_capacity(capacity: usize) -> BinaryHeapMaxPQ<Key> {
+    fn with_capacity(capacity: usize) -> BinaryHeapMaxPQ<Key> {
         let mut pq = Vec::with_capacity(capacity + 1);
         for _ in 0 .. capacity + 1 {
             pq.push(None);
@@ -19,6 +19,19 @@ impl<Key: PartialOrd> BinaryHeapMaxPQ<Key> {
             pq: pq,
             n: 0
         }
+    }
+
+    fn resize(&mut self, capacity: usize) {
+        assert!(capacity > self.n);
+        let mut temp = Vec::with_capacity(capacity);
+        for i in 0 .. capacity {
+            if i >= 1 && i <= self.n {
+                temp.push(self.pq[i].take());
+            } else {
+                temp.push(None);
+            }
+        }
+        self.pq = temp;
     }
 
     fn swim(&mut self, k: usize) {
@@ -59,6 +72,10 @@ impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapMaxPQ<Key> {
     }
     /// insert a key into the priority queue
     fn insert(&mut self, x: Key) {
+        let len = self.pq.len();
+        if self.n == len - 1 {
+            self.resize(2 * len);
+        }
         self.n += 1;
         let n = self.n;
         self.pq[n] = Some(x);
@@ -70,6 +87,10 @@ impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapMaxPQ<Key> {
         self.pq.swap(1, self.n);
         self.n -= 1;
         self.sink(1);
+        let len = self.pq.len();
+        if self.n > 0 && self.n == (len - 1) / 4 {
+            self.resize(len / 2);
+        }
         max
     }
     /// is the priority queue empty?
@@ -96,7 +117,7 @@ pub struct BinaryHeapMinPQ<Key> {
 
 
 impl<Key: PartialOrd> BinaryHeapMinPQ<Key> {
-    pub fn with_capacity(capacity: usize) -> BinaryHeapMinPQ<Key> {
+    fn with_capacity(capacity: usize) -> BinaryHeapMinPQ<Key> {
         let mut pq = Vec::with_capacity(capacity + 1);
         for _ in 0 .. capacity + 1 {
             pq.push(None);
@@ -105,6 +126,19 @@ impl<Key: PartialOrd> BinaryHeapMinPQ<Key> {
             pq: pq,
             n: 0
         }
+    }
+
+    fn resize(&mut self, capacity: usize) {
+        assert!(capacity > self.n);
+        let mut temp = Vec::with_capacity(capacity);
+        for i in 0 .. capacity {
+            if i >= 1 && i <= self.n {
+                temp.push(self.pq[i].take());
+            } else {
+                temp.push(None);
+            }
+        }
+        self.pq = temp;
     }
 
     fn swim(&mut self, k: usize) {
@@ -145,6 +179,10 @@ impl<Key: PartialOrd>  MinPQ<Key> for BinaryHeapMinPQ<Key> {
     }
     /// insert a key into the priority queue
     fn insert(&mut self, x: Key) {
+        let len = self.pq.len();
+        if self.n == len - 1 {
+            self.resize(2 * len);
+        }
         self.n += 1;
         let n = self.n;
         self.pq[n] = Some(x);
@@ -156,6 +194,10 @@ impl<Key: PartialOrd>  MinPQ<Key> for BinaryHeapMinPQ<Key> {
         self.pq.swap(1, self.n);
         self.n -= 1;
         self.sink(1);
+        let len = self.pq.len();
+        if self.n > 0 && self.n == (len - 1) / 4 {
+            self.resize(len / 2);
+        }
         min
     }
     /// is the priority queue empty?
@@ -163,7 +205,7 @@ impl<Key: PartialOrd>  MinPQ<Key> for BinaryHeapMinPQ<Key> {
     fn is_empty(&self) -> bool {
         self.n == 0
     }
-    /// return the largest key
+    /// return the smallest key
     fn min(&self) -> Option<&Key> {
         self.pq[1].as_ref()
     }

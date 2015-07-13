@@ -99,6 +99,17 @@ impl Board {
         }
         ret
     }
+
+    pub fn twin(&self) -> Board {
+        let mut twin = self.clone();
+        for i in 0 .. 2{
+            if twin.blocks[i][0] != 0 && twin.blocks[i][1] != 0 {
+                twin.blocks[i].swap(0, 1);
+                break
+            }
+        }
+        twin
+    }
 }
 
 impl fmt::Display for Board {
@@ -162,7 +173,7 @@ pub struct Solver {
 
 impl Solver {
     pub fn new(initial: Board) -> Solver {
-        let mut pq: BinaryHeapMinPQ<Node> = BinaryHeapMinPQ::with_capacity(10240);
+        let mut pq: BinaryHeapMinPQ<Node> = MinPQ::new();
 
         pq.insert(Node::new(initial.clone(), 0, Vec::new()));
 
@@ -237,6 +248,7 @@ fn main() {
     }
 
     let b = Board::new(blks);
+
     let solver = Solver::new(b);
     println!("{}", solver);
 
