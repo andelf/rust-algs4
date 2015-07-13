@@ -81,7 +81,7 @@ pub struct ResizingArrayQueue<T> {
 impl<T> ResizingArrayQueue<T> {
     pub fn with_capacity(capacity: usize) -> ResizingArrayQueue<T> {
         let mut storage = Vec::with_capacity(capacity);
-        for i in 0 .. capacity {
+        for _ in 0 .. capacity {
             storage.push(None);
         }
 

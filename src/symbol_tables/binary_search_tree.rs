@@ -319,7 +319,12 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
 
     /// key of rank k
     fn select(&self, k: usize) -> Option<&K> {
-        unimplemented!()
+        for key in self.keys() {
+            if self.rank(key) == k {
+                return Some(key)
+            }
+        }
+        None
     }
 
     /// delete smallest key
@@ -444,7 +449,9 @@ fn test_binary_search_tree() {
     assert_eq!(t.ceiling(&'Q'), Some(&'R'));
     assert_eq!(t.size(), 9);
     assert_eq!(t.rank(&'E'), 2);
+    assert_eq!(t.select(2), Some(&'E'));
     assert_eq!(t.rank(&'M'), 4);
+    assert_eq!(t.select(4), Some(&'M'));
     assert_eq!(t.max(), Some(&'X'));
     assert_eq!(t.min(), Some(&'A'));
     // inorder visite
