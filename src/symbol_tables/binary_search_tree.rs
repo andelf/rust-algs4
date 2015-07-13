@@ -2,6 +2,9 @@ use std::iter;
 use std::fmt;
 use std::cmp::Ordering;
 use super::{ST, OrderedST};
+// FIXME: out implementation can't be used. :(
+// use super::super::stacks_and_queues::Queue;
+// use super::super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
 
 pub struct Node<K, V> {
     key: K,
@@ -211,6 +214,24 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
     }
 }
 
+
+impl<K: Ord, V> BST<K, V> {
+    pub fn keys<'a>(&'a self) -> ::std::vec::IntoIter<&'a K> {
+        let mut queue: Vec<&'a K> = Vec::new();
+        fn inorder<'a, K, V>(x: Option<&'a Box<Node<K,V>>>, queue: &mut Vec<&'a K>) {
+            if x.is_none() {
+                return;
+            }
+            inorder(x.unwrap().left.as_ref(), queue);
+            queue.push(&x.unwrap().key);
+            inorder(x.unwrap().right.as_ref(), queue);
+        };
+        inorder(self.root.as_ref(), &mut queue);
+        queue.into_iter()
+    }
+}
+
+
 impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for BST<K, V> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.root.is_none() {
@@ -226,6 +247,8 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for BST<K, V> {
 
 #[test]
 fn test_binary_search_tree() {
+    use std::iter::FromIterator;
+
     let mut t = BST::<char, usize>::new();
     for (i, c) in "SEARCHEXAMP".chars().enumerate() {
         t.put(c, i);
@@ -237,4 +260,6 @@ fn test_binary_search_tree() {
     assert_eq!(t.size(), 9);
     assert_eq!(t.rank(&'E'), 2);
     assert_eq!(t.rank(&'M'), 4);
+    // inorder visite
+    assert_eq!(String::from_iter(t.keys().map(|&c| c)), "ACEHMPRSX");
 }
