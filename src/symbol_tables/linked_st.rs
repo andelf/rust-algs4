@@ -106,7 +106,6 @@ fn test_linked_symbol_table() {
     assert_eq!(st.get(&'X'), Some(&7));
     assert_eq!(st.get(&'E'), Some(&12));
     assert_eq!(st['E'], 12);
-    println!("got => {:?}", st.t);
     assert_eq!(st.size(), 10);
     // st['Z'] = 233;
     assert_eq!(st.is_empty(), false);

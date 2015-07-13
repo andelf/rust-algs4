@@ -19,7 +19,7 @@ pub trait MaxPQ<Key: PartialEq> {
 }
 
 
-pub trait MInPQ<Key: PartialEq> {
+pub trait MinPQ<Key: PartialEq> {
     /// create an empty priority queue
     fn new() -> Self;
     /// create a priority queue with given keys
@@ -30,8 +30,8 @@ pub trait MInPQ<Key: PartialEq> {
     fn del_min(&mut self) -> Option<Key>;
     /// is the priority queue empty?
     fn is_empty(&self) -> bool;
-    /// return the largest key
-    fn max(&self) -> &Key;
+    /// return the smallest key
+    fn min(&self) -> Option<&Key>;
     /// number of entries in the priority queue
     fn size(&self) -> usize;
 }
