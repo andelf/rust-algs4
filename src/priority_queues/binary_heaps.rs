@@ -1,13 +1,13 @@
 use super::{MaxPQ, MinPQ};
 
 
-const INITIAL_PRIORITY_QUEUE_CAPACITY: usize = 1;
+const INIT_SIZE: usize = 1;
 
+/// Generic max priority queue implementation with a binary heap
 pub struct BinaryHeapMaxPQ<Key> {
     pq: Vec<Option<Key>>,
     n: usize
 }
-
 
 impl<Key: PartialOrd> BinaryHeapMaxPQ<Key> {
     fn with_capacity(capacity: usize) -> BinaryHeapMaxPQ<Key> {
@@ -61,15 +61,21 @@ impl<Key: PartialOrd> BinaryHeapMaxPQ<Key> {
 impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapMaxPQ<Key> {
     /// create an empty priority queue
     fn new() -> Self {
-        BinaryHeapMaxPQ::with_capacity(INITIAL_PRIORITY_QUEUE_CAPACITY)
+        BinaryHeapMaxPQ::with_capacity(INIT_SIZE)
     }
+
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
-        let mut pq = Self::new();
         let len = a.len();
+        let mut pq = Self::new();
         pq.pq.move_from(a.map_in_place(Some), 0, len);
+        for k in 1 .. len / 2 + 1 {
+            pq.sink(k);
+        }
+        pq.n = len;
         pq
     }
+
     /// insert a key into the priority queue
     fn insert(&mut self, x: Key) {
         let len = self.pq.len();
@@ -81,6 +87,7 @@ impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapMaxPQ<Key> {
         self.pq[n] = Some(x);
         self.swim(n);
     }
+
     /// return and remove the largest key
     fn del_max(&mut self) -> Option<Key> {
         let max = self.pq[1].take();
@@ -93,23 +100,27 @@ impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapMaxPQ<Key> {
         }
         max
     }
+
     /// is the priority queue empty?
     #[inline]
     fn is_empty(&self) -> bool {
         self.n == 0
     }
+
     /// return the largest key
     fn max(&self) -> Option<&Key> {
         self.pq[1].as_ref()
     }
+
     /// number of entries in the priority queue
+    #[inline]
     fn size(&self) -> usize {
         self.n
     }
 }
 
 
-
+/// Generic min priority queue implementation with a binary heap
 pub struct BinaryHeapMinPQ<Key> {
     pq: Vec<Option<Key>>,
     n: usize
@@ -168,15 +179,21 @@ impl<Key: PartialOrd> BinaryHeapMinPQ<Key> {
 impl<Key: PartialOrd>  MinPQ<Key> for BinaryHeapMinPQ<Key> {
     /// create an empty priority queue
     fn new() -> Self {
-        BinaryHeapMinPQ::with_capacity(INITIAL_PRIORITY_QUEUE_CAPACITY)
+        BinaryHeapMinPQ::with_capacity(INIT_SIZE)
     }
+
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
-        let mut pq = Self::new();
         let len = a.len();
+        let mut pq = Self::new();
         pq.pq.move_from(a.map_in_place(Some), 0, len);
+        for k in 1 .. len / 2 + 1 {
+            pq.sink(k);
+        }
+        pq.n = len;
         pq
     }
+
     /// insert a key into the priority queue
     fn insert(&mut self, x: Key) {
         let len = self.pq.len();
@@ -188,7 +205,8 @@ impl<Key: PartialOrd>  MinPQ<Key> for BinaryHeapMinPQ<Key> {
         self.pq[n] = Some(x);
         self.swim(n);
     }
-    /// return and remove the largest key
+
+    /// return and remove the smallest key
     fn del_min(&mut self) -> Option<Key> {
         let min = self.pq[1].take();
         self.pq.swap(1, self.n);
@@ -200,15 +218,18 @@ impl<Key: PartialOrd>  MinPQ<Key> for BinaryHeapMinPQ<Key> {
         }
         min
     }
+
     /// is the priority queue empty?
     #[inline]
     fn is_empty(&self) -> bool {
         self.n == 0
     }
+
     /// return the smallest key
     fn min(&self) -> Option<&Key> {
         self.pq[1].as_ref()
     }
+
     /// number of entries in the priority queue
     fn size(&self) -> usize {
         self.n
