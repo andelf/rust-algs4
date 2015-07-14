@@ -27,7 +27,7 @@ pub trait Stack<T> {
     /// insert a new item onto stack
     fn push(&mut self, item: T);
     /// remove and return the item most recently added
-    fn pop(&mut self) ->  T;
+    fn pop(&mut self) ->  Option<T>;
     /// is the stack empty?
     fn is_empty(&self) -> bool;
     /// number of strings on the stack
@@ -62,7 +62,7 @@ pub trait Queue<T> {
     /// insert a new item onto queue
     fn enqueue(&mut self, item: T);
     /// remove and return the item least recently added
-    fn dequeue(&mut self) -> T;
+    fn dequeue(&mut self) -> Option<T>;
     /// is the queue empty?
     fn is_empty(&self) -> bool;
     /// number of items on the queue

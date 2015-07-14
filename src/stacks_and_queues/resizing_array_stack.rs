@@ -108,14 +108,17 @@ impl<T> Stack<T> for ResizingArrayStack<T> {
         self.n += 1;
     }
 
-    fn pop(&mut self) -> T {
+    fn pop(&mut self) -> Option<T> {
+        if self.n == 0 {
+            return None
+        }
         self.n -= 1;
         let cell = self.s[self.n].take();
         let len = self.s.len();
         if self.n > 0 && self.n == len / 4 {
             self.resize(len / 2);
         }
-        cell.unwrap()
+        cell
     }
 }
 
@@ -180,7 +183,7 @@ fn test_resizing_array_stack() {
 
     for s in vec![1, 3, 5, 4, 1, 0, 3, 0, 0, 3, 0, 0, 0, 4] {
         if s == 0 {
-            assert_eq!(&stack.pop(), rit.next().unwrap())
+            assert_eq!(stack.pop(), rit.next().map(|&n| n))
         } else {
             stack.push(s)
         }

@@ -119,6 +119,7 @@ impl<T> Queue<T> for ResizingArrayQueue<T> {
         ResizingArrayQueue::with_capacity(INITIAL_QUEUE_CAPACITY)
     }
 
+    #[inline]
     fn is_empty(&self) -> bool {
         self.head == self.tail
     }
@@ -133,11 +134,14 @@ impl<T> Queue<T> for ResizingArrayQueue<T> {
         self.tail = (self.tail + 1) % cap
     }
 
-    fn dequeue(&mut self) -> T {
+    fn dequeue(&mut self) -> Option<T> {
+        if self.is_empty() {
+            return None;
+        }
         let cap = self.q.len();
         let item = self.q[self.head % cap].take();
         self.head = (self.head + 1) % cap;
-        item.unwrap()
+        item
     }
 }
 
@@ -184,7 +188,7 @@ fn test_resizing_array_queue() {
 
     for s in "to be or not to - be - - that - - - is".split(' ') {
         if s == "-" {
-            assert_eq!(&queue.dequeue(), result.next().unwrap())
+            assert_eq!(queue.dequeue(), result.next().map(|s| s.into()))
         } else {
             queue.enqueue(s.into())
         }

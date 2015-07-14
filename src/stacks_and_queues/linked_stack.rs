@@ -68,11 +68,15 @@ impl<T> Stack<T> for LinkedStack<T> {
         self.first = Some(Box::new(first));
     }
 
-    fn pop(&mut self) -> T {
-        let old_first = self.first.take();
-        let (item, first) = old_first.unwrap().into_item_and_next();
-        self.first = first;
-        item
+    fn pop(&mut self) -> Option<T> {
+        match self.first.take() {
+            None => None,
+            old_first @ Some(_) => {
+                let (item, first) = old_first.unwrap().into_item_and_next();
+                self.first = first;
+                Some(item)
+            }
+        }
     }
 }
 
@@ -125,7 +129,7 @@ fn test_linked_stack() {
 
     for s in vec![1, 3, 5, 4, 1, 0, 3, 0, 0, 3, 0, 0, 0, 4] {
         if s == 0 {
-            assert_eq!(&stack.pop(), rit.next().unwrap())
+            assert_eq!(stack.pop(), rit.next().map(|&n| n))
         } else {
             stack.push(s)
         }
