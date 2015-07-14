@@ -114,12 +114,13 @@ impl Board {
 
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        try!(writeln!(f, "{}", self.dimension()));
         for row in self.blocks.iter() {
-            try!(write!(f, "|"));
+            try!(write!(f, " "));
             for val in row.iter() {
-                try!(write!(f, "{:-3}", val));
+                try!(write!(f, "{:<3}", val));
             }
-            try!(write!(f, " |\n"));
+            try!(write!(f, "\n"));
         }
         Ok(())
     }

@@ -84,6 +84,25 @@ BB
 (3000, 4000) -> (6000, 7000) -> (14000, 15000) -> (20000, 21000)
 ```
 
+### Programming Assignment 4: 8 Puzzle
+
+- ``Program``: ``examples/8puzzle.rs``
+
+```
+ᐅ time cat /path/to/8puzzle/puzzle01.txt | cargo run --example 8puzzle
+     Running `target/debug/examples/8puzzle`
+Minimum number of moves = 1
+2
+ 1  0
+ 3  2
+
+2
+ 1  2
+ 3  0
+
+cargo run --example 8puzzle  0.03s user 0.03s system 93% cpu 0.058 total
+```
+
 ## Description
 
 TODO: add file description
