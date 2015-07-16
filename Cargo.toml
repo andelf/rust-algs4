@@ -14,3 +14,10 @@ license = "MIT"
 
 [dependencies]
 rand = "*"
+
+
+[dev-dependencies.sdl2]
+sdl2 = "*"
+
+[dev-dependencies.sdl2_gfx]
+sdl2_gfx = "*"

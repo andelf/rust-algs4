@@ -42,3 +42,5 @@ pub mod unordered;
 pub mod binary_heaps;
 
 pub mod heapsort;
+
+pub mod event_driven_simulation;
