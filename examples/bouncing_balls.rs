@@ -11,7 +11,7 @@ use sdl2::timer::delay;
 use sdl2_gfx::primitives::DrawRenderer;
 
 use rand::{thread_rng, Rng};
-use algs4::priority_queues::event_driven_simulation::Ball;
+use algs4::priority_queues::event_driven_simulation::Particle;
 
 fn main() {
     let mut ctx = sdl2::init().video().unwrap();
@@ -37,7 +37,7 @@ fn main() {
     let mut balls = Vec::new();
     for _ in 0 .. 200 {
         let color: Color = rng.gen();
-        balls.push((Ball::new(), color));
+        balls.push((Particle::new(), color));
     }
 
     while running {
@@ -76,7 +76,7 @@ fn main() {
                           (ball.ry * height as f64) as i16,
                           (ball.radius * width as f64) as i16,
                           color);
-            ball.do_move(0.01);
+            ball.do_move(0.05);
 
         }
         ren.set_draw_color(Color::RGBA(255, 255, 255, 125));
