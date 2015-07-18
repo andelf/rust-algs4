@@ -16,6 +16,8 @@ pub mod priority_queues;
 
 pub mod symbol_tables;
 
+pub mod geometric_search;
+
 #[test]
 fn it_works() {
 }

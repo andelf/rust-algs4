@@ -176,6 +176,8 @@ impl CollisionSystem {
                                                   a: a });
     }
 
+    // FIXME: un-done
+    // TODO: add message remove or valid check
     pub fn simulate(&mut self) {
         self.pq = BinaryHeapMinPQ::new();
 
