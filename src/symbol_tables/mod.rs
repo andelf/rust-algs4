@@ -18,7 +18,7 @@ pub trait ST<K, V> {
     fn delete(&mut self, key: &K);
     /// is there a value paired with key?
     fn contains(&self, key: &K) -> bool {
-        self.get(key).is_none()
+        self.get(key).is_some()
     }
     /// is the table empty?
     fn is_empty(&self) -> bool;
