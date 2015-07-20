@@ -5,16 +5,23 @@ pub trait RangeSearch1D<K, V>: OrderedST<K, V> {
     /// Insert key-value pair
     fn insert(&mut self, key: K, val: V);
     /// Range search: find all keys between k1 and k2
-    fn search(&self, key1: &K, key2: &K) -> Option<Vec<&K>>;
+    fn range_search(&self, key1: &K, key2: &K) -> Option<Vec<&K>>;
     /// Range count: number of keys between k1 and k2
-    fn count(&self, key1: &K, key2: &K) -> usize;
+    fn range_count(&self, key1: &K, key2: &K) -> usize;
 }
 
+pub trait OrthogonalRangeSearch2D<K, V>: OrderedST<(K,K), V> {
+    /// Insert a 2d key
+    fn insert(&mut self, key: (K,K), val: V);
+    /// Range search: find all keys that lie in a 2d range
+    fn range_search(&self, left_top: (K,K), right_bottom: (K,K)) -> Option<Vec<&(K,K)>>;
+    /// Range count: number of keys that lie in a 2d range
+    fn range_count(&self, left_top: (K,K), right_bottom: (K,K)) -> usize;
+}
 
-
-pub trait IntervalST<K: Ord, V> {
+pub trait IntervalST<K, V> {
     type Iter: Iterator;
-    /// create interval search tree
+    /// create interval range_search tree
     fn new() -> Self;
     /// put interval-value pair into ST
     fn put(&mut self, lo: K, hi: K, val: V);
@@ -27,16 +34,16 @@ pub trait IntervalST<K: Ord, V> {
 }
 
 
-impl<K: Ord, V> RangeSearch1D<K, V> for BST<K, V> {
+impl<K: PartialOrd, V> RangeSearch1D<K, V> for BST<K, V> {
 
     #[inline]
     fn insert(&mut self, key: K, val: V) {
         self.put(key, val);
     }
 
-    fn search(&self, lo: &K, hi: &K) -> Option<Vec<&K>> {
+    fn range_search(&self, lo: &K, hi: &K) -> Option<Vec<&K>> {
         let mut queue: Vec<&K> = Vec::new();
-        fn inorder<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, queue: &mut Vec<&'a K>, lo: &K, hi: &K) {
+        fn inorder<'a, K: PartialOrd, V>(x: Option<&'a Box<Node<K,V>>>, queue: &mut Vec<&'a K>, lo: &K, hi: &K) {
             if x.is_none() {
                 return;
             }
@@ -55,7 +62,7 @@ impl<K: Ord, V> RangeSearch1D<K, V> for BST<K, V> {
     }
 
 
-    fn count(&self, lo: &K, hi: &K) -> usize {
+    fn range_count(&self, lo: &K, hi: &K) -> usize {
         if self.contains(hi) {
             self.rank(hi) - self.rank(lo) + 1
         } else {
@@ -67,7 +74,7 @@ impl<K: Ord, V> RangeSearch1D<K, V> for BST<K, V> {
 
 
 #[test]
-fn test_range_search_1d() {
+fn test_range_range_search_1d() {
     let mut ost = BST::<char,()>::new();
     ost.insert('B', ());
     ost.insert('D', ());
@@ -77,8 +84,8 @@ fn test_range_search_1d() {
     ost.insert('F', ());
     ost.insert('P', ());
 
-    assert_eq!(ost.count(&'G', &'K'), 2);
+    assert_eq!(ost.range_count(&'G', &'K'), 2);
 
-    assert_eq!(ost.search(&'G', &'K'), Some(vec![&'H', &'I']));
-    assert_eq!(ost.search(&'Y', &'Z'), None);
+    assert_eq!(ost.range_search(&'G', &'K'), Some(vec![&'H', &'I']));
+    assert_eq!(ost.range_search(&'Y', &'Z'), None);
 }

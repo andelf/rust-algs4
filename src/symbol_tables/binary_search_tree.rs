@@ -52,12 +52,12 @@ impl<K: fmt::Debug, V: fmt::Debug> Node<K, V> {
     }
 }
 
-fn put<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: K, val: V) -> Option<Box<Node<K,V>>> {
+fn put<K: PartialOrd, V>(x: Option<Box<Node<K,V>>>, key: K, val: V) -> Option<Box<Node<K,V>>> {
     let mut x = x;
     if x.is_none() {
         return Some(Box::new(Node::new(key, val)));
     }
-    let cmp = key.cmp(&x.as_ref().unwrap().key);
+    let cmp = key.partial_cmp(&x.as_ref().unwrap().key).unwrap();
     match cmp {
         Ordering::Less => {
             let left = x.as_mut().unwrap().left.take();
@@ -75,13 +75,13 @@ fn put<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: K, val: V) -> Option<Box<Node<
 }
 
 
-fn delete<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: &K) -> Option<Box<Node<K,V>>> {
+fn delete<K: PartialOrd, V>(x: Option<Box<Node<K,V>>>, key: &K) -> Option<Box<Node<K,V>>> {
     if x.is_none() {
         return None;
     }
 
     let mut x = x;
-    match key.cmp(&x.as_ref().unwrap().key) {
+    match key.partial_cmp(&x.as_ref().unwrap().key).unwrap() {
         Ordering::Less => {
             let left = x.as_mut().unwrap().left.take();
             x.as_mut().unwrap().left = delete(left, key);
@@ -117,7 +117,7 @@ pub struct BST<K, V> {
     pub root: Option<Box<Node<K, V>>>
 }
 
-impl<K: Ord, V> ST<K, V> for BST<K, V> {
+impl<K: PartialOrd, V> ST<K, V> for BST<K, V> {
     fn new() -> BST<K, V> {
         BST { root: None }
     }
@@ -125,7 +125,7 @@ impl<K: Ord, V> ST<K, V> for BST<K, V> {
     fn get(&self, key: &K) -> Option<&V> {
         let mut x = self.root.as_ref();
         while x.is_some() {
-            match key.cmp(&x.unwrap().key) {
+            match key.partial_cmp(&x.unwrap().key).unwrap() {
                 Ordering::Less => {
                     x = x.unwrap().left.as_ref();
                 },
@@ -162,12 +162,12 @@ impl<K: Ord, V> ST<K, V> for BST<K, V> {
     }
 }
 
-fn floor<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a Node<K,V>> {
+fn floor<'a, K: PartialOrd, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a Node<K,V>> {
     if x.is_none() {
         return None;
     }
 
-    match key.cmp(&x.unwrap().key) {
+    match key.partial_cmp(&x.unwrap().key).unwrap() {
         Ordering::Equal => {
             return Some(&(**x.unwrap()));
         },
@@ -185,12 +185,12 @@ fn floor<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a No
     }
 }
 
-fn ceiling<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a Node<K,V>> {
+fn ceiling<'a, K: PartialOrd, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a Node<K,V>> {
     if x.is_none() {
         return None;
     }
 
-    match key.cmp(&x.unwrap().key) {
+    match key.partial_cmp(&x.unwrap().key).unwrap() {
         Ordering::Equal => {
             return Some(&(**x.unwrap()));
         },
@@ -210,7 +210,7 @@ fn ceiling<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> Option<&'a 
 
 // delete_min helper
 // returns: top, deleted
-fn delete_min<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, Option<Box<Node<K,V>>>) {
+fn delete_min<K: PartialOrd, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, Option<Box<Node<K,V>>>) {
     let mut x = x;
     if x.is_none() {
         return (None, None);
@@ -227,7 +227,7 @@ fn delete_min<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, 
 
 // delete_max helper
 // returns: top, deleted
-fn delete_max<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, Option<Box<Node<K,V>>>) {
+fn delete_max<K: PartialOrd, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, Option<Box<Node<K,V>>>) {
     let mut x = x;
     if x.is_none() {
         return (None, None);
@@ -242,7 +242,7 @@ fn delete_max<K: Ord, V>(x: Option<Box<Node<K,V>>>) -> (Option<Box<Node<K,V>>>, 
     }
 }
 
-fn find_max<K: Ord, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
+fn find_max<K: PartialOrd, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
     if x.is_none() {
         return None;
     }
@@ -252,7 +252,7 @@ fn find_max<K: Ord, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
     }
 }
 
-fn find_min<K: Ord, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
+fn find_min<K: PartialOrd, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
     if x.is_none() {
         return None;
     }
@@ -262,7 +262,7 @@ fn find_min<K: Ord, V>(x: Option<&Box<Node<K,V>>>) -> Option<&Box<Node<K,V>>> {
     }
 }
 
-impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
+impl<K: PartialOrd, V> OrderedST<K, V> for BST<K, V> {
     /// smallest key
     fn min(&self) -> Option<&K> {
         find_min(self.root.as_ref()).map(|n| &n.key)
@@ -295,12 +295,12 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
 
     /// number of keys less than key
     fn rank(&self, key: &K) -> usize {
-        fn rank_helper<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> usize {
+        fn rank_helper<'a, K: PartialOrd, V>(x: Option<&'a Box<Node<K,V>>>, key: &K) -> usize {
             if x.is_none() {
                 return 0;
             }
 
-            match key.cmp(&x.unwrap().key) {
+            match key.partial_cmp(&x.unwrap().key).unwrap() {
                 Ordering::Less => {
                     rank_helper(x.unwrap().left.as_ref(), key)
                 },
@@ -339,7 +339,7 @@ impl<K: Ord, V> OrderedST<K, V> for BST<K, V> {
 }
 
 
-impl<K: Ord, V> BST<K, V> {
+impl<K: PartialOrd, V> BST<K, V> {
     pub fn keys<'a>(&'a self) -> ::std::vec::IntoIter<&'a K> {
         let mut queue: Vec<&'a K> = Vec::new();
         fn inorder<'a, K, V>(x: Option<&'a Box<Node<K,V>>>, queue: &mut Vec<&'a K>) {

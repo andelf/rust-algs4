@@ -7,7 +7,7 @@ pub struct OrderedArrayST<K, V> {
     pairs: Vec<(K,V)>,
 }
 
-impl<K: Ord, V> OrderedArrayST<K, V> {
+impl<K: PartialOrd, V> OrderedArrayST<K, V> {
     fn rank(&self, key: &K) -> usize {
         let mut lo = 0;
         let mut hi = self.pairs.len() - 1;
@@ -17,7 +17,7 @@ impl<K: Ord, V> OrderedArrayST<K, V> {
             if mid == 0 {
                 break;
             }
-            match key.cmp(&self.pairs[mid].0) {
+            match key.partial_cmp(&self.pairs[mid].0).unwrap() {
                 Ordering::Less => {
                     hi = mid - 1;
                 },
@@ -58,7 +58,7 @@ impl<K: Ord, V> OrderedArrayST<K, V> {
     }
 }
 
-impl<K: Ord, V> ST<K,V> for OrderedArrayST<K, V> {
+impl<K: PartialOrd, V> ST<K,V> for OrderedArrayST<K, V> {
     fn new() -> Self {
         OrderedArrayST {
             pairs: Vec::new(),
