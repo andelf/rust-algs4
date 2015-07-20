@@ -178,7 +178,7 @@ fn sorting_based(points: &[Point]) {
         }
     }
     for line in result.iter() {
-        let desc = line.iter().map(|i| format!("{}", i)).collect::<Vec<String>>().connect(" -> ");
+        let desc = line.iter().map(|i| format!("{}", i)).collect::<Vec<String>>().join(" -> ");
         println!("{}", desc);
 
     }

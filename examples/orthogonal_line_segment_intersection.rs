@@ -13,9 +13,6 @@ use algs4::geometric_search::RangeSearch1D;
 use self::Event::*;
 use self::OrthogonalLine::*;
 
-
-
-
 #[derive(Debug, PartialEq, Clone)]
 pub enum OrthogonalLine {
     HLine { x0: i32, x1: i32, y: i32 },
@@ -57,10 +54,10 @@ pub enum Event {
 }
 
 fn first_x_coords_of(event: &Event) -> i32 {
-    match event {
-        &HLineStart { x, .. } => x,
-        &HLineEnd { x, .. } => x,
-        &VLineMet { x, .. } => x
+    match *event {
+        HLineStart { x, .. } => x,
+        HLineEnd { x, .. }   => x,
+        VLineMet { x, .. }   => x
     }
 }
 impl PartialOrd for Event {
@@ -92,18 +89,14 @@ fn lines_from_slide() -> Vec<OrthogonalLine> {
 
 fn main() {
     let mut bst = BST::<i32,()>::new();
-
     let lines = lines_from_slide();
     let mut events: Vec<Event> = lines.iter().flat_map(|l| l.to_events()).collect();
+
     quick_sort(&mut events);
-    for e in events.iter() {
-        match *e {
-            HLineStart { y, .. } => {
-                bst.insert(y, ());
-            },
-            HLineEnd { y, .. } => {
-                bst.delete(&y);
-            },
+    for e in events {
+        match e {
+            HLineStart { y, .. } => bst.insert(y, ()),
+            HLineEnd { y, .. } => bst.delete(&y),
             VLineMet { x, y0, y1 } => {
                 println!("vline => ({},{})---({},{})", x, y0, x, y1);
                 match bst.search(&y0, &y1) {
@@ -113,7 +106,6 @@ fn main() {
                     }
                 }
             }
-
         }
     }
 }
