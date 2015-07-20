@@ -16,7 +16,7 @@ before_script:
   - cd SDL2_gfx-*
   - ./configure && make && sudo make install
   - cd -
-  - cd rust-sdl2_gfx
+  - cd rust-algs4
   - rustc --version
 script:
   - cargo build -v
