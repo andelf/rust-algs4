@@ -1,6 +1,11 @@
 language: rust
 rust: nightly
 sudo: true
+addons:
+  apt:
+    packages:
+      - libsdl2-dev
+      - libsdl2-gfx-dev
 env:
   global:
     - RUST_TEST_THREADS: 1

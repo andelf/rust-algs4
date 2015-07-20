@@ -29,12 +29,15 @@ pub trait IntervalST<K: Ord, V> {
 
 impl<K: Ord, V> RangeSearch1D<K, V> for BST<K, V> {
 
+    #[inline]
     fn insert(&mut self, key: K, val: V) {
         self.put(key, val);
     }
 
     fn search(&self, lo: &K, hi: &K) -> Option<Vec<&K>> {
-        unimplemented!()
+        let mut result = Vec::new();
+
+
     }
 
 
