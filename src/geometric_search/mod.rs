@@ -35,9 +35,7 @@ impl<K: Ord, V> RangeSearch1D<K, V> for BST<K, V> {
     }
 
     fn search(&self, lo: &K, hi: &K) -> Option<Vec<&K>> {
-        let mut result = Vec::new();
-
-
+        unimplemented!()
     }
 
 

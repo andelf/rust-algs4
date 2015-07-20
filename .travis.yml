@@ -1,15 +1,22 @@
 language: rust
 rust: nightly
 sudo: true
-addons:
-  apt:
-    packages:
-      - libsdl2-dev
-      - libsdl2-gfx-dev
 env:
   global:
     - RUST_TEST_THREADS: 1
 before_script:
+  - cd ..
+  - wget -q http://www.libsdl.org/release/SDL2-2.0.3.tar.gz
+  - wget -q http://iweb.dl.sourceforge.net/project/sdl2gfx/SDL2_gfx-1.0.0.tar.gz
+  - tar xf SDL2-*.tar.gz
+  - tar xf SDL2_gfx-*.tar.gz
+  - cd SDL2-*
+  - ./configure && make && sudo make install
+  - cd -
+  - cd SDL2_gfx-*
+  - ./configure && make && sudo make install
+  - cd -
+  - cd rust-sdl2_gfx
   - rustc --version
 script:
   - cargo build -v
