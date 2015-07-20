@@ -7,10 +7,10 @@ use super::{ST, OrderedST};
 // use super::super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
 
 pub struct Node<K, V> {
-    key: K,
-    val: V,
-    left:  Option<Box<Node<K, V>>>,
-    right: Option<Box<Node<K, V>>>
+    pub key: K,
+    pub val: V,
+    pub left:  Option<Box<Node<K, V>>>,
+    pub right: Option<Box<Node<K, V>>>
 }
 
 impl<K, V> Node<K, V> {
@@ -114,7 +114,7 @@ fn delete<K: Ord, V>(x: Option<Box<Node<K,V>>>, key: &K) -> Option<Box<Node<K,V>
 }
 
 pub struct BST<K, V> {
-    root: Option<Box<Node<K, V>>>
+    pub root: Option<Box<Node<K, V>>>
 }
 
 impl<K: Ord, V> ST<K, V> for BST<K, V> {

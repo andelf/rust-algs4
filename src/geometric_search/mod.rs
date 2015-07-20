@@ -35,7 +35,23 @@ impl<K: Ord, V> RangeSearch1D<K, V> for BST<K, V> {
     }
 
     fn search(&self, lo: &K, hi: &K) -> Option<Vec<&K>> {
-        unimplemented!()
+        let mut queue: Vec<&K> = Vec::new();
+        fn inorder<'a, K: Ord, V>(x: Option<&'a Box<Node<K,V>>>, queue: &mut Vec<&'a K>, lo: &K, hi: &K) {
+            if x.is_none() {
+                return;
+            }
+            inorder(x.unwrap().left.as_ref(), queue, lo, hi);
+            if x.as_ref().unwrap().key >= *lo && x.as_ref().unwrap().key <= *hi {
+                queue.push(&x.unwrap().key);
+            }
+            inorder(x.unwrap().right.as_ref(), queue, lo, hi);
+        };
+        inorder(self.root.as_ref(), &mut queue, lo, hi);
+        if queue.is_empty() {
+            None
+        } else {
+            Some(queue)
+        }
     }
 
 
@@ -62,4 +78,7 @@ fn test_range_search_1d() {
     ost.insert('P', ());
 
     assert_eq!(ost.count(&'G', &'K'), 2);
+
+    assert_eq!(ost.search(&'G', &'K'), Some(vec![&'H', &'I']));
+    assert_eq!(ost.search(&'Y', &'Z'), None);
 }
