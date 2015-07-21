@@ -1,4 +1,4 @@
-use rand::{thread_rng, Rng};
+use rand::{thread_rng, Rng, Rand};
 use std::f64;
 use std::cmp::Ordering;
 use std::mem;
@@ -27,7 +27,7 @@ impl Particle {
             vx: (rng.next_f64() - 0.5) / 10.0,
             vy: (rng.next_f64() - 0.5) / 10.0,
             mass: rng.next_f64() / 100.0,
-            radius: (rng.next_f64() + 0.3) / 100.0,
+            radius: (rng.next_f64() + 0.4) / 100.0,
             count: 0
         }
     }
@@ -75,17 +75,17 @@ impl Particle {
 
     pub fn time_to_hit_vertical_wall(&self) -> f64 {
         if self.vx > 0.0 {
-            (1.0 - self.rx) / self.vx
+            (1.0 - self.rx - self.radius) / self.vx
         } else {
-            - self.rx / self.vx
+            - (self.rx - self.radius) / self.vx
         }
     }
 
     pub fn time_to_hit_horizontal_wall(&self) -> f64 {
         if self.vy > 0.0 {
-            (1.0 - self.ry) / self.vy
+            (1.0 - self.ry - self.radius) / self.vy
         } else {
-            - self.ry / self.vy
+            - (self.ry - self.radius) / self.vy
         }
     }
 
@@ -112,19 +112,36 @@ impl Particle {
 
     pub fn bounce_off_vertical_wall(&mut self) {
         self.vx = -self.vx;
+        self.count += 1;
     }
 
     pub fn bounce_off_horizontal_wall(&mut self) {
         self.vy = -self.vy;
+        self.count += 1;
     }
 }
 
 
-#[derive(PartialEq)]
+impl Rand for Particle {
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        Particle {
+            rx: rng.next_f64(),
+            ry: rng.next_f64(),
+            vx: (rng.next_f64() - 0.5) / 10.0,
+            vy: (rng.next_f64() - 0.5) / 10.0,
+            mass: rng.next_f64() / 100.0,
+            radius: (rng.next_f64() + 0.4) / 100.0,
+            count: 0
+        }
+    }
+}
+
+
+#[derive(PartialEq, Debug)]
 pub enum Event {
-    Hit { timestamp: f64, a: usize, b: usize },
-    HitVerticalWall { timestamp: f64, a: usize },
-    HitHorizontalWall { timestamp: f64, a: usize },
+    Hit { timestamp: f64, a: usize, b: usize, count_a: usize, count_b: usize },
+    HitVerticalWall { timestamp: f64, a: usize, count_a: usize },
+    HitHorizontalWall { timestamp: f64, a: usize, count_a: usize },
     Refresh { timestamp: f64 }
 }
 
@@ -135,6 +152,26 @@ impl Event {
             &Event::HitVerticalWall { timestamp: t, .. } => t,
             &Event::HitHorizontalWall { timestamp: t, .. } => t,
             &Event::Refresh { timestamp: t } => t
+        }
+    }
+
+    pub fn is_valid_for(&self, particles: &[Particle]) -> bool {
+        match *self {
+            Event::Hit { a, count_a, b, count_b, .. } => {
+                println!("a={:?} cnt={}\nb={:?} cnt={}",
+                         particles[a], count_a,
+                         particles[b], count_b);
+                particles[a].count == count_a && particles[b].count == count_b
+            },
+            Event::HitVerticalWall { a, count_a, .. } => {
+                println!("a={:?} cnt={}", particles[a], count_a);
+                particles[a].count == count_a
+            },
+            Event::HitHorizontalWall { a, count_a, .. } => {
+                println!("a={:?} cnt={}", particles[a], count_a);
+                particles[a].count == count_a
+            },
+            Event::Refresh { .. } => true
         }
     }
 }
@@ -167,13 +204,20 @@ impl CollisionSystem {
                 continue;
             }
             let dt = self.particles[a].time_to_hit(&self.particles[i]);
-            self.pq.insert(Event::Hit { timestamp: self.t + dt,
-                                        a: a, b: i });
+            self.pq.insert(Event::Hit {
+                timestamp: self.t + dt,
+                a: a, b: i,
+                count_a: self.particles[a].count,
+                count_b: self.particles[i].count });
         }
-        self.pq.insert(Event::HitVerticalWall { timestamp: self.t + self.particles[a].time_to_hit_vertical_wall(),
-                                                a: a });
-        self.pq.insert(Event::HitHorizontalWall { timestamp: self.t + self.particles[a].time_to_hit_horizontal_wall(),
-                                                  a: a });
+        self.pq.insert(Event::HitVerticalWall {
+            timestamp: self.t + self.particles[a].time_to_hit_vertical_wall(),
+            a: a,
+            count_a: self.particles[a].count });
+        self.pq.insert(Event::HitHorizontalWall {
+            timestamp: self.t + self.particles[a].time_to_hit_horizontal_wall(),
+            a: a,
+            count_a: self.particles[a].count });
     }
 
     // FIXME: un-done
@@ -187,15 +231,17 @@ impl CollisionSystem {
         }
         self.pq.insert(Event::Refresh { timestamp: 0.0 });
 
-        loop {
+        // loop {
+        for _ in 0 .. 10 {
             if self.pq.is_empty() {
                 break;
             }
             let event = self.pq.del_min().unwrap();
 
-            // if !event.is_valid() {
-            //     continue;
-            // }
+            // FIXME: <= self.t
+            if !event.is_valid_for(&self.particles) || event.timestamp() <= self.t {
+                continue
+            }
 
             for i in 0 .. n {
                 self.particles[i].do_move(event.timestamp() - self.t);
@@ -204,16 +250,19 @@ impl CollisionSystem {
 
             match event {
                 Event::Hit { a, b, .. } => {
+                    println!("{}: {} hit {}", self.t, a, b);
                     let ptr = unsafe { mem::transmute::<_, usize>(&mut self.particles[b]) };
                     self.particles[a].bounce_off(unsafe { mem::transmute::<_, &mut Particle>(ptr) });
                     self.predict(a);
                     self.predict(b);
                 },
                 Event::HitVerticalWall { a, .. } => {
+                    println!("{}: {} hit vertical wall", self.t, a);
                     self.particles[a].bounce_off_vertical_wall();
                     self.predict(a);
                 },
                 Event::HitHorizontalWall { a, .. } => {
+                    println!("{}: {} hit horizontal wall", self.t, a);
                     self.particles[a].bounce_off_horizontal_wall();
                     self.predict(a);
                 },
@@ -221,8 +270,19 @@ impl CollisionSystem {
                     println!("refresh");
                 }
             }
-
         }
     }
+}
 
+
+#[test]
+fn test_collision_system() {
+    let mut rng = thread_rng();
+    let mut ps: Vec<Particle> = Vec::new();
+    for _ in 0 .. 20 {
+        ps.push(rng.gen());
+    }
+
+    let mut sys = CollisionSystem::new(ps);
+    sys.simulate();
 }
