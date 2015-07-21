@@ -39,6 +39,20 @@ impl<K, V> Node<K, V> {
         self.color == Red
     }
 
+    fn depth(&self) -> usize {
+        let mut ret = 1;
+        if self.left.is_some() {
+            ret += self.left.as_ref().unwrap().depth();
+        }
+        if self.right.is_some() {
+            let rsz = self.right.as_ref().unwrap().depth();
+            if rsz >= ret {
+                ret = 1 + rsz
+            }
+        }
+        ret
+    }
+
     fn size(&self) -> usize {
         let mut ret = 1;
         if self.left.is_some() {
@@ -52,8 +66,7 @@ impl<K, V> Node<K, V> {
 
     /// Left rotation. Orient a (temporarily) right-leaning red link to lean left.
     fn rotate_left(&mut self) {
-        assert!(self.right.is_some());
-        assert!(self.right.as_ref().unwrap().is_red());
+        assert!(is_red(&self.right));
         let mut x = self.right.take();
         self.right = x.as_mut().unwrap().left.take();
         x.as_mut().unwrap().color = self.color;
@@ -64,8 +77,7 @@ impl<K, V> Node<K, V> {
 
     /// Right rotation. Orient a left-leaning red link to (temporarily) lean right
     fn rotate_right(&mut self) {
-        assert!(self.left.is_some());
-        assert!(self.left.as_ref().unwrap().is_red());
+        assert!(is_red(&self.left));
         let mut x = self.left.take();
         self.left = x.as_mut().unwrap().right.take();
         x.as_mut().unwrap().color = self.color;
@@ -77,8 +89,8 @@ impl<K, V> Node<K, V> {
     /// Color flip. Recolor to split a (temporary) 4-node.
     fn flip_color(&mut self) {
         assert!(!self.is_red());
-        assert!(self.left.as_ref().unwrap().is_red());
-        assert!(self.right.as_ref().unwrap().is_red());
+        assert!(is_red(&self.left));
+        assert!(is_red(&self.right));
         self.color = Red;
         self.left.as_mut().map(|n| n.color = Black);
         self.right.as_mut().map(|n| n.color = Black);
@@ -190,6 +202,15 @@ fn delete<K: PartialOrd, V>(x: Option<Box<Node<K,V>>>, key: &K) -> Option<Box<No
 
 pub struct RedBlackBST<K, V> {
     pub root: Option<Box<Node<K, V>>>
+}
+
+impl<K: PartialOrd, V> RedBlackBST<K, V> {
+    pub fn depth(&self) -> usize {
+        match self.root {
+            None => 0,
+            Some(ref x) => x.depth()
+        }
+    }
 }
 
 impl<K: PartialOrd, V> ST<K, V> for RedBlackBST<K, V> {
@@ -445,93 +466,16 @@ impl<K: fmt::Debug, V: fmt::Debug> fmt::Debug for RedBlackBST<K, V> {
 }
 
 #[test]
-fn test_binary_search_tree_delete_min() {
-    let mut t = RedBlackBST::<char, ()>::new();
-    for c in "SEARCHEXAMP".chars() {
+fn test_red_black_tree_shape() {
+    let mut t = RedBlackBST::<i32, ()>::new();
+    assert_eq!(0, t.depth());
+    for c in 0 .. 255 {
         t.put(c, ());
     }
-
-    let sz0 = t.size();
-    assert!(t.get(&'A').is_some());
-    t.delete_min();             // assume delete 'A'
-    assert_eq!(t.get(&'A'), None);
-    assert_eq!(t.size(), sz0 - 1);
-}
-
-#[test]
-fn test_binary_search_tree_delete_max() {
-    let mut t = RedBlackBST::<char, ()>::new();
-    for c in "SEARCHEXAMP".chars() {
-        t.put(c, ());
-    }
-
-    let sz0 = t.size();
-    assert!(t.get(&'X').is_some());
-    t.delete_max();             // assume delete 'X'
-    assert_eq!(t.get(&'X'), None);
-    assert_eq!(t.size(), sz0 - 1);
-}
-
-#[test]
-fn test_binary_search_tree_delete_case0() {
-    let mut t = RedBlackBST::<char, ()>::new();
-    for c in "SEARCHEXAM".chars() {
-        t.put(c, ());
-    }
-
-    let sz0 = t.size();
-    t.delete(&'C');
-    assert_eq!(t.get(&'C'), None);
-    assert_eq!(t.size(), sz0 - 1);
-}
-
-#[test]
-fn test_binary_search_tree_delete_case1() {
-    let mut t = RedBlackBST::<char, ()>::new();
-    for c in "SEARCHEXAM".chars() {
-        t.put(c, ());
-    }
-
-    let sz0 = t.size();
-    t.delete(&'R');
-    assert_eq!(t.get(&'R'), None);
-    assert_eq!(t.size(), sz0 - 1);
-}
-
-#[test]
-fn test_binary_search_tree_delete_case2() {
-    let mut t = RedBlackBST::<char, ()>::new();
-    for c in "SEARCHEXAM".chars() {
-        t.put(c, ());
-    }
-
-    let sz0 = t.size();
-    t.delete(&'E');
-    assert_eq!(t.get(&'E'), None);
-    assert_eq!(t.size(), sz0 - 1);
-}
-
-
-#[test]
-fn test_red_black_tree_rotate() {
-    use std::iter::FromIterator;
-
-    let mut t = RedBlackBST::<char, usize>::new();
-    let mut i = 0_usize;
-    for c in 97 .. 122 + 1 {
-        let c = c as u8 as char;
-        t.put(c, i);
-        i += 1;
-    }
-    for c in 65 .. 90 + 1 {
-        let c = c as u8 as char;
-        t.put(c, i);
-        i += 1;
-    }
-    println!("{:?}", t);
-    println!("size => {:?}", t.size());
-    assert!(false);
-
+    // println!("{:?}", t);
+    assert_eq!(255, t.size());
+    // max for n=255
+    assert!(t.depth() <= 8);
 }
 
 
