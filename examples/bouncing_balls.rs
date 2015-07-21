@@ -7,13 +7,12 @@ extern crate rand;
 use sdl2::pixels::Color;
 use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
-use sdl2::timer::delay;
 use sdl2_gfx::primitives::DrawRenderer;
 
 use rand::{thread_rng, Rng};
 use algs4::priority_queues::event_driven_simulation::Particle;
 
-fn main() {
+fn run() -> Result<(), String> {
     let mut ctx = sdl2::init().video().unwrap();
     let mut rng = thread_rng();
 
@@ -30,9 +29,6 @@ fn main() {
     ren.present();
 
     let mut running = true;
-
-    let mut x = 50;
-    let mut y = 50;
 
     let mut balls = Vec::new();
     for _ in 0 .. 200 {
@@ -68,22 +64,24 @@ fn main() {
         let width = vp.width();
         let height = vp.height();
         for &mut (ref mut ball, color) in balls.iter_mut() {
-            ren.filled_circle((ball.rx * width as f64) as i16,
-                              (ball.ry * height as f64) as i16,
-                              (ball.radius * width as f64) as i16,
-                              color);
-            ren.aa_circle((ball.rx * width as f64) as i16,
-                          (ball.ry * height as f64) as i16,
-                          (ball.radius * width as f64) as i16,
-                          color);
-            ball.do_move(0.05);
+            try!(ren.filled_circle((ball.rx * width as f64) as i16,
+                                   (ball.ry * height as f64) as i16,
+                                   (ball.radius * width as f64) as i16,
+                                   color));
+            try!(ren.aa_circle((ball.rx * width as f64) as i16,
+                               (ball.ry * height as f64) as i16,
+                               (ball.radius * width as f64) as i16,
+                               color));
+            ball.do_move(0.1);
 
         }
         ren.set_draw_color(Color::RGBA(255, 255, 255, 125));
-        x += 2;
-        y += 2;
         ren.present();
-
-
     }
+    Ok(())
+}
+
+
+fn main() {
+    run().unwrap();
 }
