@@ -3,6 +3,8 @@ use super::symbol_tables::binary_search_tree::{BST, Node};
 
 pub mod primitive;
 
+pub mod kd_tree;
+
 pub trait RangeSearch1D<K, V>: OrderedST<K, V> {
     /// Insert key-value pair
     fn insert(&mut self, key: K, val: V);
