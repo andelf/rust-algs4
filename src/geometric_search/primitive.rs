@@ -1,6 +1,8 @@
 use std::fmt;
 use std::vec::IntoIter;
 
+use rand::{Rand, Rng};
+
 #[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
 pub struct Point2D {
     pub x: f64,
@@ -30,6 +32,15 @@ impl fmt::Display for Point2D {
 impl AsRef<Point2D> for Point2D {
     fn as_ref(&self) -> &Point2D {
         &self
+    }
+}
+
+impl Rand for Point2D {
+    fn rand<R: Rng>(rng: &mut R) -> Self {
+        Point2D {
+            x: rng.next_f64(),
+            y: rng.next_f64()
+        }
     }
 }
 
@@ -155,4 +166,23 @@ impl PointSet {
         }
         result.into_iter()
     }
+
+    pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
+        // Ord :(
+        self.ps.iter().min_by(|q| (q.distance_squared_to(p.as_ref()) * 10000.0) as u64)
+    }
+}
+
+#[test]
+fn test_point_set() {
+    use rand::thread_rng;
+
+    let mut rng = thread_rng();
+    let mut ps = PointSet::new();
+    for _ in 0 .. 100 {
+        ps.insert(rng.gen())
+    }
+
+    assert!(ps.nearest(Point2D::new(0.5, 0.5)).is_some());
+    assert!(ps.range(RectHV::new(0.4, 0.4, 0.6, 0.6)).count() > 0);
 }
