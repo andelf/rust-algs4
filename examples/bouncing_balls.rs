@@ -3,14 +3,9 @@ extern crate sdl2;
 extern crate sdl2_gfx;
 extern crate rand;
 
-use std::thread;
-use std::mem;
-
 use sdl2::pixels::Color;
 use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
-use sdl2::render::Renderer;
-use sdl2::timer::delay;
 use sdl2::timer::get_ticks;
 use sdl2_gfx::primitives::DrawRenderer;
 
@@ -47,7 +42,6 @@ fn run() -> Result<(), String> {
     let mut old_ps = collision_sys.particles.clone();
 
     collision_sys.tick();
-    let mut world_time: f64 = collision_sys.t;
 
     let mut last_world_time = (collision_sys.t * 1000.0) as u32;
     let mut last_update_ticks = 0;
@@ -91,7 +85,7 @@ fn run() -> Result<(), String> {
 
         if get_ticks() >= last_world_time {
             old_ps = collision_sys.particles.clone();
-            let tick = collision_sys.tick();
+            let _ = collision_sys.tick();
             last_world_time = (collision_sys.t * 1000.0) as u32;
         }
 

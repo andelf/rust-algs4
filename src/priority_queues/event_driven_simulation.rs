@@ -305,5 +305,7 @@ fn test_collision_system() {
     }
 
     let mut sys = CollisionSystem::new(ps);
-    sys.simulate(|ps| ());
+    sys.init();
+    sys.tick();
+    //sys.simulate(|ps| ());
 }

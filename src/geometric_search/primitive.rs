@@ -1,5 +1,5 @@
 use std::fmt;
-
+use std::vec::IntoIter;
 
 #[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
 pub struct Point2D {
@@ -120,4 +120,39 @@ fn test_rect() {
     let r1 = RectHV::new(0.0, 0.0, 1.1, 1.1);
     let r2 = RectHV::new(1.2, 2.0, 3.1, 4.1);
     assert!(!r1.intersects(r2));
+}
+
+
+pub struct PointSet {
+    ps: Vec<Point2D>
+}
+
+impl PointSet {
+    pub fn new() -> PointSet {
+        PointSet { ps: Vec::new() }
+    }
+
+    pub fn size(&self) -> usize {
+        self.ps.len()
+    }
+
+    pub fn insert(&mut self, p: Point2D) {
+        if !self.ps.contains(&p) {
+            self.ps.push(p)
+        }
+    }
+
+    pub fn contains<T: AsRef<Point2D>>(&self, p: T) -> bool {
+        self.ps.contains(p.as_ref())
+    }
+
+    pub fn range<T: AsRef<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
+        let mut result = Vec::new();
+        for p in self.ps.iter() {
+            if rect.as_ref().contains(p) {
+                result.push(p);
+            }
+        }
+        result.into_iter()
+    }
 }
