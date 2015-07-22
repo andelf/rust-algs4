@@ -5,7 +5,7 @@ use std::mem;
 use super::MinPQ;
 use super::binary_heaps::BinaryHeapMinPQ;
 
-#[derive(PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Particle {
     pub rx: f64,
     pub ry: f64,
@@ -20,16 +20,7 @@ pub struct Particle {
 impl Particle {
     pub fn new() -> Particle {
         let mut rng = thread_rng();
-
-        Particle {
-            rx: rng.next_f64(),
-            ry: rng.next_f64(),
-            vx: (rng.next_f64() - 0.5) / 10.0,
-            vy: (rng.next_f64() - 0.5) / 10.0,
-            mass: rng.next_f64() / 100.0,
-            radius: (rng.next_f64() + 0.4) / 100.0,
-            count: 0
-        }
+        rng.gen()
     }
 
     pub fn do_move(&mut self, dt: f64) {
@@ -106,6 +97,25 @@ impl Particle {
         that.vx -= jx / that.mass;
         that.vy -= jy / that.mass;
 
+        // FIXME: max v, hit boundary
+        if self.vx.abs() > 1.0 {
+            self.vx = 1.0 * self.vx.signum();
+        }
+        if self.vy.abs() > 1.0 {
+            self.vy = 1.0 * self.vy.signum();
+        }
+        if self.rx < 0.0 {
+            self.rx = 0.0 + self.radius
+        }
+        if self.rx > 1.0 {
+            self.rx = 1.0 - self.radius
+        }
+        if self.ry > 1.0 {
+            self.ry = 1.0 - self.radius
+        }
+        if self.ry < 0.0 {
+            self.ry = 0.0 + self.radius
+        }
         self.count += 1;
         that.count += 1;
     }
@@ -124,13 +134,15 @@ impl Particle {
 
 impl Rand for Particle {
     fn rand<R: Rng>(rng: &mut R) -> Self {
+        let r = (rng.next_f64() + 0.4) / 100.0;
         Particle {
-            rx: rng.next_f64(),
-            ry: rng.next_f64(),
+            // avoid boundary
+            rx: rng.next_f64() % 0.9 + 0.05,
+            ry: rng.next_f64() % 0.9 + 0.05,
             vx: (rng.next_f64() - 0.5) / 10.0,
             vy: (rng.next_f64() - 0.5) / 10.0,
-            mass: rng.next_f64() / 100.0,
-            radius: (rng.next_f64() + 0.4) / 100.0,
+            mass: r, // .powi(2),
+            radius: r,
             count: 0
         }
     }
@@ -138,6 +150,8 @@ impl Rand for Particle {
 
 
 #[derive(PartialEq, Debug)]
+// Use index number as Particle ref
+// Or to use RawLink
 pub enum Event {
     Hit { timestamp: f64, a: usize, b: usize, count_a: usize, count_b: usize },
     HitVerticalWall { timestamp: f64, a: usize, count_a: usize },
@@ -158,17 +172,15 @@ impl Event {
     pub fn is_valid_for(&self, particles: &[Particle]) -> bool {
         match *self {
             Event::Hit { a, count_a, b, count_b, .. } => {
-                println!("a={:?} cnt={}\nb={:?} cnt={}",
-                         particles[a], count_a,
-                         particles[b], count_b);
+                 println!("a={:?} cnt={}\nb={:?} cnt={}",
+                          particles[a], count_a,
+                          particles[b], count_b);
                 particles[a].count == count_a && particles[b].count == count_b
             },
             Event::HitVerticalWall { a, count_a, .. } => {
-                println!("a={:?} cnt={}", particles[a], count_a);
                 particles[a].count == count_a
             },
             Event::HitHorizontalWall { a, count_a, .. } => {
-                println!("a={:?} cnt={}", particles[a], count_a);
                 particles[a].count == count_a
             },
             Event::Refresh { .. } => true
@@ -184,8 +196,8 @@ impl PartialOrd for Event {
 
 pub struct CollisionSystem {
     pq: BinaryHeapMinPQ<Event>,
-    t: f64,
-    particles: Vec<Particle>
+    pub t: f64,
+    pub particles: Vec<Particle>
 }
 
 impl CollisionSystem {
@@ -222,7 +234,7 @@ impl CollisionSystem {
 
     // FIXME: un-done
     // TODO: add message remove or valid check
-    pub fn simulate(&mut self) {
+    pub fn init(&mut self) {
         self.pq = BinaryHeapMinPQ::new();
 
         let n = self.particles.len();
@@ -230,46 +242,55 @@ impl CollisionSystem {
             self.predict(i);
         }
         self.pq.insert(Event::Refresh { timestamp: 0.0 });
+    }
 
-        // loop {
-        for _ in 0 .. 10 {
+    pub fn tick(&mut self) -> f64 {
+        let n = self.particles.len();
+        loop {
             if self.pq.is_empty() {
-                break;
+                panic!("should init first")
             }
             let event = self.pq.del_min().unwrap();
 
-            // FIXME: <= self.t
+            // FIXME: is timestamp <= self.t necessary
             if !event.is_valid_for(&self.particles) || event.timestamp() <= self.t {
                 continue
             }
 
+            let diff = event.timestamp() - self.t;
+            // thread::sleep_ms((diff * 1000.0) as u32);
+
             for i in 0 .. n {
                 self.particles[i].do_move(event.timestamp() - self.t);
             }
+
+
             self.t = event.timestamp();
 
             match event {
                 Event::Hit { a, b, .. } => {
-                    println!("{}: {} hit {}", self.t, a, b);
+                    // println!("{}: {} hit {}", self.t, a, b);
                     let ptr = unsafe { mem::transmute::<_, usize>(&mut self.particles[b]) };
                     self.particles[a].bounce_off(unsafe { mem::transmute::<_, &mut Particle>(ptr) });
                     self.predict(a);
                     self.predict(b);
                 },
                 Event::HitVerticalWall { a, .. } => {
-                    println!("{}: {} hit vertical wall", self.t, a);
+                    // println!("{}: {} hit vertical wall", self.t, a);
                     self.particles[a].bounce_off_vertical_wall();
                     self.predict(a);
                 },
                 Event::HitHorizontalWall { a, .. } => {
-                    println!("{}: {} hit horizontal wall", self.t, a);
+                    // println!("{}: {} hit horizontal wall", self.t, a);
                     self.particles[a].bounce_off_horizontal_wall();
                     self.predict(a);
                 },
                 Event::Refresh { .. } => {
-                    println!("refresh");
+                    // println!("refresh");
                 }
             }
+
+            return diff;
         }
     }
 }
@@ -284,5 +305,5 @@ fn test_collision_system() {
     }
 
     let mut sys = CollisionSystem::new(ps);
-    sys.simulate();
+    sys.simulate(|ps| ());
 }
