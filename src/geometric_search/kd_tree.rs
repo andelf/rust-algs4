@@ -2,9 +2,12 @@ use super::primitive::{Point2D, RectHV};
 
 use std::iter;
 use std::fmt;
+use std::f64;
 use std::vec::IntoIter;
 use std::cmp::Ordering;
 use super::super::symbol_tables::ST;
+use super::super::stacks_and_queues::Queue;
+use super::super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
 
 
 pub trait Point: Copy {
@@ -284,6 +287,54 @@ impl KdTree<Point2D, ()> {
     pub fn range_count<T: AsRef<RectHV>>(&self, rect: T) -> usize {
         self.range_search(rect).count()
     }
+
+    pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
+        let mut result = None;
+        let mut min_distance_squared = f64::MAX;
+        let p = p.as_ref();
+
+        let mut queue = ResizingArrayQueue::new();
+        queue.enqueue(self.root.as_ref());
+        while !queue.is_empty() {
+            let x = queue.dequeue().unwrap();
+
+            if x.is_none() {
+                continue;
+            }
+
+            let dim = x.as_ref().unwrap().depth % 2;
+
+            // Check distance from point in node to query point
+            let dist = x.as_ref().unwrap().key.distance_squared_to(p);
+            if dist < min_distance_squared {
+                result = Some(&x.as_ref().unwrap().key);
+                min_distance_squared = dist;
+            }
+
+            // Recursively search left/bottom (if it could contain a closer point)
+            // Recursively search right/top (if it could contain a closer point)
+            // TODO: pruning
+            if dim == 0 {
+                if p.x < x.as_ref().unwrap().comparator_for_current_dim() {
+                    queue.enqueue(x.unwrap().left.as_ref());
+                    queue.enqueue(x.unwrap().right.as_ref());
+                } else {
+                    queue.enqueue(x.unwrap().right.as_ref());
+                    queue.enqueue(x.unwrap().left.as_ref());
+                }
+            } else {        // dim == 1: y
+                if p.y < x.as_ref().unwrap().comparator_for_current_dim() {
+                    queue.enqueue(x.unwrap().left.as_ref());
+                    queue.enqueue(x.unwrap().right.as_ref());
+                } else {
+                    queue.enqueue(x.unwrap().right.as_ref());
+                    queue.enqueue(x.unwrap().left.as_ref());
+                }
+            }
+        }
+        result
+
+    }
 }
 
 
@@ -312,4 +363,29 @@ fn test_kd_tree_with_point_2d() {
 
     assert_eq!(5, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
     assert_eq!(1, t.range_search(RectHV::new(0.1, 0.1, 0.4, 0.4)).count());
+
+    assert_eq!(&Point2D::new(0.2, 0.3), t.nearest(Point2D::new(0.1, 0.1)).unwrap());
+}
+
+
+// BUG, if equal key? then points missing
+#[test]
+fn test_kd_tree_with_point_2d_duplicated() {
+    let mut t = KdTree::<Point2D, ()>::new();
+
+    t.put(Point2D::new(0.7, 0.2), ());
+    t.put(Point2D::new(0.5, 0.4), ());
+    t.put(Point2D::new(0.2, 0.3), ());
+    t.put(Point2D::new(0.2, 0.7), ());
+    t.put(Point2D::new(0.4, 0.7), ());
+    t.put(Point2D::new(0.4, 0.2), ());
+    t.put(Point2D::new(0.9, 0.6), ());
+    t.put(Point2D::new(0.7, 0.4), ());
+
+    println!("got => {:?}", t);
+
+    // assert_eq!(8, t.size());
+
+    // assert_eq!(7, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
+    assert_eq!(2, t.range_search(RectHV::new(0.1, 0.1, 0.4, 0.4)).count());
 }
