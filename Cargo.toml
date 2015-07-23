@@ -1,6 +1,6 @@
 [package]
 name = "algs4"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Shuyu Wang <andelf@gmail.com>"]
 description = "Algorithms, 4ed. MOOC in Coursera. in Rust."
 homepage = "https://github.com/andelf/rust-algs4"
@@ -17,7 +17,7 @@ rand = "*"
 
 
 [dev-dependencies.sdl2]
-sdl2 = "*"
+sdl2 = "0.6.0"
 
 [dev-dependencies.sdl2_gfx]
-sdl2_gfx = "*"
+sdl2_gfx = "0.6.0"
