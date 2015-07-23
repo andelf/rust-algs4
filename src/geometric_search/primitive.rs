@@ -1,5 +1,6 @@
 use std::fmt;
 use std::vec::IntoIter;
+use std::f64;
 use rand::{Rand, Rng};
 use super::super::symbol_tables::ST;
 use super::super::balanced_search_trees::RedBlackBST;
@@ -175,7 +176,16 @@ impl PointSet {
 
     pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
         // Ord :(
-        self.pset.keys().min_by(|q| (q.distance_squared_to(p.as_ref()) * 10000.0) as u64)
+        let mut min_distance = f64::MAX;
+        let mut result = None;
+        for q in self.pset.keys() {
+            let dist = p.as_ref().distance_to(q);
+            if dist < min_distance {
+                result = Some(q);
+                min_distance = dist;
+            }
+        }
+        result
     }
 }
 
