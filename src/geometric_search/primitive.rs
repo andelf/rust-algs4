@@ -157,7 +157,7 @@ impl PointSet {
         self.ps.contains(p.as_ref())
     }
 
-    pub fn range<T: AsRef<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
+    pub fn range_search<T: AsRef<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
         let mut result = Vec::new();
         for p in self.ps.iter() {
             if rect.as_ref().contains(p) {
@@ -184,5 +184,5 @@ fn test_point_set() {
     }
 
     assert!(ps.nearest(Point2D::new(0.5, 0.5)).is_some());
-    assert!(ps.range(RectHV::new(0.4, 0.4, 0.6, 0.6)).count() > 0);
+    assert!(ps.range_search(RectHV::new(0.4, 0.4, 0.6, 0.6)).count() > 0);
 }
