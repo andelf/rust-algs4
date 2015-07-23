@@ -309,11 +309,13 @@ impl KdTree<Point2D, ()> {
         self.range_search(rect).count()
     }
 
+    // TODO: refactor to a generic solution
     pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
         let mut result = None;
-        let mut min_distance_squared = f64::MAX;
+        let mut min_distance = f64::MAX;
         let p = p.as_ref();
 
+        // use FIFO queue
         let mut queue = ResizingArrayQueue::new();
         queue.enqueue(self.root.as_ref());
         while !queue.is_empty() {
@@ -326,30 +328,43 @@ impl KdTree<Point2D, ()> {
             let dim = x.as_ref().unwrap().depth % 2;
 
             // Check distance from point in node to query point
-            let dist = x.as_ref().unwrap().key.distance_squared_to(p);
-            if dist < min_distance_squared {
+            let dist = x.as_ref().unwrap().key.distance_to(p);
+            if dist < min_distance {
                 result = Some(&x.as_ref().unwrap().key);
-                min_distance_squared = dist;
+                min_distance = dist;
             }
 
             // Recursively search left/bottom (if it could contain a closer point)
             // Recursively search right/top (if it could contain a closer point)
-            // TODO: pruning
             if dim == 0 {
-                if p.x < x.as_ref().unwrap().comparator_for_current_dim() {
-                    queue.enqueue(x.unwrap().left.as_ref());
-                    queue.enqueue(x.unwrap().right.as_ref());
-                } else {
-                    queue.enqueue(x.unwrap().right.as_ref());
-                    queue.enqueue(x.unwrap().left.as_ref());
+                // right
+                if x.unwrap().right.is_some() {
+                    let perpendicular_len = (p.y - x.unwrap().right.as_ref().unwrap().key.y).abs();
+                    if perpendicular_len < min_distance {
+                        queue.enqueue(x.unwrap().right.as_ref());
+                    }
+                }
+                // left
+                if x.unwrap().left.is_some() {
+                    let perpendicular_len = (p.y - x.unwrap().left.as_ref().unwrap().key.y).abs();
+                    if perpendicular_len < min_distance {
+                        queue.enqueue(x.unwrap().left.as_ref());
+                    }
                 }
             } else {        // dim == 1: y
-                if p.y < x.as_ref().unwrap().comparator_for_current_dim() {
-                    queue.enqueue(x.unwrap().left.as_ref());
-                    queue.enqueue(x.unwrap().right.as_ref());
-                } else {
-                    queue.enqueue(x.unwrap().right.as_ref());
-                    queue.enqueue(x.unwrap().left.as_ref());
+                // above
+                if x.unwrap().right.is_some() {
+                    let perpendicular_len = (p.x - x.unwrap().right.as_ref().unwrap().key.x).abs();
+                    if perpendicular_len < min_distance {
+                        queue.enqueue(x.unwrap().right.as_ref());
+                    }
+                }
+                // below
+                if x.unwrap().left.is_some() {
+                    let perpendicular_len = (p.x - x.unwrap().left.as_ref().unwrap().key.x).abs();
+                    if perpendicular_len < min_distance {
+                        queue.enqueue(x.unwrap().left.as_ref());
+                    }
                 }
             }
         }
@@ -374,18 +389,21 @@ impl<K: Point + fmt::Debug, V: fmt::Debug> fmt::Debug for KdTree<K, V> {
 fn test_kd_tree_with_point_2d() {
     let mut t = KdTree::<Point2D, ()>::new();
 
+    assert!(t.nearest(Point2D::new(0.9, 0.8)).is_none());
+
     t.put(Point2D::new(0.7, 0.2), ());
     t.put(Point2D::new(0.5, 0.4), ());
     t.put(Point2D::new(0.2, 0.3), ());
     t.put(Point2D::new(0.4, 0.7), ());
     t.put(Point2D::new(0.9, 0.6), ());
 
-    println!("got => {:?}", t);
+    // println!("got => {:?}", t);
 
     assert_eq!(5, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
     assert_eq!(1, t.range_search(RectHV::new(0.1, 0.1, 0.4, 0.4)).count());
 
     assert_eq!(&Point2D::new(0.2, 0.3), t.nearest(Point2D::new(0.1, 0.1)).unwrap());
+    assert_eq!(&Point2D::new(0.9, 0.6), t.nearest(Point2D::new(0.9, 0.8)).unwrap());
 }
 
 
@@ -401,13 +419,14 @@ fn test_kd_tree_with_point_2d_duplicated() {
     t.put(Point2D::new(0.4, 0.2), ());
     t.put(Point2D::new(0.9, 0.6), ());
     t.put(Point2D::new(0.7, 0.4), ());
-
-    println!("got => {:?}", t);
+    // same node, this is replace behavior, no new node
+    t.put(Point2D::new(0.9, 0.6), ());
 
     assert_eq!(8, t.size());
     assert!(t.contains(&Point2D::new(0.7, 0.2)));
     assert!(t.contains(&Point2D::new(0.7, 0.4)));
     assert!(!t.contains(&Point2D::new(0.7, 0.3)));
+    assert!(!t.contains(&Point2D::new(0.4, 0.3)));
     assert_eq!(8, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
     assert_eq!(2, t.range_search(RectHV::new(0.1, 0.1, 0.4, 0.4)).count());
 }

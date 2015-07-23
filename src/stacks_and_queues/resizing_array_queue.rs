@@ -166,7 +166,6 @@ impl<T> Queue<T> for ResizingArrayQueue<T> {
     }
 }
 
-// FIXME: can't handle ResizingArrayQueue<&Option<char>>
 impl<T: fmt::Debug> fmt::Debug for ResizingArrayQueue<T> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         if self.head < self.tail {
