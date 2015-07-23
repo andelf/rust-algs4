@@ -1,7 +1,8 @@
 use std::fmt;
 use std::vec::IntoIter;
-
 use rand::{Rand, Rng};
+use super::super::symbol_tables::ST;
+use super::super::balanced_search_trees::RedBlackBST;
 
 #[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
 pub struct Point2D {
@@ -133,33 +134,34 @@ fn test_rect() {
     assert!(!r1.intersects(r2));
 }
 
-
+/// represents a set of points in the unit square
+/// implemented using RedBlackBST
 pub struct PointSet {
-    ps: Vec<Point2D>
+    pset: RedBlackBST<Point2D, ()>
 }
 
 impl PointSet {
     pub fn new() -> PointSet {
-        PointSet { ps: Vec::new() }
+        PointSet { pset: RedBlackBST::new() }
     }
 
     pub fn size(&self) -> usize {
-        self.ps.len()
+        self.pset.size()
     }
 
     pub fn insert(&mut self, p: Point2D) {
-        if !self.ps.contains(&p) {
-            self.ps.push(p)
+        if !self.pset.contains(&p) {
+            self.pset.put(p, ())
         }
     }
 
     pub fn contains<T: AsRef<Point2D>>(&self, p: T) -> bool {
-        self.ps.contains(p.as_ref())
+        self.pset.contains(p.as_ref())
     }
 
     pub fn range_search<T: AsRef<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
         let mut result = Vec::new();
-        for p in self.ps.iter() {
+        for p in self.pset.keys() {
             if rect.as_ref().contains(p) {
                 result.push(p);
             }
@@ -169,7 +171,7 @@ impl PointSet {
 
     pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
         // Ord :(
-        self.ps.iter().min_by(|q| (q.distance_squared_to(p.as_ref()) * 10000.0) as u64)
+        self.pset.keys().min_by(|q| (q.distance_squared_to(p.as_ref()) * 10000.0) as u64)
     }
 }
 
@@ -182,6 +184,7 @@ fn test_point_set() {
     for _ in 0 .. 100 {
         ps.insert(rng.gen())
     }
+    assert_eq!(ps.size(), 100);
 
     assert!(ps.nearest(Point2D::new(0.5, 0.5)).is_some());
     assert!(ps.range_search(RectHV::new(0.4, 0.4, 0.6, 0.6)).count() > 0);
