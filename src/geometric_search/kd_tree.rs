@@ -336,34 +336,42 @@ impl KdTree<Point2D, ()> {
 
             // Recursively search left/bottom (if it could contain a closer point)
             // Recursively search right/top (if it could contain a closer point)
+            // FIXME: duplicated code
             if dim == 0 {
-                // right
-                if x.unwrap().right.is_some() {
-                    let perpendicular_len = (p.y - x.unwrap().right.as_ref().unwrap().key.y).abs();
-                    if perpendicular_len < min_distance {
-                        queue.enqueue(x.unwrap().right.as_ref());
+                // p in left
+                if p.x < x.unwrap().key.x {
+                    queue.enqueue(x.unwrap().left.as_ref());
+                    if x.unwrap().right.is_some() {
+                        let perpendicular_len = (p.y - x.unwrap().right.as_ref().unwrap().key.y).abs();
+                        if perpendicular_len < min_distance {
+                            queue.enqueue(x.unwrap().right.as_ref());
+                        }
                     }
-                }
-                // left
-                if x.unwrap().left.is_some() {
-                    let perpendicular_len = (p.y - x.unwrap().left.as_ref().unwrap().key.y).abs();
-                    if perpendicular_len < min_distance {
-                        queue.enqueue(x.unwrap().left.as_ref());
+                } else {        // p in right
+                    queue.enqueue(x.unwrap().right.as_ref());
+                    if x.unwrap().left.is_some() {
+                        let perpendicular_len = (p.y - x.unwrap().left.as_ref().unwrap().key.y).abs();
+                        if perpendicular_len < min_distance {
+                            queue.enqueue(x.unwrap().left.as_ref());
+                        }
                     }
                 }
             } else {        // dim == 1: y
-                // above
-                if x.unwrap().right.is_some() {
-                    let perpendicular_len = (p.x - x.unwrap().right.as_ref().unwrap().key.x).abs();
-                    if perpendicular_len < min_distance {
-                        queue.enqueue(x.unwrap().right.as_ref());
+                if p.y < x.unwrap().key.y {
+                    queue.enqueue(x.unwrap().left.as_ref());
+                    if x.unwrap().right.is_some() {
+                        let perpendicular_len = (p.x - x.unwrap().right.as_ref().unwrap().key.x).abs();
+                        if perpendicular_len < min_distance {
+                            queue.enqueue(x.unwrap().right.as_ref());
+                        }
                     }
-                }
-                // below
-                if x.unwrap().left.is_some() {
-                    let perpendicular_len = (p.x - x.unwrap().left.as_ref().unwrap().key.x).abs();
-                    if perpendicular_len < min_distance {
-                        queue.enqueue(x.unwrap().left.as_ref());
+                } else {
+                    queue.enqueue(x.unwrap().right.as_ref());
+                    if x.unwrap().left.is_some() {
+                        let perpendicular_len = (p.x - x.unwrap().left.as_ref().unwrap().key.x).abs();
+                        if perpendicular_len < min_distance {
+                            queue.enqueue(x.unwrap().left.as_ref());
+                        }
                     }
                 }
             }
@@ -429,4 +437,6 @@ fn test_kd_tree_with_point_2d_duplicated() {
     assert!(!t.contains(&Point2D::new(0.4, 0.3)));
     assert_eq!(8, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
     assert_eq!(2, t.range_search(RectHV::new(0.1, 0.1, 0.4, 0.4)).count());
+
+    assert_eq!(t.nearest(&Point2D::new(0.7, 0.39)).unwrap(), &Point2D::new(0.7, 0.4));
 }

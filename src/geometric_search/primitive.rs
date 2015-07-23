@@ -175,7 +175,6 @@ impl PointSet {
     }
 
     pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
-        // Ord :(
         let mut min_distance = f64::MAX;
         let mut result = None;
         for q in self.pset.keys() {
@@ -201,5 +200,5 @@ fn test_point_set() {
     assert_eq!(ps.size(), 100);
 
     assert!(ps.nearest(Point2D::new(0.5, 0.5)).is_some());
-    assert!(ps.range_search(RectHV::new(0.4, 0.4, 0.6, 0.6)).count() > 0);
+    assert!(ps.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count() > 0);
 }
