@@ -169,6 +169,10 @@ impl PointSet {
         result.into_iter()
     }
 
+    pub fn range_count<T: AsRef<RectHV>>(&self, rect: T) -> usize {
+        self.range_search(rect).count()
+    }
+
     pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
         // Ord :(
         self.pset.keys().min_by(|q| (q.distance_squared_to(p.as_ref()) * 10000.0) as u64)
