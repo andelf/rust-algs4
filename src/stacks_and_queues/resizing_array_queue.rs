@@ -55,12 +55,12 @@ impl QueueOfStrings for ResizingArrayQueueOfStrings {
 
     fn enqueue(&mut self, item: String) {
         let mut cap = self.q.len();
+        self.q[self.tail % cap] = Some(item);
+        self.tail = (self.tail + 1) % cap;
         if self.q[self.tail % cap].is_some() {
             cap = 2 * cap;
             self.resize(cap);
         }
-        self.q[self.tail % cap] = Some(item);
-        self.tail = (self.tail + 1) % cap
     }
 
     fn dequeue(&mut self) -> String {
@@ -68,6 +68,16 @@ impl QueueOfStrings for ResizingArrayQueueOfStrings {
         let item = self.q[self.head % cap].take();
         self.head = (self.head + 1) % cap;
         item.unwrap()
+    }
+
+    fn size(&self) -> usize {
+        let cap = self.q.len();
+        let tail = if self.tail > self.head {
+            self.tail
+        } else {
+            self.tail + cap
+        };
+        tail - self.head
     }
 }
 
@@ -126,12 +136,13 @@ impl<T> Queue<T> for ResizingArrayQueue<T> {
 
     fn enqueue(&mut self, item: T) {
         let mut cap = self.q.len();
+        self.q[self.tail % cap] = Some(item);
+        self.tail = (self.tail + 1) % cap;
+        // if resize before enqueue, is_empty() will fail.
         if self.q[self.tail % cap].is_some() {
             cap = 2 * cap;
             self.resize(cap);
         }
-        self.q[self.tail % cap] = Some(item);
-        self.tail = (self.tail + 1) % cap
     }
 
     fn dequeue(&mut self) -> Option<T> {
@@ -142,6 +153,16 @@ impl<T> Queue<T> for ResizingArrayQueue<T> {
         let item = self.q[self.head % cap].take();
         self.head = (self.head + 1) % cap;
         item
+    }
+
+    fn size(&self) -> usize {
+        let cap = self.q.len();
+        let tail = if self.tail > self.head {
+            self.tail
+        } else {
+            self.tail + cap
+        };
+        tail - self.head
     }
 }
 
@@ -169,6 +190,7 @@ impl<T: fmt::Debug> fmt::Debug for ResizingArrayQueue<T> {
 fn test_resizing_array_queue_of_strings() {
     let mut queue: ResizingArrayQueueOfStrings = QueueOfStrings::new();
 
+    assert!(queue.is_empty());
     let mut result = "to be or not to be".split(' ');
 
     for s in "to be or not to - be - - that - - - is".split(' ') {
@@ -178,12 +200,15 @@ fn test_resizing_array_queue_of_strings() {
             queue.enqueue(s.into())
         }
     }
+    assert!(!queue.is_empty());
+    assert_eq!(2, queue.size());
 }
 
 #[test]
 fn test_resizing_array_queue() {
     let mut queue: ResizingArrayQueue<String> = Queue::new();
 
+    assert!(queue.is_empty());
     let mut result = "to be or not to be".split(' ');
 
     for s in "to be or not to - be - - that - - - is".split(' ') {
@@ -193,4 +218,6 @@ fn test_resizing_array_queue() {
             queue.enqueue(s.into())
         }
     }
+    assert!(!queue.is_empty());
+    assert_eq!(2, queue.size());
 }

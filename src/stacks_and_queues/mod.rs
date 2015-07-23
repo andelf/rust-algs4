@@ -50,9 +50,7 @@ pub trait QueueOfStrings {
     /// is the queue empty?
     fn is_empty(&self) -> bool;
     /// number of strings on the queue
-    fn size(&self) -> usize {
-        unimplemented!()
-    }
+    fn size(&self) -> usize;
 }
 
 /// generic queue
@@ -66,9 +64,7 @@ pub trait Queue<T> {
     /// is the queue empty?
     fn is_empty(&self) -> bool;
     /// number of items on the queue
-    fn size(&self) -> usize {
-        unimplemented!()
-    }
+    fn size(&self) -> usize;
 }
 
 // bag

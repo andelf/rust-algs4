@@ -22,14 +22,20 @@ impl<T> Rawlink<T> {
 
 struct Node {
     item: String,
-    next: Option<Box<Node>>,
-
+    next: Option<Box<Node>>
 }
 
 impl Node {
     /// work around for moved value
     fn into_item_and_next(self) -> (String, Option<Box<Node>>) {
         (self.item, self.next)
+    }
+
+    fn size(&self) -> usize {
+        match self.next {
+            Some(ref n) => 1 + n.size(),
+            None        => 1
+        }
     }
 }
 
@@ -72,6 +78,14 @@ impl QueueOfStrings for LinkedQueueOfStrings {
         }
         item
     }
+
+    fn size(&self) -> usize {
+        if self.is_empty() {
+            0
+        } else {
+            self.first.as_ref().unwrap().size()
+        }
+    }
 }
 
 
@@ -79,6 +93,7 @@ impl QueueOfStrings for LinkedQueueOfStrings {
 fn test_linked_queue() {
     let mut queue: LinkedQueueOfStrings = QueueOfStrings::new();
 
+    assert!(queue.is_empty());
     let mut result = "to be or not to be".split(' ');
 
     for s in "to be or not to - be - - that - - - is".split(' ') {
@@ -88,4 +103,6 @@ fn test_linked_queue() {
             queue.enqueue(s.into())
         }
     }
+    assert!(!queue.is_empty());
+    assert_eq!(2, queue.size());
 }
