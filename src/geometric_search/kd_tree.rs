@@ -2,6 +2,7 @@ use super::primitive::{Point2D, RectHV};
 
 use std::iter;
 use std::fmt;
+use std::vec::IntoIter;
 use std::cmp::Ordering;
 use super::super::symbol_tables::ST;
 
@@ -59,6 +60,12 @@ impl<K: Point, V> Node<K, V> {
             ret += self.right.as_ref().unwrap().size()
         }
         ret
+    }
+
+    #[inline]
+    fn comparator_for_current_dim(&self) -> K::ValueType {
+        // let dim = self.depth % <K as Point>::dimension();
+        self.key.get(self.depth % <K as Point>::dimension())
     }
 }
 
@@ -226,15 +233,56 @@ impl<K: Point, V> KdTree<K, V> {
     }
 }
 
-impl<V> KdTree<Point2D, V> {
+impl KdTree<Point2D, ()> {
+    // add the point to the KdTree
+    pub fn insert(&mut self, p: Point2D) {
+        self.put(p, ());
+    }
+
     /// find all Point2D keys that lie in a 2d range
-    pub fn range_search<T: AsRef<RectHV>>(&self, rect: T) -> Option<&Point2D> {
-        unimplemented!()
+    pub fn range_search<T: AsRef<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
+        let mut result = Vec::new();
+
+        // use stack approach
+        let mut stack = Vec::new();
+        stack.push(self.root.as_ref());
+        while !stack.is_empty() {
+            let x = stack.pop().unwrap();
+
+            if x.is_none() {
+                continue;
+            }
+
+            let dim = x.as_ref().unwrap().depth % 2;
+
+            // Check if point in node lies in given rectangle
+            if rect.as_ref().contains(x.as_ref().unwrap().key) {
+                result.push(&x.as_ref().unwrap().key)
+            }
+            // Recursively search left/bottom (if any could fall in rectangle)
+            // Recursively search right/top (if any could fall in rectangle)
+            if dim == 0 {
+                if rect.as_ref().xmin < x.as_ref().unwrap().comparator_for_current_dim() {
+                    stack.push(x.unwrap().left.as_ref())
+                }
+                if rect.as_ref().xmax > x.as_ref().unwrap().comparator_for_current_dim() {
+                    stack.push(x.unwrap().right.as_ref())
+                }
+            } else {        // dim == 1: y
+                if rect.as_ref().ymin < x.as_ref().unwrap().comparator_for_current_dim() {
+                    stack.push(x.unwrap().left.as_ref())
+                }
+                if rect.as_ref().ymax > x.as_ref().unwrap().comparator_for_current_dim() {
+                    stack.push(x.unwrap().right.as_ref())
+                }
+            }
+        }
+        result.into_iter()
     }
 
     /// number of keys that lie in a 2d range
     pub fn range_count<T: AsRef<RectHV>>(&self, rect: T) -> usize {
-        unimplemented!()
+        self.range_search(rect).count()
     }
 }
 
@@ -261,4 +309,7 @@ fn test_kd_tree_with_point_2d() {
     t.put(Point2D::new(0.9, 0.6), ());
 
     println!("got => {:?}", t);
+
+    assert_eq!(5, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
+    assert_eq!(1, t.range_search(RectHV::new(0.1, 0.1, 0.4, 0.4)).count());
 }
