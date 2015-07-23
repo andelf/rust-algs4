@@ -95,20 +95,31 @@ fn put<K: Point, V>(x: Option<Box<Node<K,V>>>, key: K, val: V, depth: usize) -> 
         return Some(Box::new(Node::new(key, val, depth)));
     }
     let depth = x.as_ref().unwrap().depth;
-    let dim = x.as_ref().unwrap().depth % <K as Point>::dimension();
+    let dimension = <K as Point>::dimension();
+    let current_dim = x.as_ref().unwrap().depth % dimension;
+    let mut dim = current_dim;
 
-    let cmp = key.get(dim).partial_cmp(&x.as_ref().unwrap().key.get(dim)).unwrap();
-    match cmp {
-        Ordering::Less => {
-            let left = x.as_mut().unwrap().left.take();
-            x.as_mut().unwrap().left = put(left, key, val, depth + 1)
-        },
-        Ordering::Greater => {
-            let right = x.as_mut().unwrap().right.take();
-            x.as_mut().unwrap().right = put(right, key, val, depth + 1)
-        },
-        Ordering::Equal => {
-            x.as_mut().unwrap().val = val
+    loop {
+        let cmp = key.get(dim).partial_cmp(&x.as_ref().unwrap().key.get(dim)).unwrap();
+        match cmp {
+            Ordering::Less => {
+                let left = x.as_mut().unwrap().left.take();
+                x.as_mut().unwrap().left = put(left, key, val, depth + 1);
+                break;
+            },
+            Ordering::Greater => {
+                let right = x.as_mut().unwrap().right.take();
+                x.as_mut().unwrap().right = put(right, key, val, depth + 1);
+                break;
+            },
+            // when current dimension is equal, compare next non-equal dimension
+            Ordering::Equal => {
+                dim = (dim + 1) % dimension;
+                if dim == current_dim {
+                    x.as_mut().unwrap().val = val;
+                    break;
+                }
+            }
         }
     }
     x
@@ -175,22 +186,32 @@ pub struct KdTree<K: Point, V> {
 
 impl<K: Point, V> ST<K, V> for KdTree<K, V> {
     fn new() -> KdTree<K, V> {
+        assert!(K::dimension() >= 2);
         KdTree { root: None }
     }
 
     fn get(&self, key: &K) -> Option<&V> {
         let mut x = self.root.as_ref();
+        let dimension = <K as Point>::dimension();
+        let current_dim = x.as_ref().unwrap().depth % dimension;
         while x.is_some() {
-            let dim = x.as_ref().unwrap().depth % <K as Point>::dimension();
-            match key.get(dim).partial_cmp(&x.unwrap().key.get(dim)).unwrap() {
-                Ordering::Less => {
-                    x = x.unwrap().left.as_ref();
-                },
-                Ordering::Greater => {
-                    x = x.unwrap().right.as_ref();
-                },
-                Ordering::Equal  => {
-                    return Some(&x.unwrap().val)
+            let mut dim = current_dim;
+            loop {
+                match key.get(dim).partial_cmp(&x.unwrap().key.get(dim)).unwrap() {
+                    Ordering::Less => {
+                        x = x.unwrap().left.as_ref();
+                        break;
+                    },
+                    Ordering::Greater => {
+                        x = x.unwrap().right.as_ref();
+                        break;
+                    },
+                    Ordering::Equal  => {
+                        dim = (dim + 1) % dimension;
+                        if dim == current_dim {
+                            return Some(&x.unwrap().val)
+                        }
+                    }
                 }
             }
         }
@@ -368,7 +389,6 @@ fn test_kd_tree_with_point_2d() {
 }
 
 
-// BUG, if equal key? then points missing
 #[test]
 fn test_kd_tree_with_point_2d_duplicated() {
     let mut t = KdTree::<Point2D, ()>::new();
@@ -384,8 +404,10 @@ fn test_kd_tree_with_point_2d_duplicated() {
 
     println!("got => {:?}", t);
 
-    // assert_eq!(8, t.size());
-
-    // assert_eq!(7, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
+    assert_eq!(8, t.size());
+    assert!(t.contains(&Point2D::new(0.7, 0.2)));
+    assert!(t.contains(&Point2D::new(0.7, 0.4)));
+    assert!(!t.contains(&Point2D::new(0.7, 0.3)));
+    assert_eq!(8, t.range_search(RectHV::new(0.1, 0.1, 0.9, 0.9)).count());
     assert_eq!(2, t.range_search(RectHV::new(0.1, 0.1, 0.4, 0.4)).count());
 }
