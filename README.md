@@ -1,11 +1,11 @@
 rust-algs4
 ==========
 
-[![Build Status](https://travis-ci.org/andelf/rust-algs4.svg?branch=master)](https://travis-ci.org/andelf/rust-algs4)|[![Crates.io](http://meritbadge.herokuapp.com/algs4)](https://crates.io/crates/algs4)|[![MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/andelf/rust-algs4/blob/master/LICENSE)
+[![Build Status](https://travis-ci.org/andelf/rust-algs4.svg?branch=master)](https://travis-ci.org/andelf/rust-algs4)  [![Crates.io](http://meritbadge.herokuapp.com/algs4)](https://crates.io/crates/algs4)   [![MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://github.com/andelf/rust-algs4/blob/master/LICENSE)
 
-Algorithms, 4ed.
+Algorithms, 4ed. MOOC in Coursera.
 
-algs4partI-008 in Rust.
+algs4partI-008 Code & Assignments in Rust.
 
 [Algorithms, Part I](https://class.coursera.org/algs4partI-008)
 
