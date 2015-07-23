@@ -103,6 +103,33 @@ Minimum number of moves = 1
 cargo run --example 8puzzle  0.03s user 0.03s system 93% cpu 0.058 total
 ```
 
+### Programming Assignment 5: Kd-Trees
+
+- ``Point2D``, ``RectHV``, ``PointSet``: ``src/geometric_search/primitive.rs``
+- ``KdTree``: ``src/geometric_search/kd_tree.rs``
+- ``Program``: ``examples/kdtree.rs``
+- ``Benchmark``: ``benches/geometric_search.rs``
+
+```
+ᐅ cargo run --example kdtree < priv/input100K.txt
+     Running `target/debug/examples/kdtree`
+got 100000 points
+in rect [0.4, 0.6] x [0.4, 0.6]
+PointSet => 3975
+KdTree   => 3975
+nearest to (0.9, 0.6)
+PointSet => Some(Point2D { x: 0.9001859999999999, y: 0.5974529999999999 }) d = 0.002553782488780193
+KdTree   => Some(Point2D { x: 0.9001859999999999, y: 0.5974529999999999 }) d = 0.002553782488780193
+
+ᐅ cargo bench
+test bench_brute_force_nearest      ... bench:      14,265 ns/iter (+/- 3,196)
+test bench_brute_force_range_search ... bench:      14,660 ns/iter (+/- 2,676)
+test bench_kd_tree_nearest          ... bench:       4,351 ns/iter (+/- 7,388)
+test bench_kd_tree_range_search     ... bench:       1,475 ns/iter (+/- 855)
+```
+
+
+
 ## Description
 
 TODO: add file description

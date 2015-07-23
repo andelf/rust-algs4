@@ -29,9 +29,10 @@ fn run() {
     let point: Point2D = Point2D::new(0.9, 0.6);
     let rect = RectHV::new(0.4, 0.4, 0.6, 0.6);
 
-    println!("PSet   in Rect: {}", pset.range_count(rect));
-    println!("KdTree in Rect: {}",   kt.range_count(rect));
-    //println!("tree => {:?}", kt);
+    println!("in rect {}", rect);
+    println!("PointSet => {}", pset.range_count(rect));
+    println!("KdTree   => {}",   kt.range_count(rect));
+
     println!("nearest to {}", point);
     println!("PointSet => {:?} d = {}", pset.nearest(point), pset.nearest(point).unwrap().distance_to(point));
     println!("KdTree   => {:?} d = {}", kt.nearest(point), kt.nearest(point).unwrap().distance_to(point));
