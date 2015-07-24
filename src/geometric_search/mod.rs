@@ -5,6 +5,8 @@ pub mod primitive;
 
 pub mod kd_tree;
 
+pub mod interval_search_tree;
+
 pub trait RangeSearch1D<K, V>: OrderedST<K, V> {
     /// Insert key-value pair
     fn insert(&mut self, key: K, val: V);
@@ -23,19 +25,19 @@ pub trait OrthogonalRangeSearch2D<K, V>: OrderedST<(K,K), V> {
     fn range_count(&self, left_top: (K,K), right_bottom: (K,K)) -> usize;
 }
 
-pub trait IntervalST<K, V> {
-    type Iter: Iterator;
-    /// create interval range_search tree
-    fn new() -> Self;
-    /// put interval-value pair into ST
-    fn put(&mut self, lo: K, hi: K, val: V);
-    /// value paired with given interval
-    fn get(&self, lo: &K, hi: &K) -> Option<&V>;
-    /// delete the given interval
-    fn delete(&mut self, lo: &K, hi: &K);
-    /// all intervals that intersect the given interval
-    fn intersects(&self, lo: &K, hi: &K) -> Self::Iter;
-}
+// pub trait IntervalST<K, V> {
+//     type Iter: Iterator;
+//     /// create interval range_search tree
+//     fn new() -> Self;
+//     /// put interval-value pair into ST
+//     fn put(&mut self, lo: K, hi: K, val: V);
+//     /// value paired with given interval
+//     fn get(&self, lo: &K, hi: &K) -> Option<&V>;
+//     /// delete the given interval
+//     fn delete(&mut self, lo: &K, hi: &K);
+//     /// all intervals that intersect the given interval
+//     fn intersects(&self, lo: &K, hi: &K) -> Self::Iter;
+// }
 
 
 impl<K: PartialOrd, V> RangeSearch1D<K, V> for BST<K, V> {
