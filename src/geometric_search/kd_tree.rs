@@ -1,13 +1,14 @@
-use super::primitive::{Point2D, RectHV};
-
 use std::iter;
 use std::fmt;
 use std::f64;
 use std::vec::IntoIter;
 use std::cmp::Ordering;
+use std::borrow::Borrow;
+
 use super::super::symbol_tables::ST;
 use super::super::stacks_and_queues::Queue;
 use super::super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
+use super::primitive::{Point2D, RectHV};
 
 
 pub trait Point: Copy {
@@ -264,9 +265,9 @@ impl KdTree<Point2D, ()> {
     }
 
     /// find all Point2D keys that lie in a 2d range
-    pub fn range_search<T: AsRef<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
+    pub fn range_search<T: Borrow<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
         let mut result = Vec::new();
-
+        let rect = rect.borrow();
         // use stack approach
         let mut stack = Vec::new();
         stack.push(self.root.as_ref());
@@ -280,23 +281,23 @@ impl KdTree<Point2D, ()> {
             let dim = x.as_ref().unwrap().depth % 2;
 
             // Check if point in node lies in given rectangle
-            if rect.as_ref().contains(x.as_ref().unwrap().key) {
+            if rect.contains(x.as_ref().unwrap().key) {
                 result.push(&x.as_ref().unwrap().key)
             }
             // Recursively search left/bottom (if any could fall in rectangle)
             // Recursively search right/top (if any could fall in rectangle)
             if dim == 0 {
-                if rect.as_ref().xmin < x.as_ref().unwrap().comparator_for_current_dim() {
+                if rect.xmin < x.as_ref().unwrap().comparator_for_current_dim() {
                     stack.push(x.unwrap().left.as_ref())
                 }
-                if rect.as_ref().xmax > x.as_ref().unwrap().comparator_for_current_dim() {
+                if rect.xmax > x.as_ref().unwrap().comparator_for_current_dim() {
                     stack.push(x.unwrap().right.as_ref())
                 }
             } else {        // dim == 1: y
-                if rect.as_ref().ymin < x.as_ref().unwrap().comparator_for_current_dim() {
+                if rect.ymin < x.as_ref().unwrap().comparator_for_current_dim() {
                     stack.push(x.unwrap().left.as_ref())
                 }
-                if rect.as_ref().ymax > x.as_ref().unwrap().comparator_for_current_dim() {
+                if rect.ymax > x.as_ref().unwrap().comparator_for_current_dim() {
                     stack.push(x.unwrap().right.as_ref())
                 }
             }
@@ -305,15 +306,15 @@ impl KdTree<Point2D, ()> {
     }
 
     /// number of keys that lie in a 2d range
-    pub fn range_count<T: AsRef<RectHV>>(&self, rect: T) -> usize {
+    pub fn range_count<T: Borrow<RectHV>>(&self, rect: T) -> usize {
         self.range_search(rect).count()
     }
 
     // TODO: refactor to a generic solution
-    pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
+    pub fn nearest<T: Borrow<Point2D>>(&self, p: T) -> Option<&Point2D> {
         let mut result = None;
         let mut min_distance = f64::MAX;
-        let p = p.as_ref();
+        let p = p.borrow();
 
         // use FIFO queue
         let mut queue = ResizingArrayQueue::new();

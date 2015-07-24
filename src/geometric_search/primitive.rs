@@ -2,6 +2,7 @@ use std::fmt;
 use std::vec::IntoIter;
 use std::f64;
 use rand::{Rand, Rng};
+use std::borrow::Borrow;
 use super::super::symbol_tables::ST;
 use super::super::balanced_search_trees::RedBlackBST;
 
@@ -16,24 +17,18 @@ impl Point2D {
         Point2D { x: x, y: y }
     }
 
-    pub fn distance_to<T: AsRef<Point2D>>(&self, that: T) -> f64 {
+    pub fn distance_to<T: Borrow<Point2D>>(&self, that: T) -> f64 {
         self.distance_squared_to(that).sqrt()
     }
 
-    pub fn distance_squared_to<T: AsRef<Point2D>>(&self, that: T) -> f64 {
-        (self.x - that.as_ref().x).powi(2) + (self.y - that.as_ref().y).powi(2)
+    pub fn distance_squared_to<T: Borrow<Point2D>>(&self, that: T) -> f64 {
+        (self.x - that.borrow().x).powi(2) + (self.y - that.borrow().y).powi(2)
     }
 }
 
 impl fmt::Display for Point2D {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
-    }
-}
-
-impl AsRef<Point2D> for Point2D {
-    fn as_ref(&self) -> &Point2D {
-        &self
     }
 }
 
@@ -78,27 +73,27 @@ impl RectHV {
         self.ymax - self.ymin
     }
 
-    pub fn contains<T: AsRef<Point2D>>(&self, p: T) -> bool {
-        let p = p.as_ref();
+    pub fn contains<T: Borrow<Point2D>>(&self, p: T) -> bool {
+        let p = p.borrow();
         p.x >= self.xmin && p.y >= self.ymin &&
             p.x <= self.xmax && p.y <= self.ymax
     }
 
     /// does this axis-aligned rectangle intersect that one?
-    pub fn intersects<T: AsRef<RectHV>>(&self, that: T) -> bool {
-        let that = that.as_ref();
+    pub fn intersects<T: Borrow<RectHV>>(&self, that: T) -> bool {
+        let that = that.borrow();
         self.xmax >= that.xmin && self.ymax >= that.ymin &&
             that.xmax >= self.xmin && that.ymax >= self.ymin
     }
 
     /// distance from p to closest point on this axis-aligned rectangle
-    pub fn distance_to<T: AsRef<Point2D>>(&self, p: T) -> f64 {
+    pub fn distance_to<T: Borrow<Point2D>>(&self, p: T) -> f64 {
         self.distance_squared_to(p).sqrt()
     }
 
     /// distance squared from p to closest point on this axis-aligned rectangle
-    pub fn distance_squared_to<T: AsRef<Point2D>>(&self, p: T) -> f64 {
-        let p = p.as_ref();
+    pub fn distance_squared_to<T: Borrow<Point2D>>(&self, p: T) -> f64 {
+        let p = p.borrow();
         let mut dx = 0.0;
         let mut dy = 0.0;
         if p.x < self.xmin {
@@ -118,13 +113,6 @@ impl RectHV {
 impl fmt::Display for RectHV {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "[{}, {}] x [{}, {}]", self.xmin, self.xmax, self.ymin, self.ymax)
-    }
-}
-
-
-impl AsRef<RectHV> for RectHV {
-    fn as_ref(&self) -> &RectHV {
-        &self
     }
 }
 
@@ -156,29 +144,29 @@ impl PointSet {
         }
     }
 
-    pub fn contains<T: AsRef<Point2D>>(&self, p: T) -> bool {
-        self.pset.contains(p.as_ref())
+    pub fn contains<T: Borrow<Point2D>>(&self, p: T) -> bool {
+        self.pset.contains(p.borrow())
     }
 
-    pub fn range_search<T: AsRef<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
+    pub fn range_search<T: Borrow<RectHV>>(&self, rect: T) -> IntoIter<&Point2D> {
         let mut result = Vec::new();
         for p in self.pset.keys() {
-            if rect.as_ref().contains(p) {
+            if rect.borrow().contains(p) {
                 result.push(p);
             }
         }
         result.into_iter()
     }
 
-    pub fn range_count<T: AsRef<RectHV>>(&self, rect: T) -> usize {
+    pub fn range_count<T: Borrow<RectHV>>(&self, rect: T) -> usize {
         self.range_search(rect).count()
     }
 
-    pub fn nearest<T: AsRef<Point2D>>(&self, p: T) -> Option<&Point2D> {
+    pub fn nearest<T: Borrow<Point2D>>(&self, p: T) -> Option<&Point2D> {
         let mut min_distance = f64::MAX;
         let mut result = None;
         for q in self.pset.keys() {
-            let dist = p.as_ref().distance_to(q);
+            let dist = p.borrow().distance_to(q);
             if dist < min_distance {
                 result = Some(q);
                 min_distance = dist;

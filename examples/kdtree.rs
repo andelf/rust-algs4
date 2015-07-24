@@ -7,6 +7,7 @@ use std::io;
 
 use algs4::geometric_search::primitive::{Point2D, PointSet, RectHV};
 use algs4::symbol_tables::ST;
+// FIXME: fails under input1M.txt
 use algs4::geometric_search::kd_tree::KdTree;
 
 
