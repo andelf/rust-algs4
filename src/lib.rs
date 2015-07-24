@@ -19,6 +19,4 @@ pub mod symbol_tables;
 pub mod balanced_search_trees;
 pub mod geometric_search;
 
-#[test]
-fn it_works() {
-}
+pub mod hash_tables;
