@@ -20,3 +20,4 @@ pub mod balanced_search_trees;
 pub mod geometric_search;
 
 pub mod hash_tables;
+pub mod searching_application;
