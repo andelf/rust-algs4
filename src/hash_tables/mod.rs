@@ -1,6 +1,9 @@
 use std::hash::{Hash, Hasher, SipHasher};
 use std::borrow::Borrow;
 
+
+pub mod linear_probing;
+
 struct Node<K, V> {
     key: K,
     val: V,
@@ -58,9 +61,7 @@ impl<K: Hash + PartialEq, V> SeparateChainingHashST<K, V> {
             }
         }
         let old = self.st[i].take();
-        self.st[i] = Some(Box::new(Node { key: key,
-                                          val: val,
-                                          next: old }))
+        self.st[i] = Some(Box::new(Node { key: key, val: val, next: old }))
     }
 }
 
