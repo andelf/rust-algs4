@@ -1,6 +1,6 @@
 use std::hash::{Hash, Hasher, SipHasher};
 use std::borrow::Borrow;
-
+use std::mem;
 
 pub mod linear_probing;
 
@@ -8,6 +8,21 @@ struct Node<K, V> {
     key: K,
     val: V,
     next: Option<Box<Node<K, V>>>
+}
+
+fn delete<K: PartialEq, V>(x: Option<Box<Node<K, V>>> , key: &K) -> Option<Box<Node<K, V>>> {
+    let mut x = x;
+    if x.is_none() {
+        None
+    } else if x.as_ref().unwrap().key.eq(key) {
+        let next = x.as_mut().unwrap().next.take();
+        mem::replace(&mut x, None);
+        next
+    } else {
+        let next = x.as_mut().unwrap().next.take();
+        x.as_mut().unwrap().next = delete(next, key);
+        x
+    }
 }
 
 pub struct SeparateChainingHashST<K, V> {
@@ -63,6 +78,12 @@ impl<K: Hash + PartialEq, V> SeparateChainingHashST<K, V> {
         let old = self.st[i].take();
         self.st[i] = Some(Box::new(Node { key: key, val: val, next: old }))
     }
+
+    pub fn delete(&mut self, key: &K) {
+        let i = Self::hash(&key);
+        let next = self.st[i].take();
+        self.st[i] = delete(next, key);
+    }
 }
 
 
@@ -75,4 +96,7 @@ fn test_separate_chaining_st() {
 
     assert_eq!(m.get("Age"), Some(&"25"));
     assert_eq!(m.get("Gender"), None);
+
+    m.delete(&"Age");
+    assert_eq!(m.get("Age"), None);
 }
