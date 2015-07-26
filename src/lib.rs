@@ -1,4 +1,4 @@
-#![feature(move_from, map_in_place)]
+#![feature(move_from, map_in_place, iter_arith)]
 
 extern crate rand;
 
