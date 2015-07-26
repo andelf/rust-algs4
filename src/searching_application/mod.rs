@@ -16,7 +16,7 @@ pub trait Set<K> {
 }
 
 
-type HashSet<K> = SeparateChainingHashST<K,()>;
+pub type HashSet<K> = SeparateChainingHashST<K,()>;
 
 impl<K: Hash + PartialEq> Set<K> for HashSet<K> {
     fn new() -> Self {
