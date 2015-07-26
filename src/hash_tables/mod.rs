@@ -10,6 +10,16 @@ struct Node<K, V> {
     next: Option<Box<Node<K, V>>>
 }
 
+impl<K, V> Node<K, V> {
+    pub fn size(&self) -> usize {
+        if self.next.is_none() {
+            1
+        } else {
+            1 + self.next.as_ref().unwrap().size()
+        }
+    }
+}
+
 fn delete<K: PartialEq, V>(x: Option<Box<Node<K, V>>> , key: &K) -> Option<Box<Node<K, V>>> {
     let mut x = x;
     if x.is_none() {
@@ -84,19 +94,26 @@ impl<K: Hash + PartialEq, V> SeparateChainingHashST<K, V> {
         let next = self.st[i].take();
         self.st[i] = delete(next, key);
     }
+
+    pub fn size(&self) -> usize {
+        self.st.iter().filter(|n| n.is_some()).map(|h| h.as_ref().unwrap().size()).sum()
+    }
 }
 
 
 #[test]
 fn test_separate_chaining_st() {
     let mut m = SeparateChainingHashST::new();
+    assert_eq!(m.size(), 0);
     m.put("Name", "Feather");
     m.put("Age", "25");
     m.put("Address", "Beijing");
 
+    assert_eq!(m.size(), 3);
     assert_eq!(m.get("Age"), Some(&"25"));
     assert_eq!(m.get("Gender"), None);
 
     m.delete(&"Age");
+    assert_eq!(m.size(), 2);
     assert_eq!(m.get("Age"), None);
 }
