@@ -1,6 +1,8 @@
 use std::hash::{Hash, Hasher, SipHasher};
 use std::borrow::Borrow;
 
+const M: usize = 97;
+
 struct Node<K, V> {
     key: K,
     val: V,
@@ -9,26 +11,24 @@ struct Node<K, V> {
 
 impl<K, V> Node<K, V> {
     pub fn size(&self) -> usize {
-        if self.next.is_none() {
-            1
-        } else {
-            1 + self.next.as_ref().unwrap().size()
+        match self.next {
+            None => 1,
+            Some(ref next) => 1 + next.size()
         }
     }
 }
 
 fn delete<K: PartialEq, V>(x: Option<Box<Node<K, V>>> , key: &K) -> Option<Box<Node<K, V>>> {
-    match x {
-        None => None,
-        Some(mut x) => {
-            let next = x.next.take();
-            if x.key == *key {
-                next            // this will drop x
-            } else {
-                x.next = delete(next, key);
-                Some(x)
-            }
+    if let Some(mut x) = x {
+        let next = x.next.take();
+        if x.key == *key {
+            next            // this will drop x
+        } else {
+            x.next = delete(next, key);
+            Some(x)
         }
+    } else {
+        None
     }
 }
 
@@ -37,14 +37,10 @@ pub struct SeparateChainingHashST<K, V> {
 }
 
 
-const M: usize = 97;
-
 impl<K: Hash + PartialEq, V> SeparateChainingHashST<K, V> {
     pub fn new() -> SeparateChainingHashST<K, V> {
         let mut st = Vec::with_capacity(M);
-        for _ in 0 .. M {
-            st.push(None);
-        }
+        (0..M).map(|_| st.push(None)).count();
         SeparateChainingHashST {
             st: st
         }
@@ -74,8 +70,8 @@ impl<K: Hash + PartialEq, V> SeparateChainingHashST<K, V> {
         {
             let mut x = self.st[i].as_mut();
             while x.is_some() {
-                if key.eq(&x.as_ref().unwrap().key) {
-                    x.unwrap().val = val;
+                if x.as_ref().map(|x| x.key == key).unwrap_or(false) {
+                    x.map(|x| x.val = val);
                     return;
                 } else {
                     x = x.unwrap().next.as_mut();
