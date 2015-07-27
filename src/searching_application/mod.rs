@@ -1,5 +1,5 @@
 use std::hash::Hash;
-use super::hash_tables::SeparateChainingHashST;
+use super::hash_tables::separate_chaining::SeparateChainingHashST;
 
 /// Mathematical set. A collection of distinct keys
 pub trait Set<K> {
@@ -34,7 +34,6 @@ impl<K: Hash + PartialEq> Set<K> for HashSet<K> {
     fn size(&self) -> usize {
         self.size()
     }
-
 }
 
 

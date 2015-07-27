@@ -52,6 +52,11 @@ impl<K: Hash + PartialEq, V> LinearProbingHashST<K, V> {
         }
         None
     }
+
+    pub fn delete(&mut self, _key: &K) {
+        // TODO: deleting in linear probing hash is difficult
+        unimplemented!()
+    }
 }
 
 
