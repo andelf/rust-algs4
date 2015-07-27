@@ -46,6 +46,7 @@ impl<K: Hash + PartialEq, V> SeparateChainingHashST<K, V> {
         }
     }
 
+    // FIXME: hash state bug
     fn hash(key: &K) -> usize {
         let mut hasher = SipHasher::new();
         key.hash(&mut hasher);
@@ -71,7 +72,7 @@ impl<K: Hash + PartialEq, V> SeparateChainingHashST<K, V> {
             let mut x = self.st[i].as_mut();
             while x.is_some() {
                 if x.as_ref().map(|x| x.key == key).unwrap_or(false) {
-                    x.map(|x| x.val = val);
+                    x.unwrap().val = val;
                     return;
                 } else {
                     x = x.unwrap().next.as_mut();

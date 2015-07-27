@@ -441,3 +441,20 @@ fn test_kd_tree_with_point_2d_duplicated() {
 
     assert_eq!(t.nearest(&Point2D::new(0.7, 0.39)).unwrap(), &Point2D::new(0.7, 0.4));
 }
+
+// A B E C D H F G
+#[test]
+fn test_kd_tree_quiz_777404() {
+    let mut t = KdTree::<Point2D, char>::new();
+
+    t.put(Point2D::new(0.50, 0.23), 'A');
+    t.put(Point2D::new(0.25, 0.75), 'B');
+    t.put(Point2D::new(0.17, 0.72), 'C');
+    t.put(Point2D::new(0.01, 0.82), 'D');
+    t.put(Point2D::new(0.71, 0.86), 'E');
+    t.put(Point2D::new(0.98, 0.94), 'F');
+    t.put(Point2D::new(0.08, 0.66), 'G');
+    t.put(Point2D::new(0.57, 0.20), 'H');
+
+    println!("tree : {:?}", t);
+}
