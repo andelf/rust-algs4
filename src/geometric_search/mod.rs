@@ -53,11 +53,11 @@ impl<K: PartialOrd, V> RangeSearch1D<K, V> for BST<K, V> {
             if x.is_none() {
                 return;
             }
-            inorder(x.unwrap().left.as_ref(), queue, lo, hi);
-            if x.as_ref().unwrap().key >= *lo && x.as_ref().unwrap().key <= *hi {
-                queue.push(&x.unwrap().key);
+            x.map(|n| inorder(n.left.as_ref(), queue, lo, hi));
+            if x.map(|n| n.key >= *lo && n.key <= *hi ).unwrap_or(false) {
+               x.map(|n| queue.push(&n.key));
             }
-            inorder(x.unwrap().right.as_ref(), queue, lo, hi);
+            x.map(|n| inorder(n.right.as_ref(), queue, lo, hi));
         };
         inorder(self.root.as_ref(), &mut queue, lo, hi);
         if queue.is_empty() {
