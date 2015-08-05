@@ -4,7 +4,7 @@ extern crate algs4;
 use std::io::prelude::*;
 use std::io;
 
-use algs4::union_find::UnionFind;
+use algs4::union_find::UF;
 use algs4::union_find::quick_find;
 use algs4::union_find::quick_union;
 use algs4::union_find::weighted_quick_union;
@@ -14,7 +14,7 @@ fn main() {
     let mut lines = io::BufReader::new(io::stdin()).lines();
 
     let n = lines.next().unwrap().unwrap().parse().unwrap();
-    let mut uf: quick_find::UF = UnionFind::new(n);
+    let mut uf: quick_find::UnionFind = UF::new(n);
 
     for line in lines {
         let segs: Vec<usize> = line.unwrap().split(' ').map(|n| n.parse().unwrap()).collect();

@@ -9,12 +9,12 @@ use std::iter;
 use test::stats::Stats;
 use rand::{thread_rng, Rng};
 
-use algs4::union_find::UnionFind;
-use algs4::union_find::weighted_quick_union::UF;
+use algs4::union_find::UF;
+use algs4::union_find::weighted_quick_union::UnionFind;
 
 /// a percolation system using an N-by-N grid of sites
 pub struct Percolation {
-    uf: UF,
+    uf: UnionFind,
     n: usize,
     opened: Vec<bool>
 }
@@ -23,7 +23,7 @@ impl Percolation {
     /// create N-by-N grid, with all sites blocked
     pub fn new(n: usize) -> Percolation {
         Percolation {
-            uf: UF::new(n * n),
+            uf: UnionFind::new(n * n),
             n: n,
             opened: iter::repeat(false).take(n * n).collect()
         }

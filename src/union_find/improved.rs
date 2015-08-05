@@ -4,15 +4,15 @@ use std::iter;
 use std::fmt;
 
 /// Quick union with path compression.
-pub struct UF {
+pub struct UnionFind {
     id: Vec<usize>,
     //  number of objects in the tree rooted at i.
     sz: Vec<usize>
 }
 
-impl UF {
-    pub fn new(n: usize) -> UF {
-        UF {
+impl UnionFind {
+    pub fn new(n: usize) -> UnionFind {
+        UnionFind {
             id: (0..n).collect(),
             sz: iter::repeat(1).take(n).collect()
         }
@@ -61,7 +61,7 @@ impl UF {
     }
 }
 
-impl fmt::Display for UF {
+impl fmt::Display for UnionFind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for i in self.id.iter() {
             try!(write!(f, "{} ", i));

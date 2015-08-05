@@ -3,7 +3,7 @@ pub mod quick_union;
 pub mod weighted_quick_union;
 pub mod improved;
 
-pub trait UnionFind {
+pub trait UF {
     fn new(n: usize) -> Self;
 
     // whose id equals id[p] to id[q].

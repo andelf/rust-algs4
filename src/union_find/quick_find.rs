@@ -1,15 +1,15 @@
 use std::fmt;
-use super::UnionFind;
+use super::UF;
 
-pub struct UF {
+pub struct UnionFind {
     id: Vec<usize>
 }
 
-impl UnionFind for UF {
+impl UF for UnionFind {
     // Integer array id[] of length N.
     // Interpretation: p and q are connected iff they have the same id.
-    fn new(n: usize) -> UF {
-        UF { id: (0..n).collect() }
+    fn new(n: usize) -> UnionFind {
+        UnionFind { id: (0..n).collect() }
     }
 
     // To merge components containing p and q, change all entries
@@ -31,7 +31,7 @@ impl UnionFind for UF {
     }
 }
 
-impl fmt::Display for UF {
+impl fmt::Display for UnionFind {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         for i in self.id.iter() {
             try!(write!(f, "{} ", i));
