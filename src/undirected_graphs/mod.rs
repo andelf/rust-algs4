@@ -49,9 +49,21 @@ impl Graph {
     }
 
     pub fn average_degree(&self) -> f64 {
-        (0 .. self.vertices()).map(|v| self.degree(v)).sum::<usize>() as f64 / self.vertices() as f64
+        // (0 .. self.vertices()) .map(|v| self.degree(v)).sum::<usize>() as f64 / self.vertices() as f64
+        2.0 * self.edges() as f64 / self.vertices() as f64
     }
 
+    pub fn number_of_self_loops(&self) -> usize {
+        let mut count = 0;
+        for v in 0 .. self.vertices() {
+            for w in self.adj(v) {
+                if v == *w {
+                    count += 1;
+                }
+            }
+        }
+        count / 2
+    }
 
     pub fn to_dot(&self) -> String {
         let mut dot = String::new();
@@ -73,6 +85,45 @@ impl Graph {
     pub fn adj(&self, v: usize) -> Iter<usize> {
         self.adj[v].iter()
     }
+
+    pub fn dfs<'a>(&'a self, s: usize) -> DepthFirstPaths<'a> {
+        DepthFirstPaths {
+            graph: self,
+            marked: Vec::new(),
+            edge_to: Vec::new(),
+            s: s
+        }
+    }
+}
+
+pub struct DepthFirstPaths<'a> {
+    graph: &'a Graph,
+    marked: Vec<bool>,
+    edge_to: Vec<usize>,
+    s: usize
+}
+
+#[test]
+fn test_graph_visit() {
+    let mut g = Graph::new(13);
+    g.add_edge(0, 1);
+    g.add_edge(0, 2);
+    g.add_edge(0, 6);
+    g.add_edge(0, 5);
+    g.add_edge(5, 3);
+    g.add_edge(5, 4);
+    g.add_edge(3, 4);
+    g.add_edge(4, 6);
+
+
+    g.add_edge(7, 8);
+
+    g.add_edge(9, 10);
+    g.add_edge(9, 11);
+    g.add_edge(9, 12);
+    g.add_edge(11, 12);
+
+
 }
 
 
@@ -102,4 +153,5 @@ fn test_graph() {
 
     assert_eq!(g.max_degree(), 3);
     assert!(g.average_degree() < 2.0);
+    assert_eq!(g.number_of_self_loops(), 0);
 }
