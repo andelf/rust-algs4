@@ -29,8 +29,7 @@ impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
         let mut pq = Self::new();
-        let len = a.len();
-        pq.pq.move_from(a.map_in_place(Some), 0, len);
+        pq.pq.append(&mut a.map_in_place(Some));
         pq
     }
     /// insert a key into the priority queue

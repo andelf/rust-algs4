@@ -76,6 +76,8 @@ pub trait Bag<T> {
         unimplemented!()
     }
 }
+// FIXME: not compatiable with trait
+pub mod bag;
 
 // Programming Assignment 2: Randomized Queues and Deques
 // Deque
