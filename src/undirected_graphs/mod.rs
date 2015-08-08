@@ -38,10 +38,20 @@ impl Graph {
         self.adj[w].add(v);
     }
 
+    // FIXME: should this be a global function
     pub fn degree(&self, v: usize) -> usize {
         self.validate_vertex(v);
         self.adj[v].len()
     }
+
+    pub fn max_degree(&self) -> usize {
+        (0 .. self.vertices()).map(|v| self.degree(v)).max().unwrap_or(0)
+    }
+
+    pub fn average_degree(&self) -> f64 {
+        (0 .. self.vertices()).map(|v| self.degree(v)).sum::<usize>() as f64 / self.vertices() as f64
+    }
+
 
     pub fn to_dot(&self) -> String {
         let mut dot = String::new();
@@ -89,4 +99,7 @@ fn test_graph() {
     for w in g.adj(5) {
         assert!(vec![8, 4, 0].contains(w));
     }
+
+    assert_eq!(g.max_degree(), 3);
+    assert!(g.average_degree() < 2.0);
 }
