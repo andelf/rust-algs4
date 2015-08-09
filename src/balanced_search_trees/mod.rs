@@ -40,28 +40,17 @@ impl<K, V> Node<K, V> {
     }
 
     fn depth(&self) -> usize {
-        let mut ret = 1;
-        if self.left.is_some() {
-            ret += self.left.as_ref().unwrap().depth();
+        let lsz = self.left.as_ref().map_or(0, |n| n.depth());
+        let rsz = self.right.as_ref().map_or(0, |n| n.depth());
+        if rsz >= lsz {
+            1 + rsz
+        } else {
+            1 + lsz
         }
-        if self.right.is_some() {
-            let rsz = self.right.as_ref().unwrap().depth();
-            if rsz >= ret {
-                ret = 1 + rsz
-            }
-        }
-        ret
     }
 
     fn size(&self) -> usize {
-        let mut ret = 1;
-        if self.left.is_some() {
-            ret += self.left.as_ref().unwrap().size()
-        }
-        if self.right.is_some() {
-            ret += self.right.as_ref().unwrap().size()
-        }
-        ret
+        1 + self.left.as_ref().map_or(0, |n| n.size()) + self.right.as_ref().map_or(0, |n| n.size())
     }
 
     /// Left rotation. Orient a (temporarily) right-leaning red link to lean left.
@@ -403,11 +392,11 @@ impl<K: PartialOrd, V> OrderedST<K, V> for RedBlackBST<K, V> {
                     rank_helper(x.unwrap().left.as_ref(), key)
                 },
                 Ordering::Greater => {
-                    1 + x.as_ref().unwrap().left.as_ref().map(|ref n| n.size()).unwrap_or(0) +
+                    1 + x.as_ref().unwrap().left.as_ref().map_or(0, |ref n| n.size()) +
                         rank_helper(x.unwrap().right.as_ref(), key)
                 }
                 Ordering::Equal => {
-                    x.as_ref().unwrap().left.as_ref().map(|ref n| n.size()).unwrap_or(0)
+                    x.as_ref().unwrap().left.as_ref().map_or(0, |ref n| n.size())
                 }
             }
         }
