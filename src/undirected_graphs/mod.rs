@@ -1,5 +1,7 @@
 use std::iter;
 use super::stacks_and_queues::bag::{Bag, Iter};
+use super::stacks_and_queues::Stack;
+use super::stacks_and_queues::linked_stack;
 
 #[derive(Clone, Debug)]
 pub struct Graph {
@@ -87,20 +89,57 @@ impl Graph {
     }
 
     pub fn dfs<'a>(&'a self, s: usize) -> DepthFirstPaths<'a> {
-        DepthFirstPaths {
+        let marked = iter::repeat(false).take(self.vertices()).collect();
+        let edge_to = iter::repeat(None).take(self.vertices()).collect();
+        let mut path = DepthFirstPaths {
             graph: self,
-            marked: Vec::new(),
-            edge_to: Vec::new(),
+            marked: marked,
+            edge_to: edge_to,
             s: s
-        }
+        };
+        let s = path.s.clone();
+
+        path.dfs(s);
+        path
     }
 }
 
 pub struct DepthFirstPaths<'a> {
     graph: &'a Graph,
     marked: Vec<bool>,
-    edge_to: Vec<usize>,
+    edge_to: Vec<Option<usize>>,
     s: usize
+}
+
+impl<'a> DepthFirstPaths<'a> {
+    pub fn dfs(&mut self, v: usize) {
+        self.marked[v] = true;
+        for w in self.graph.adj(v) {
+            if !self.marked[*w] {
+                self.dfs(*w);
+                self.edge_to[*w] = Some(v);
+            }
+        }
+    }
+
+    pub fn has_path_to(&self, v: usize) -> bool {
+        self.marked[v]
+    }
+
+    pub fn path_to(&self, v: usize) -> Option<Vec<usize>> {
+        if !self.has_path_to(v) {
+            None
+        } else {
+            let mut path = linked_stack::LinkedStack::new();
+            let mut x = v;
+            while x != self.s {
+                path.push(x);
+                x = self.edge_to[x].unwrap();
+            }
+            path.push(self.s);
+            Some(path.into_iter().collect())
+        }
+    }
 }
 
 #[test]
@@ -123,6 +162,10 @@ fn test_graph_visit() {
     g.add_edge(9, 12);
     g.add_edge(11, 12);
 
+    println!("dot => \n {}", g.to_dot());
+    let path = g.dfs(0);
+    println!("got path=> {:?}", path.edge_to);
+    println!("path to 3 => {:?}", path.path_to(3));
 
 }
 
