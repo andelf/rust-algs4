@@ -104,6 +104,27 @@ impl<T> LinkedStack<T> {
     }
 }
 
+pub struct IntoIter<T> {
+    stack: LinkedStack<T>
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<T> {
+        self.stack.pop()
+    }
+}
+
+impl<T> IntoIterator for LinkedStack<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+
+    fn into_iter(self) -> IntoIter<T> {
+        IntoIter { stack: self }
+    }
+}
+
 #[test]
 fn test_linked_stack_of_strings() {
     let mut stack: LinkedStackOfStrings = StackOfStrings::new();
