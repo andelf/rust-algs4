@@ -164,8 +164,7 @@ fn test_graph_visit() {
 
     println!("dot => \n {}", g.to_dot());
     let path = g.dfs(0);
-    println!("got path=> {:?}", path.edge_to);
-    println!("path to 3 => {:?}", path.path_to(3));
+    assert!(path.path_to(3).is_some());
 
 }
 
@@ -197,4 +196,17 @@ fn test_graph() {
     assert_eq!(g.max_degree(), 3);
     assert!(g.average_degree() < 2.0);
     assert_eq!(g.number_of_self_loops(), 0);
+}
+
+#[test]
+fn test_graph_functions() {
+    let mut g = Graph::new(5);
+    for i in 0 .. 5 {
+        for j in 0 .. 5 {
+            g.add_edge(i, j);
+        }
+    }
+
+    assert_eq!(10, g.max_degree());
+    assert_eq!(5, g.number_of_self_loops());
 }
