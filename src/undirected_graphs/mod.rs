@@ -1,7 +1,8 @@
 use std::iter;
 use super::stacks_and_queues::bag::{Bag, Iter};
-use super::stacks_and_queues::Stack;
+use super::stacks_and_queues::{Stack, Queue};
 use super::stacks_and_queues::linked_stack;
+use super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
 
 #[derive(Clone, Debug)]
 pub struct Graph {
@@ -88,36 +89,60 @@ impl Graph {
         self.adj[v].iter()
     }
 
-    pub fn dfs<'a>(&'a self, s: usize) -> DepthFirstPaths<'a> {
-        let marked = iter::repeat(false).take(self.vertices()).collect();
-        let edge_to = iter::repeat(None).take(self.vertices()).collect();
-        let mut path = DepthFirstPaths {
-            graph: self,
-            marked: marked,
-            edge_to: edge_to,
-            s: s
-        };
-        let s = path.s.clone();
-
+    pub fn dfs<'a>(&'a self, s: usize) -> SearchPaths<'a> {
+        let mut path = SearchPaths::new(self, s);
         path.dfs(s);
+        path
+    }
+
+    pub fn bfs<'a>(&'a self, s: usize) -> SearchPaths<'a> {
+        let mut path = SearchPaths::new(self, s);
+        path.bfs(s);
         path
     }
 }
 
-pub struct DepthFirstPaths<'a> {
+pub struct SearchPaths<'a> {
     graph: &'a Graph,
     marked: Vec<bool>,
     edge_to: Vec<Option<usize>>,
     s: usize
 }
 
-impl<'a> DepthFirstPaths<'a> {
-    pub fn dfs(&mut self, v: usize) {
+impl<'a> SearchPaths<'a> {
+    fn new<'b>(graph: &'b Graph, s: usize) -> SearchPaths<'b> {
+        let marked = iter::repeat(false).take(graph.vertices()).collect();
+        let edge_to = iter::repeat(None).take(graph.vertices()).collect();
+        SearchPaths {
+            graph: graph,
+            marked: marked,
+            edge_to: edge_to,
+            s: s
+        }
+    }
+
+    fn dfs(&mut self, v: usize) {
         self.marked[v] = true;
         for w in self.graph.adj(v) {
             if !self.marked[*w] {
                 self.dfs(*w);
                 self.edge_to[*w] = Some(v);
+            }
+        }
+    }
+
+    fn bfs(&mut self, s: usize) {
+        let mut q = ResizingArrayQueue::new();
+        q.enqueue(s);
+        self.marked[s] = true;
+        while !q.is_empty() {
+            let v = q.dequeue().unwrap();
+            for w in self.graph.adj(v) {
+                if !self.marked[*w] {
+                    self.edge_to[*w] = Some(v);
+                    q.enqueue(*w);
+                    self.marked[*w] = true;
+                }
             }
         }
     }
@@ -142,6 +167,7 @@ impl<'a> DepthFirstPaths<'a> {
     }
 }
 
+
 #[test]
 fn test_graph_visit() {
     let mut g = Graph::new(13);
@@ -163,9 +189,8 @@ fn test_graph_visit() {
     g.add_edge(11, 12);
 
     println!("dot => \n {}", g.to_dot());
-    let path = g.dfs(0);
-    assert!(path.path_to(3).is_some());
-
+    assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 4, 3]");
+    assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 3]");
 }
 
 
