@@ -100,6 +100,10 @@ impl Graph {
         path.bfs(s);
         path
     }
+
+    pub fn cc<'a>(&'a self) -> ConnectedComponents<'a> {
+        ConnectedComponents::new(self)
+    }
 }
 
 pub struct SearchPaths<'a> {
@@ -167,6 +171,58 @@ impl<'a> SearchPaths<'a> {
     }
 }
 
+pub struct ConnectedComponents<'a> {
+    graph: &'a Graph,
+    marked: Vec<bool>,
+    id: Vec<Option<usize>>,
+    n: usize,
+    count: usize,
+}
+
+impl<'a> ConnectedComponents<'a> {
+    fn new<'b>(graph: &'b Graph) -> ConnectedComponents<'b> {
+        let n = graph.vertices();
+        let mut cc = ConnectedComponents {
+            graph: graph,
+            marked: iter::repeat(false).take(n).collect(),
+            id: iter::repeat(None).take(n).collect(),
+            n: n,
+            count: 0
+        };
+        cc.init();
+        cc
+    }
+
+    fn init(&mut self) {
+        for v in 0 .. self.n {
+            if !self.marked[v] {
+                self.dfs(v);
+                self.count += 1;
+            }
+        }
+    }
+
+    pub fn count(&self) -> usize {
+        self.count
+    }
+
+    pub fn id(&self, v: usize) -> usize {
+        self.id[v].unwrap()
+    }
+
+    fn dfs(&mut self, v: usize) {
+        self.marked[v] = true;
+        self.id[v] = Some(self.count);
+        for w in self.graph.adj(v) {
+            if !self.marked[*w] {
+                self.dfs(*w)
+            }
+        }
+    }
+}
+
+
+
 
 #[test]
 fn test_graph_visit() {
@@ -188,9 +244,13 @@ fn test_graph_visit() {
     g.add_edge(9, 12);
     g.add_edge(11, 12);
 
-    println!("dot => \n {}", g.to_dot());
+    // println!("dot => \n {}", g.to_dot());
     assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 4, 3]");
     assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 3]");
+
+    assert_eq!(g.cc().id(4), 0);
+    assert_eq!(g.cc().id(8), 1);
+    assert_eq!(g.cc().id(11), 2);
 }
 
 
