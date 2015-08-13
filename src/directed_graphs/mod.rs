@@ -1,5 +1,5 @@
 use std::iter;
-use super::stacks_and_queues::bag::{Bag, Iter};
+use super::stacks_and_queues::bag::Bag;
 use super::stacks_and_queues::{Stack, Queue};
 use super::stacks_and_queues::linked_stack;
 use super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
@@ -40,25 +40,16 @@ impl Digraph {
         self.adj[v].add(w);
     }
 
-    pub fn degree(&self, v: usize) -> usize {
+    pub fn outdegree(&self, v: usize) -> usize {
         self.validate_vertex(v);
         self.adj[v].len()
-    }
-
-    pub fn max_degree(&self) -> usize {
-        (0 .. self.vertices()).map(|v| self.degree(v)).max().unwrap_or(0)
-    }
-
-    pub fn average_degree(&self) -> f64 {
-        // (0 .. self.vertices()) .map(|v| self.degree(v)).sum::<usize>() as f64 / self.vertices() as f64
-        2.0 * self.edges() as f64 / self.vertices() as f64
     }
 
     pub fn number_of_self_loops(&self) -> usize {
         let mut count = 0;
         for v in 0 .. self.vertices() {
             for w in self.adj(v) {
-                if v == *w {
+                if v == w {
                     count += 1;
                 }
             }
@@ -83,8 +74,8 @@ impl Digraph {
         dot
     }
 
-    pub fn adj(&self, v: usize) -> Iter<usize> {
-        self.adj[v].iter()
+    pub fn adj(&self, v: usize) -> ::std::vec::IntoIter<usize> {
+        self.adj[v].iter().map(|v| v.clone()).collect::<Vec<usize>>().into_iter()
     }
 
     pub fn reverse(&self) -> Digraph {
@@ -92,7 +83,7 @@ impl Digraph {
         let mut adj = iter::repeat(Bag::new()).take(v).collect::<Vec<Bag<usize>>>();
         for s in 0 .. v {
             for e in self.adj(s) {
-                adj[*e].add(s);
+                adj[e].add(s);
             }
         }
         Digraph {
@@ -114,8 +105,10 @@ impl Digraph {
         path
     }
 
-    pub fn cc<'a>(&'a self) -> ConnectedComponents<'a> {
-        ConnectedComponents::new(self)
+    pub fn reverse_dfs_postorder<'a>(&'a self) -> linked_stack::IntoIter<usize> {
+        let mut dfo = DepthFirstOrder::new(self);
+        dfo.init();
+        dfo.reverse_post.into_iter()
     }
 }
 
@@ -141,9 +134,9 @@ impl<'a> SearchPaths<'a> {
     fn dfs(&mut self, v: usize) {
         self.marked[v] = true;
         for w in self.graph.adj(v) {
-            if !self.marked[*w] {
-                self.dfs(*w);
-                self.edge_to[*w] = Some(v);
+            if !self.marked[w] {
+                self.dfs(w);
+                self.edge_to[w] = Some(v);
             }
         }
     }
@@ -155,10 +148,10 @@ impl<'a> SearchPaths<'a> {
         while !q.is_empty() {
             let v = q.dequeue().unwrap();
             for w in self.graph.adj(v) {
-                if !self.marked[*w] {
-                    self.edge_to[*w] = Some(v);
-                    q.enqueue(*w);
-                    self.marked[*w] = true;
+                if !self.marked[w] {
+                    self.edge_to[w] = Some(v);
+                    q.enqueue(w);
+                    self.marked[w] = true;
                 }
             }
         }
@@ -184,58 +177,40 @@ impl<'a> SearchPaths<'a> {
     }
 }
 
-pub struct ConnectedComponents<'a> {
+pub struct DepthFirstOrder<'a> {
     graph: &'a Digraph,
     marked: Vec<bool>,
-    id: Vec<Option<usize>>,
-    n: usize,
-    count: usize,
+    reverse_post: linked_stack::LinkedStack<usize>
 }
 
-impl<'a> ConnectedComponents<'a> {
-    fn new<'b>(graph: &'b Digraph) -> ConnectedComponents<'b> {
-        let n = graph.vertices();
-        let mut cc = ConnectedComponents {
+impl<'a> DepthFirstOrder<'a> {
+    fn new<'b>(graph: &'b Digraph) -> DepthFirstOrder<'b> {
+        let marked = iter::repeat(false).take(graph.vertices()).collect();
+        DepthFirstOrder {
             graph: graph,
-            marked: iter::repeat(false).take(n).collect(),
-            id: iter::repeat(None).take(n).collect(),
-            n: n,
-            count: 0
-        };
-        cc.init();
-        cc
-    }
-
-    fn init(&mut self) {
-        for v in 0 .. self.n {
-            if !self.marked[v] {
-                self.dfs(v);
-                self.count += 1;
-            }
+            marked: marked,
+            reverse_post: Stack::new()
         }
     }
 
-    pub fn count(&self) -> usize {
-        self.count
-    }
-
-    pub fn id(&self, v: usize) -> usize {
-        self.id[v].unwrap()
+    fn init(&mut self) {
+        for v in 0 .. self.graph.vertices() {
+            if !self.marked[v] {
+                self.dfs(v)
+            }
+        }
     }
 
     fn dfs(&mut self, v: usize) {
         self.marked[v] = true;
-        self.id[v] = Some(self.count);
         for w in self.graph.adj(v) {
-            if !self.marked[*w] {
-                self.dfs(*w)
+            if !self.marked[w] {
+                self.dfs(w);
             }
         }
+        self.reverse_post.push(v);
     }
 }
-
-
-
 
 #[test]
 fn test_digraph_visit() {
@@ -274,9 +249,6 @@ fn test_digraph_visit() {
     assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 4, 2, 3]");
     assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 4, 3]");
 
-    // assert_eq!(g.cc().id(4), 0);
-    // assert_eq!(g.cc().id(8), 1);
-    // assert_eq!(g.cc().id(11), 2);
 }
 
 
@@ -298,14 +270,12 @@ fn test_digraph() {
 
     assert_eq!(10, g.vertices());
     assert_eq!(9, g.edges());
-    assert_eq!(1, g.degree(5));
+    assert_eq!(1, g.outdegree(5));
 
     for w in g.adj(5) {
-        assert!(vec![8, 4, 0].contains(w));
+        assert!(vec![8, 4, 0].contains(&w));
     }
 
-    assert_eq!(g.max_degree(), 2);
-    assert!(g.average_degree() < 2.0);
     assert_eq!(g.number_of_self_loops(), 0);
 }
 
@@ -318,6 +288,24 @@ fn test_digraph_functions() {
         }
     }
 
-    assert_eq!(5, g.max_degree());
     assert_eq!(2, g.number_of_self_loops());
+}
+
+#[test]
+fn test_digraph_depth_first_search_order() {
+    let mut g = Digraph::new(7);
+    g.add_edge(0, 2);
+    g.add_edge(0, 5);
+    g.add_edge(0, 1);
+    g.add_edge(6, 0);
+    g.add_edge(5, 2);
+    g.add_edge(3, 2);
+    g.add_edge(3, 5);
+    g.add_edge(1, 4);
+    g.add_edge(3, 4);
+    g.add_edge(3, 6);
+    g.add_edge(6, 4);
+
+    let dfo: Vec<usize> = g.reverse_dfs_postorder().collect();
+    assert_eq!(vec![3, 6, 0, 5, 2, 1, 4], dfo);
 }
