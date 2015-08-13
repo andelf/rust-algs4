@@ -1,5 +1,5 @@
 use std::iter;
-use super::stacks_and_queues::bag::{Bag, Iter};
+use super::stacks_and_queues::bag::Bag;
 use super::stacks_and_queues::{Stack, Queue};
 use super::stacks_and_queues::linked_stack;
 use super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
@@ -60,7 +60,7 @@ impl Graph {
         let mut count = 0;
         for v in 0 .. self.vertices() {
             for w in self.adj(v) {
-                if v == *w {
+                if v == w {
                     count += 1;
                 }
             }
@@ -85,8 +85,8 @@ impl Graph {
         dot
     }
 
-    pub fn adj(&self, v: usize) -> Iter<usize> {
-        self.adj[v].iter()
+    pub fn adj(&self, v: usize) -> ::std::vec::IntoIter<usize> {
+        self.adj[v].iter().map(|v| v.clone()).collect::<Vec<usize>>().into_iter()
     }
 
     pub fn dfs<'a>(&'a self, s: usize) -> SearchPaths<'a> {
@@ -128,9 +128,9 @@ impl<'a> SearchPaths<'a> {
     fn dfs(&mut self, v: usize) {
         self.marked[v] = true;
         for w in self.graph.adj(v) {
-            if !self.marked[*w] {
-                self.dfs(*w);
-                self.edge_to[*w] = Some(v);
+            if !self.marked[w] {
+                self.dfs(w);
+                self.edge_to[w] = Some(v);
             }
         }
     }
@@ -142,10 +142,10 @@ impl<'a> SearchPaths<'a> {
         while !q.is_empty() {
             let v = q.dequeue().unwrap();
             for w in self.graph.adj(v) {
-                if !self.marked[*w] {
-                    self.edge_to[*w] = Some(v);
-                    q.enqueue(*w);
-                    self.marked[*w] = true;
+                if !self.marked[w] {
+                    self.edge_to[w] = Some(v);
+                    q.enqueue(w);
+                    self.marked[w] = true;
                 }
             }
         }
@@ -214,8 +214,8 @@ impl<'a> ConnectedComponents<'a> {
         self.marked[v] = true;
         self.id[v] = Some(self.count);
         for w in self.graph.adj(v) {
-            if !self.marked[*w] {
-                self.dfs(*w)
+            if !self.marked[w] {
+                self.dfs(w)
             }
         }
     }
@@ -275,7 +275,7 @@ fn test_graph() {
     assert_eq!(3, g.degree(5));
 
     for w in g.adj(5) {
-        assert!(vec![8, 4, 0].contains(w));
+        assert!(vec![8, 4, 0].contains(&w));
     }
 
     assert_eq!(g.max_degree(), 3);
