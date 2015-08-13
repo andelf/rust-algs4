@@ -110,6 +110,10 @@ impl Digraph {
         dfo.init();
         dfo.reverse_post.into_iter()
     }
+
+    pub fn scc<'a>(&'a self) -> KosarajuSharirStrongConnectedComponents<'a> {
+        KosarajuSharirStrongConnectedComponents::new(self)
+    }
 }
 
 pub struct SearchPaths<'a> {
@@ -212,6 +216,59 @@ impl<'a> DepthFirstOrder<'a> {
     }
 }
 
+pub struct KosarajuSharirStrongConnectedComponents<'a> {
+    graph: &'a Digraph,
+    marked: Vec<bool>,
+    id: Vec<Option<usize>>,
+    count: usize,
+}
+
+impl<'a> KosarajuSharirStrongConnectedComponents<'a> {
+    fn new<'b>(graph: &'b Digraph) -> KosarajuSharirStrongConnectedComponents<'b> {
+        let n = graph.vertices();
+        let mut cc = KosarajuSharirStrongConnectedComponents {
+            graph: graph,
+            marked: iter::repeat(false).take(n).collect(),
+            id: iter::repeat(None).take(n).collect(),
+            count: 0
+        };
+        cc.init();
+        cc
+    }
+
+    fn init(&mut self) {
+        for v in self.graph.reverse().reverse_dfs_postorder() {
+            if !self.marked[v] {
+                self.dfs(v);
+                self.count += 1;
+            }
+        }
+    }
+
+    pub fn count(&self) -> usize {
+        self.count
+    }
+
+    pub fn id(&self, v: usize) -> usize {
+        self.id[v].unwrap()
+    }
+
+    pub fn connected(&self, v: usize, w: usize) -> bool {
+        self.id[v] == self.id[w]
+    }
+
+    fn dfs(&mut self, v: usize) {
+        self.marked[v] = true;
+        self.id[v] = Some(self.count);
+        for w in self.graph.adj(v) {
+            if !self.marked[w] {
+                self.dfs(w)
+            }
+        }
+    }
+}
+
+
 #[test]
 fn test_digraph_visit() {
     let mut g = Digraph::new(13);
@@ -249,6 +306,11 @@ fn test_digraph_visit() {
     assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 4, 2, 3]");
     assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 4, 3]");
 
+    let scc = g.scc();
+
+    assert!(scc.connected(6, 8));
+    assert!(scc.connected(9, 12));
+    assert!(!scc.connected(6, 7));
 }
 
 
