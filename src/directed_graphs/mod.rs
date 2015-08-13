@@ -40,7 +40,6 @@ impl Digraph {
         self.adj[v].add(w);
     }
 
-    // FIXME: should this be a global function
     pub fn degree(&self, v: usize) -> usize {
         self.validate_vertex(v);
         self.adj[v].len()
@@ -70,7 +69,7 @@ impl Digraph {
     pub fn to_dot(&self) -> String {
         let mut dot = String::new();
 
-        dot.push_str("graph G {\n");
+        dot.push_str("digraph G {\n");
         for i in 0 .. self.v {
             dot.push_str(&format!("  {};\n", i));
         }
@@ -86,6 +85,21 @@ impl Digraph {
 
     pub fn adj(&self, v: usize) -> Iter<usize> {
         self.adj[v].iter()
+    }
+
+    pub fn reverse(&self) -> Digraph {
+        let v = self.v;
+        let mut adj = iter::repeat(Bag::new()).take(v).collect::<Vec<Bag<usize>>>();
+        for s in 0 .. v {
+            for e in self.adj(s) {
+                adj[*e].add(s);
+            }
+        }
+        Digraph {
+            v: v,
+            e: self.e,
+            adj: adj
+        }
     }
 
     pub fn dfs<'a>(&'a self, s: usize) -> SearchPaths<'a> {
@@ -227,29 +241,42 @@ impl<'a> ConnectedComponents<'a> {
 fn test_digraph_visit() {
     let mut g = Digraph::new(13);
     g.add_edge(0, 1);
-    g.add_edge(0, 2);
-    g.add_edge(0, 6);
+    g.add_edge(2, 0);
+    g.add_edge(6, 0);
     g.add_edge(0, 5);
-    g.add_edge(5, 3);
+
+    g.add_edge(3, 5);
     g.add_edge(5, 4);
-    g.add_edge(3, 4);
-    g.add_edge(4, 6);
 
+    g.add_edge(2, 3);
+    g.add_edge(3, 2);
 
-    g.add_edge(7, 8);
+    g.add_edge(4, 3);
+    g.add_edge(4, 2);
+    g.add_edge(6, 4);
+
+    g.add_edge(6, 8);
+    g.add_edge(8, 6);
+
+    g.add_edge(7, 6);
+
+    g.add_edge(7, 9);
+    g.add_edge(6, 9);
 
     g.add_edge(9, 10);
+    g.add_edge(10, 12);
     g.add_edge(9, 11);
-    g.add_edge(9, 12);
+    g.add_edge(12, 9);
     g.add_edge(11, 12);
 
-    // println!("dot => \n {}", g.to_dot());
-    assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 3]");
-    assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 3]");
+    println!("dot => \n {}", g.to_dot());
+    println!("dot => \n {}", g.reverse().to_dot());
+    assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 4, 2, 3]");
+    assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 4, 3]");
 
-    assert_eq!(g.cc().id(4), 0);
-    assert_eq!(g.cc().id(8), 1);
-    assert_eq!(g.cc().id(11), 2);
+    // assert_eq!(g.cc().id(4), 0);
+    // assert_eq!(g.cc().id(8), 1);
+    // assert_eq!(g.cc().id(11), 2);
 }
 
 
