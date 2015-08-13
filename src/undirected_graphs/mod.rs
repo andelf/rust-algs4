@@ -175,7 +175,6 @@ pub struct ConnectedComponents<'a> {
     graph: &'a Graph,
     marked: Vec<bool>,
     id: Vec<Option<usize>>,
-    n: usize,
     count: usize,
 }
 
@@ -186,7 +185,6 @@ impl<'a> ConnectedComponents<'a> {
             graph: graph,
             marked: iter::repeat(false).take(n).collect(),
             id: iter::repeat(None).take(n).collect(),
-            n: n,
             count: 0
         };
         cc.init();
@@ -194,7 +192,7 @@ impl<'a> ConnectedComponents<'a> {
     }
 
     fn init(&mut self) {
-        for v in 0 .. self.n {
+        for v in 0 .. self.graph.vertices() {
             if !self.marked[v] {
                 self.dfs(v);
                 self.count += 1;
@@ -208,6 +206,10 @@ impl<'a> ConnectedComponents<'a> {
 
     pub fn id(&self, v: usize) -> usize {
         self.id[v].unwrap()
+    }
+
+    pub fn connected(&self, v: usize, w: usize) -> bool {
+        self.id[v] == self.id[w]
     }
 
     fn dfs(&mut self, v: usize) {
@@ -251,6 +253,8 @@ fn test_graph_visit() {
     assert_eq!(g.cc().id(4), 0);
     assert_eq!(g.cc().id(8), 1);
     assert_eq!(g.cc().id(11), 2);
+
+    assert!(g.cc().connected(0, 4));
 }
 
 
