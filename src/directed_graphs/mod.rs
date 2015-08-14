@@ -24,11 +24,11 @@ impl Digraph {
         assert!(v < self.v, "vertex is not between 0 and {}", self.v - 1)
     }
 
-    pub fn vertices(&self) -> usize {
+    pub fn v(&self) -> usize {
         self.v
     }
 
-    pub fn edges(&self) -> usize {
+    pub fn e(&self) -> usize {
         self.e
     }
 
@@ -47,7 +47,7 @@ impl Digraph {
 
     pub fn number_of_self_loops(&self) -> usize {
         let mut count = 0;
-        for v in 0 .. self.vertices() {
+        for v in 0 .. self.v() {
             for w in self.adj(v) {
                 if v == w {
                     count += 1;
@@ -125,8 +125,8 @@ pub struct SearchPaths<'a> {
 
 impl<'a> SearchPaths<'a> {
     fn new<'b>(graph: &'b Digraph, s: usize) -> SearchPaths<'b> {
-        let marked = iter::repeat(false).take(graph.vertices()).collect();
-        let edge_to = iter::repeat(None).take(graph.vertices()).collect();
+        let marked = iter::repeat(false).take(graph.v()).collect();
+        let edge_to = iter::repeat(None).take(graph.v()).collect();
         SearchPaths {
             graph: graph,
             marked: marked,
@@ -189,7 +189,7 @@ pub struct DepthFirstOrder<'a> {
 
 impl<'a> DepthFirstOrder<'a> {
     fn new<'b>(graph: &'b Digraph) -> DepthFirstOrder<'b> {
-        let marked = iter::repeat(false).take(graph.vertices()).collect();
+        let marked = iter::repeat(false).take(graph.v()).collect();
         DepthFirstOrder {
             graph: graph,
             marked: marked,
@@ -198,7 +198,7 @@ impl<'a> DepthFirstOrder<'a> {
     }
 
     fn init(&mut self) {
-        for v in 0 .. self.graph.vertices() {
+        for v in 0 .. self.graph.v() {
             if !self.marked[v] {
                 self.dfs(v)
             }
@@ -225,7 +225,7 @@ pub struct KosarajuSharirStrongConnectedComponents<'a> {
 
 impl<'a> KosarajuSharirStrongConnectedComponents<'a> {
     fn new<'b>(graph: &'b Digraph) -> KosarajuSharirStrongConnectedComponents<'b> {
-        let n = graph.vertices();
+        let n = graph.v();
         let mut cc = KosarajuSharirStrongConnectedComponents {
             graph: graph,
             marked: iter::repeat(false).take(n).collect(),
@@ -330,8 +330,8 @@ fn test_digraph() {
 
     // println!("got => \n{}", g.to_dot());
 
-    assert_eq!(10, g.vertices());
-    assert_eq!(9, g.edges());
+    assert_eq!(10, g.v());
+    assert_eq!(9, g.e());
     assert_eq!(1, g.outdegree(5));
 
     for w in g.adj(5) {

@@ -24,11 +24,11 @@ impl Graph {
         assert!(v < self.v, "vertex is not between 0 and {}", self.v - 1)
     }
 
-    pub fn vertices(&self) -> usize {
+    pub fn v(&self) -> usize {
         self.v
     }
 
-    pub fn edges(&self) -> usize {
+    pub fn e(&self) -> usize {
         self.e
     }
 
@@ -48,17 +48,17 @@ impl Graph {
     }
 
     pub fn max_degree(&self) -> usize {
-        (0 .. self.vertices()).map(|v| self.degree(v)).max().unwrap_or(0)
+        (0 .. self.v()).map(|v| self.degree(v)).max().unwrap_or(0)
     }
 
     pub fn average_degree(&self) -> f64 {
-        // (0 .. self.vertices()) .map(|v| self.degree(v)).sum::<usize>() as f64 / self.vertices() as f64
-        2.0 * self.edges() as f64 / self.vertices() as f64
+        // (0 .. self.v()) .map(|v| self.degree(v)).sum::<usize>() as f64 / self.v() as f64
+        2.0 * self.e() as f64 / self.v() as f64
     }
 
     pub fn number_of_self_loops(&self) -> usize {
         let mut count = 0;
-        for v in 0 .. self.vertices() {
+        for v in 0 .. self.v() {
             for w in self.adj(v) {
                 if v == w {
                     count += 1;
@@ -115,8 +115,8 @@ pub struct SearchPaths<'a> {
 
 impl<'a> SearchPaths<'a> {
     fn new<'b>(graph: &'b Graph, s: usize) -> SearchPaths<'b> {
-        let marked = iter::repeat(false).take(graph.vertices()).collect();
-        let edge_to = iter::repeat(None).take(graph.vertices()).collect();
+        let marked = iter::repeat(false).take(graph.v()).collect();
+        let edge_to = iter::repeat(None).take(graph.v()).collect();
         SearchPaths {
             graph: graph,
             marked: marked,
@@ -180,7 +180,7 @@ pub struct ConnectedComponents<'a> {
 
 impl<'a> ConnectedComponents<'a> {
     fn new<'b>(graph: &'b Graph) -> ConnectedComponents<'b> {
-        let n = graph.vertices();
+        let n = graph.v();
         let mut cc = ConnectedComponents {
             graph: graph,
             marked: iter::repeat(false).take(n).collect(),
@@ -192,7 +192,7 @@ impl<'a> ConnectedComponents<'a> {
     }
 
     fn init(&mut self) {
-        for v in 0 .. self.graph.vertices() {
+        for v in 0 .. self.graph.v() {
             if !self.marked[v] {
                 self.dfs(v);
                 self.count += 1;
@@ -274,8 +274,8 @@ fn test_graph() {
 
     // println!("got => \n{}", g.to_dot());
 
-    assert_eq!(10, g.vertices());
-    assert_eq!(9, g.edges());
+    assert_eq!(10, g.v());
+    assert_eq!(9, g.e());
     assert_eq!(3, g.degree(5));
 
     for w in g.adj(5) {

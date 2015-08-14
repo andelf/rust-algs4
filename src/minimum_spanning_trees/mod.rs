@@ -67,6 +67,7 @@ pub struct EdgeWeightedGraph {
     adj: Vec<Bag<Edge>>
 }
 
+/// an edge-weighted graph
 impl EdgeWeightedGraph {
     pub fn new(v: usize) -> EdgeWeightedGraph {
         EdgeWeightedGraph {
