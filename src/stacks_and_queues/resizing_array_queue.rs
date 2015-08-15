@@ -184,6 +184,30 @@ impl<T: fmt::Debug> fmt::Debug for ResizingArrayQueue<T> {
     }
 }
 
+pub struct IntoIter<T> {
+    queue: ResizingArrayQueue<T>
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<T> {
+        self.queue.dequeue()
+    }
+
+    fn size_hint(&self) -> (usize, Option<usize>) {
+        (self.size(), Some(self.size()))
+    }
+}
+
+impl<T> IntoIterator for ResizingArrayQueue<T> {
+    type Item = T;
+    type IntoIter = IntoIter<T>;
+
+    fn into_iter(self) -> IntoIter<T> {
+        IntoIter { queue: self }
+    }
+}
 
 #[test]
 fn test_resizing_array_queue_of_strings() {
