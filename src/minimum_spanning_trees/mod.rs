@@ -2,6 +2,12 @@ use std::fmt;
 use std::iter;
 use std::cmp;
 use super::stacks_and_queues::bag::Bag;
+use super::stacks_and_queues::Queue;
+use super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
+use super::priority_queues::MinPQ;
+use super::priority_queues::binary_heaps::BinaryHeapMinPQ;
+use super::union_find::UF;
+use super::union_find::weighted_quick_union::UnionFind;
 
 /// a weighted edge
 #[derive(Clone, Copy)]
@@ -161,4 +167,81 @@ fn test_edge_weighted_graph() {
 
     assert_eq!(10, g.edges().count());
     assert!(!g.to_dot().is_empty());
+}
+
+
+#[allow(dead_code)]
+pub struct KruskalMST<'a> {
+    graph: &'a EdgeWeightedGraph,
+    weight: f64,
+    mst: ResizingArrayQueue<Edge>
+}
+
+impl<'a> KruskalMST<'a> {
+    fn new<'b>(graph: &'b EdgeWeightedGraph) -> KruskalMST<'b> {
+        let n = graph.v();
+        let mut weight = 0f64;
+        let mut mst = ResizingArrayQueue::<Edge>::new();
+        let mut pq = BinaryHeapMinPQ::<Edge>::new();
+        for e in graph.edges() {
+            pq.insert(e);
+        }
+        let mut uf = UnionFind::new(n);
+
+        while !pq.is_empty() && mst.size() < n - 1 {
+            let e = pq.del_min().unwrap();
+            let v = e.either();
+            let w = e.other(v);
+            if !uf.connected(v, w) {
+                uf.union(v, w);
+                weight += e.weight();
+                mst.enqueue(e);
+            }
+        }
+
+        KruskalMST {
+            graph: graph,
+            weight: weight,
+            mst: mst
+        }
+    }
+
+    pub fn edges(&self) -> ::std::vec::IntoIter<Edge> {
+        self.mst.clone().into_iter().collect::<Vec<Edge>>().into_iter()
+    }
+}
+
+impl EdgeWeightedGraph {
+    pub fn kruskal_mst<'a>(&'a self) -> KruskalMST<'a> {
+        KruskalMST::new(self)
+    }
+}
+
+#[test]
+fn test_edge_weighted_graph_kruskal_mst() {
+    let mut g = EdgeWeightedGraph::new(6);
+    g.add_edge(Edge::new(0, 1, 7.0));
+    g.add_edge(Edge::new(1, 2, 10.0));
+    g.add_edge(Edge::new(0, 2, 9.0));
+    g.add_edge(Edge::new(0, 5, 14.0));
+    g.add_edge(Edge::new(1, 3, 15.0));
+    g.add_edge(Edge::new(2, 5, 2.0));
+    g.add_edge(Edge::new(2, 3, 11.0));
+    g.add_edge(Edge::new(4, 5, 9.0));
+    g.add_edge(Edge::new(3, 4, 6.0));
+    g.add_edge(Edge::new(2, 2, 1.0));
+
+    assert_eq!(33.0, g.kruskal_mst().weight);
+    assert_eq!(33.0, g.kruskal_mst().edges().map(|e| e.weight).sum());
+
+}
+
+
+/// data type for computing a minimum spanning tree in an edge-weighted graph
+pub struct LazyPrimMST<'a> {
+    graph: &'a EdgeWeightedGraph,
+    weight: f64,
+    mst: ResizingArrayQueue<Edge>,
+    marked: Vec<bool>,
+    pq: BinaryHeapMinPQ<Edge>
 }
