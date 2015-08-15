@@ -88,6 +88,16 @@ pub struct ResizingArrayQueue<T> {
     tail: usize
 }
 
+impl<T: Clone> Clone for ResizingArrayQueue<T> {
+    fn clone(&self) -> Self {
+        ResizingArrayQueue {
+            q: self.q.clone(),
+            head: self.head,
+            tail: self.tail
+        }
+    }
+}
+
 impl<T> ResizingArrayQueue<T> {
     pub fn with_capacity(capacity: usize) -> ResizingArrayQueue<T> {
         let mut storage = Vec::with_capacity(capacity);
@@ -196,7 +206,7 @@ impl<T> Iterator for IntoIter<T> {
     }
 
     fn size_hint(&self) -> (usize, Option<usize>) {
-        (self.size(), Some(self.size()))
+        (self.queue.size(), Some(self.queue.size()))
     }
 }
 
