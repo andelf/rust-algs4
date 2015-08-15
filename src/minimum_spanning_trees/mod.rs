@@ -233,7 +233,6 @@ fn test_edge_weighted_graph_kruskal_mst() {
 
     assert_eq!(33.0, g.kruskal_mst().weight);
     assert_eq!(33.0, g.kruskal_mst().edges().map(|e| e.weight).sum());
-
 }
 
 
@@ -244,4 +243,89 @@ pub struct LazyPrimMST<'a> {
     mst: ResizingArrayQueue<Edge>,
     marked: Vec<bool>,
     pq: BinaryHeapMinPQ<Edge>
+}
+
+impl<'a> LazyPrimMST<'a> {
+    fn new<'b>(graph: &'b EdgeWeightedGraph) -> LazyPrimMST<'b> {
+        let n = graph.v();
+        let marked = iter::repeat(false).take(n).collect();
+        let pq = BinaryHeapMinPQ::new();
+        let mst = ResizingArrayQueue::new();
+
+        let mut ret = LazyPrimMST {
+            graph: graph,
+            weight: 0.0,
+            mst: mst,
+            marked: marked,
+            pq: pq
+        };
+        // run Prim for all vertices
+        // get a minimum spanning forest
+        for v in 0 .. n {
+            if !ret.marked[v] {
+                ret.prim(v);
+            }
+        }
+        ret
+    }
+
+    // Prim's algorithm
+    fn prim(&mut self, s: usize) {
+        self.visit(s);
+
+        while !self.pq.is_empty() {
+            let e = self.pq.del_min().unwrap();
+            let v = e.either();
+            let w = e.other(v);
+
+            if self.marked[v] && self.marked[w] {
+                continue;
+            }
+            self.weight += e.weight();
+            self.mst.enqueue(e);
+            if !self.marked[v] {
+                self.visit(v);
+            }
+            if !self.marked[w] {
+                self.visit(w)
+            }
+        }
+    }
+
+    fn visit(&mut self, v: usize) {
+        self.marked[v] = true;
+        for e in self.graph.adj(v) {
+            if !self.marked[e.other(v)] {
+                self.pq.insert(e)
+            }
+        }
+    }
+
+    pub fn edges(&self) -> ::std::vec::IntoIter<Edge> {
+        self.mst.clone().into_iter().collect::<Vec<Edge>>().into_iter()
+    }
+}
+
+impl EdgeWeightedGraph {
+     pub fn lazy_prim_mst<'a>(&'a self) -> LazyPrimMST<'a> {
+         LazyPrimMST::new(self)
+    }
+}
+
+#[test]
+fn test_edge_weighted_graph_lazy_prim_mst() {
+    let mut g = EdgeWeightedGraph::new(6);
+    g.add_edge(Edge::new(0, 1, 7.0));
+    g.add_edge(Edge::new(1, 2, 10.0));
+    g.add_edge(Edge::new(0, 2, 9.0));
+    g.add_edge(Edge::new(0, 5, 14.0));
+    g.add_edge(Edge::new(1, 3, 15.0));
+    g.add_edge(Edge::new(2, 5, 2.0));
+    g.add_edge(Edge::new(2, 3, 11.0));
+    g.add_edge(Edge::new(4, 5, 9.0));
+    g.add_edge(Edge::new(3, 4, 6.0));
+    g.add_edge(Edge::new(2, 2, 1.0));
+
+    assert_eq!(33.0, g.lazy_prim_mst().weight);
+    assert_eq!(33.0, g.lazy_prim_mst().edges().map(|e| e.weight).sum());
 }
