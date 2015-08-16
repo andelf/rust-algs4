@@ -301,8 +301,8 @@ fn test_digraph_visit() {
     g.add_edge(12, 9);
     g.add_edge(11, 12);
 
-    println!("dot => \n {}", g.to_dot());
-    println!("dot => \n {}", g.reverse().to_dot());
+    // println!("dot => \n {}", g.to_dot());
+    // println!("dot => \n {}", g.reverse().to_dot());
     assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 4, 2, 3]");
     assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 4, 3]");
 

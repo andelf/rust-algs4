@@ -138,7 +138,6 @@ impl EdgeWeightedGraph {
             .into_iter()
     }
 
-    // use fdp or neato
     pub fn to_dot(&self) -> String {
         let mut dot = String::new();
 
@@ -150,7 +149,7 @@ impl EdgeWeightedGraph {
         for e in self.edges() {
             let v = e.either();
             let w = e.other(v);
-            dot.push_str(&format!("  {} -- {} [len={}];\n",
+            dot.push_str(&format!("  {} -- {} [ label=\"{}\" ];\n",
                                   v, w, e.weight))
         }
         dot.push_str("}\n");
@@ -176,6 +175,7 @@ fn test_edge_weighted_graph() {
 
     assert_eq!(10, g.edges().count());
     assert!(!g.to_dot().is_empty());
+    // println!("got => \n{}", g.to_dot());
 }
 
 
