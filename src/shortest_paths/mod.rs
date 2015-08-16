@@ -209,6 +209,53 @@ impl<'a> DijkstraSP<'a> {
             path.into_iter().collect::<Vec<DirectedEdge>>().into_iter()
         }
     }
+
+    // FIXME: should this be public?
+    pub fn check(&self) -> bool {
+        let s = self.s;
+        for e in self.graph.edges() {
+            if e.weight() < 0.0 {
+                return false;
+            }
+        }
+
+        if self.dist_to[s] != 0.0 || self.edge_to[s].is_some() {
+            return false;
+        }
+
+        for v in 0 .. self.graph.v() {
+            if v == s { continue }
+            if self.edge_to[v].is_none() && self.dist_to[v] != f64::INFINITY {
+                // dist_to[] edge_to[] inconsistent
+                return false;
+            }
+        }
+
+        for v in 0 .. self.graph.v() {
+            for e in self.graph.adj(v) {
+                let w  = e.to();
+                if self.dist_to[v] + e.weight() < self.dist_to[w] {
+                    // edge not relaxed
+                    return false;
+                }
+            }
+        }
+
+        for w in 0 .. self.graph.v() {
+            if self.edge_to[w].is_none() { continue }
+            let e = self.edge_to[w].unwrap();
+            let v = e.from();
+            if w != e.to() {
+                return false;
+            }
+            if self.dist_to[v] + e.weight() != self.dist_to[w] {
+                // edge on shortest path not tight
+                return false;
+            }
+        }
+
+        true
+    }
 }
 
 
@@ -234,4 +281,6 @@ fn test_dijkstra_shortest_path() {
 
     assert_eq!(20.0, g.dijkstra_sp(0).dist_to(3));
     assert_eq!(26.0, g.dijkstra_sp(0).path_to(4).map(|e| e.weight()).sum());
+
+    assert!(g.dijkstra_sp(0).check());
 }
