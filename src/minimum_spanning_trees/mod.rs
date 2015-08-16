@@ -154,7 +154,6 @@ impl EdgeWeightedGraph {
         }
         dot.push_str("}\n");
         dot
-
     }
 }
 
