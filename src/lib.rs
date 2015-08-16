@@ -1,6 +1,7 @@
 #![feature(move_from, map_in_place, append, iter_arith, associated_type_defaults)]
 
 extern crate rand;
+extern crate adivon;
 
 // part1
 pub mod union_find;

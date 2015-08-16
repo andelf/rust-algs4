@@ -14,7 +14,7 @@ license = "MIT"
 
 [dependencies]
 rand = "*"
-
+adivon = "*"
 
 [dev-dependencies.sdl2]
 sdl2 = "0.6.0"
