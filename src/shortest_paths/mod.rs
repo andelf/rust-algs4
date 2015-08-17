@@ -576,6 +576,132 @@ impl EdgeWeightedDigraph {
     }
 }
 
+/// Bellman-Ford shortest path algorithm. Computes the shortest path tree in
+/// edge-weighted digraph G from vertex s, or finds a negative cost cycle
+/// reachable from s.
+pub struct BellmanFordSP<'a> {
+    graph: &'a EdgeWeightedDigraph,
+    dist_to: Vec<f64>,
+    edge_to: Vec<Option<DirectedEdge>>,
+    on_queue: Vec<bool>,
+    queue: Queue<usize>,
+    cost: usize,
+    cycle: Option<Vec<DirectedEdge>>
+}
+
+impl<'a> BellmanFordSP<'a> {
+    fn new<'b>(graph: &'b EdgeWeightedDigraph, s: usize) -> BellmanFordSP<'b> {
+        let n = graph.v();
+        let dist_to = iter::repeat(f64::INFINITY).take(n).collect();
+        let edge_to = iter::repeat(None).take(n).collect();
+        let on_queue = iter::repeat(false).take(n).collect();
+
+        let mut ret = BellmanFordSP {
+            graph: graph,
+            dist_to: dist_to,
+            edge_to: edge_to,
+            on_queue: on_queue,
+            queue: Queue::new(),
+            cost: 0,
+            cycle: None
+        };
+
+        ret.dist_to[s] = 0.0;
+
+        // Bellman-Ford algorithm
+        ret.queue.enqueue(s);
+        ret.on_queue[s] = true;
+        while !ret.queue.is_empty() && !ret.has_negative_cycle() {
+            let v = ret.queue.dequeue().unwrap();
+            ret.on_queue[v] = false;
+            ret.relax(v);
+        }
+
+        ret
+    }
+
+    fn relax(&mut self, v: usize) {
+        for e in self.graph.adj(v) {
+            let w = e.to();
+            if self.dist_to[w] > self.dist_to[v] + e.weight() {
+                self.dist_to[w] = self.dist_to[v] + e.weight();
+                self.edge_to[w] = Some(e);
+                if !self.on_queue[w] {
+                    self.queue.enqueue(w);
+                    self.on_queue[w] = true;
+                }
+            }
+            // workaround
+            self.cost += 1;
+            if (self.cost - 1) % self.graph.v() == 0 {
+                self.find_negative_cycle();
+                if self.has_negative_cycle() {
+                    return;
+                }
+            }
+        }
+    }
+
+    pub fn has_negative_cycle(&self) -> bool {
+        self.cycle.is_some()
+    }
+
+    pub fn negative_cycle(&self) -> ::std::vec::IntoIter<DirectedEdge> {
+        self.cycle.iter().flat_map(|e| e.clone()).collect::<Vec<DirectedEdge>>().into_iter()
+    }
+
+    fn find_negative_cycle(&mut self) {
+        let n = self.graph.v();
+        let mut spt = EdgeWeightedDigraph::new(n);
+        for v in 0 .. n {
+            if self.edge_to[v].is_some() {
+                spt.add_edge(self.edge_to[v].unwrap());
+            }
+        }
+
+        let finder = spt.cycle();
+        if finder.has_cycle() {
+            self.cycle = Some(finder.edges().collect());
+        } else {
+            self.cycle = None;
+        }
+    }
+
+    pub fn dist_to(&self, v: usize) -> f64 {
+        if self.has_negative_cycle() {
+            panic!("negative cost cycle exists")
+        } else {
+            self.dist_to[v]
+        }
+    }
+
+    pub fn has_path_to(&self, v: usize) -> bool {
+        self.dist_to[v] < f64::INFINITY
+    }
+
+    pub fn path_to(&self, v: usize) -> ::std::vec::IntoIter<DirectedEdge> {
+        if self.has_negative_cycle() {
+            panic!("negative cost cycle exists")
+        } else if !self.has_path_to(v) {
+            vec![].into_iter()
+        } else {
+            let mut path = Stack::new();
+            let mut e = self.edge_to[v];
+            while e.is_some() {
+                path.push(e.unwrap());
+                e = self.edge_to[e.unwrap().from()];
+            }
+            path.into_iter().collect::<Vec<DirectedEdge>>().into_iter()
+        }
+    }
+}
+
+impl EdgeWeightedDigraph {
+    pub fn bellman_ford_sp<'a>(&'a self, s: usize) -> BellmanFordSP<'a> {
+        BellmanFordSP::new(self, s)
+    }
+}
+
 
 #[test]
 fn test_dijkstra_shortest_path() {
@@ -633,4 +759,27 @@ fn test_acyclic_shortest_path() {
 
     assert_eq!(20.0, g.acyclic_sp(0).dist_to(3));
     assert_eq!(26.0, g.acyclic_sp(0).path_to(4).map(|e| e.weight()).sum());
+}
+
+#[test]
+fn test_negative_weight_shortest_path() {
+    let mut g = EdgeWeightedDigraph::new(6);
+    g.add_edge(DirectedEdge::new(0, 1, 7.0));
+    g.add_edge(DirectedEdge::new(1, 2, 10.0));
+    g.add_edge(DirectedEdge::new(0, 2, 9.0));
+    g.add_edge(DirectedEdge::new(0, 5, 14.0));
+    g.add_edge(DirectedEdge::new(1, 3, 15.0));
+    g.add_edge(DirectedEdge::new(2, 5, 2.0));
+    g.add_edge(DirectedEdge::new(2, 3, 11.0));
+    g.add_edge(DirectedEdge::new(4, 5, 9.0));
+    g.add_edge(DirectedEdge::new(3, 4, 6.0));
+
+    assert_eq!(20.0, g.bellman_ford_sp(0).dist_to(3));
+    assert_eq!(26.0, g.bellman_ford_sp(0).path_to(4).map(|e| e.weight()).sum());
+
+    g.add_edge(DirectedEdge::new(0, 3, -5.0));
+
+    assert_eq!(1.0, g.bellman_ford_sp(0).dist_to(4));
+    assert_eq!(2, g.bellman_ford_sp(0).path_to(4).count());
+    assert_eq!(1.0, g.bellman_ford_sp(0).path_to(4).map(|e| e.weight()).sum());
 }
