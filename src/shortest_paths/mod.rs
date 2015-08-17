@@ -589,6 +589,7 @@ fn test_dijkstra_shortest_path() {
     g.add_edge(DirectedEdge::new(2, 3, 11.0));
     g.add_edge(DirectedEdge::new(4, 5, 9.0));
     g.add_edge(DirectedEdge::new(3, 4, 6.0));
+    // this edge makes a non-DAG
     g.add_edge(DirectedEdge::new(2, 2, 1.0));
 
     assert_eq!(20.0, g.dijkstra_sp(0).dist_to(3));
@@ -627,8 +628,9 @@ fn test_acyclic_shortest_path() {
     g.add_edge(DirectedEdge::new(2, 3, 11.0));
     g.add_edge(DirectedEdge::new(4, 5, 9.0));
     g.add_edge(DirectedEdge::new(3, 4, 6.0));
-    g.add_edge(DirectedEdge::new(2, 2, 1.0));
-
 
     assert!(g.depth_first_order().check());
+
+    assert_eq!(20.0, g.acyclic_sp(0).dist_to(3));
+    assert_eq!(26.0, g.acyclic_sp(0).path_to(4).map(|e| e.weight()).sum());
 }
