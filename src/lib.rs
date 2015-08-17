@@ -30,3 +30,5 @@ pub mod directed_graphs;
 
 pub mod minimum_spanning_trees;
 pub mod shortest_paths;
+
+pub mod maximum_flow;
