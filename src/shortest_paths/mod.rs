@@ -211,8 +211,8 @@ impl<'a> DijkstraSP<'a> {
         }
     }
 
-    // FIXME: should this be public?
-    pub fn check(&self) -> bool {
+    #[cfg(test)]
+    fn check(&self) -> bool {
         let s = self.s;
         for e in self.graph.edges() {
             if e.weight() < 0.0 {
@@ -345,6 +345,7 @@ impl<'a> DepthFirstOrder<'a> {
         reverse.into_iter().collect::<Vec<usize>>().into_iter()
     }
 
+    #[cfg(test)]
     fn check(&self) -> bool {
         let mut r = 0;
         for v in self.post() {
@@ -435,14 +436,15 @@ impl<'a> EdgeWeightedDirectedCycle<'a> {
         self.cycle.is_some()
     }
 
-    pub fn cycle(&self) -> ::std::vec::IntoIter<DirectedEdge> {
+    pub fn edges(&self) -> ::std::vec::IntoIter<DirectedEdge> {
         self.cycle.iter().flat_map(|e| e.clone()).collect::<Vec<DirectedEdge>>().into_iter()
     }
 
-    pub fn check(&self) -> bool {
+    #[cfg(test)]
+    fn check(&self) -> bool {
         if self.has_cycle() {
-            let first = self.cycle().next().unwrap();
-            let last = self.cycle().last().unwrap();
+            let first = self.edges().next().unwrap();
+            let last = self.edges().last().unwrap();
 
             if first.from() == last.to() {
                 return true;
@@ -456,12 +458,8 @@ impl<'a> EdgeWeightedDirectedCycle<'a> {
 
 
 impl EdgeWeightedDigraph {
-    pub fn cycle(&self) -> ::std::vec::IntoIter<DirectedEdge> {
-        EdgeWeightedDirectedCycle::new(self).cycle()
-    }
-
-    pub fn has_cycle(&self) -> bool {
-        EdgeWeightedDirectedCycle::new(self).has_cycle()
+    pub fn cycle<'a>(&'a self) -> EdgeWeightedDirectedCycle<'a> {
+        EdgeWeightedDirectedCycle::new(self)
     }
 }
 
@@ -529,8 +527,10 @@ fn test_cyclic_edge_weighted_directed_graph() {
     g.add_edge(DirectedEdge::new(2, 3, 0.5));
     g.add_edge(DirectedEdge::new(3, 1, 0.5));
 
-    assert!(g.has_cycle());
-    assert_eq!(3, g.cycle().count());
+    let cycle = g.cycle();
+    assert!(cycle.has_cycle());
+    assert_eq!(3, cycle.edges().count());
+    assert!(cycle.check());
 }
 
 
