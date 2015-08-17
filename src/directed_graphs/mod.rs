@@ -111,8 +111,8 @@ impl Digraph {
         dfo.reverse_post.into_iter()
     }
 
-    pub fn scc<'a>(&'a self) -> KosarajuSharirStrongConnectedComponents<'a> {
-        KosarajuSharirStrongConnectedComponents::new(self)
+    pub fn kosaraju_sharir_scc<'a>(&'a self) -> KosarajuSharirSCC<'a> {
+        KosarajuSharirSCC::new(self)
     }
 }
 
@@ -216,17 +216,19 @@ impl<'a> DepthFirstOrder<'a> {
     }
 }
 
-pub struct KosarajuSharirStrongConnectedComponents<'a> {
+/// Compute the strongly-connected components of a digraph using the
+/// Kosaraju-Sharir algorithm.
+pub struct KosarajuSharirSCC<'a> {
     graph: &'a Digraph,
     marked: Vec<bool>,
     id: Vec<Option<usize>>,
     count: usize,
 }
 
-impl<'a> KosarajuSharirStrongConnectedComponents<'a> {
-    fn new<'b>(graph: &'b Digraph) -> KosarajuSharirStrongConnectedComponents<'b> {
+impl<'a> KosarajuSharirSCC<'a> {
+    fn new<'b>(graph: &'b Digraph) -> KosarajuSharirSCC<'b> {
         let n = graph.v();
-        let mut cc = KosarajuSharirStrongConnectedComponents {
+        let mut cc = KosarajuSharirSCC {
             graph: graph,
             marked: iter::repeat(false).take(n).collect(),
             id: iter::repeat(None).take(n).collect(),
@@ -306,7 +308,7 @@ fn test_digraph_visit() {
     assert_eq!(format!("{:?}", g.dfs(0).path_to(3).unwrap()), "[0, 5, 4, 2, 3]");
     assert_eq!(format!("{:?}", g.bfs(0).path_to(3).unwrap()), "[0, 5, 4, 3]");
 
-    let scc = g.scc();
+    let scc = g.kosaraju_sharir_scc();
 
     assert!(scc.connected(6, 8));
     assert!(scc.connected(9, 12));

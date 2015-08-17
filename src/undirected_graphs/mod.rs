@@ -101,8 +101,8 @@ impl Graph {
         path
     }
 
-    pub fn cc<'a>(&'a self) -> ConnectedComponents<'a> {
-        ConnectedComponents::new(self)
+    pub fn cc<'a>(&'a self) -> CC<'a> {
+        CC::new(self)
     }
 }
 
@@ -171,17 +171,18 @@ impl<'a> SearchPaths<'a> {
     }
 }
 
-pub struct ConnectedComponents<'a> {
+/// Compute connected components using depth first search.
+pub struct CC<'a> {
     graph: &'a Graph,
     marked: Vec<bool>,
     id: Vec<Option<usize>>,
     count: usize,
 }
 
-impl<'a> ConnectedComponents<'a> {
-    fn new<'b>(graph: &'b Graph) -> ConnectedComponents<'b> {
+impl<'a> CC<'a> {
+    fn new<'b>(graph: &'b Graph) -> CC<'b> {
         let n = graph.v();
-        let mut cc = ConnectedComponents {
+        let mut cc = CC {
             graph: graph,
             marked: iter::repeat(false).take(n).collect(),
             id: iter::repeat(None).take(n).collect(),
