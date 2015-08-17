@@ -260,13 +260,6 @@ impl<'a> DijkstraSP<'a> {
     }
 }
 
-
-impl EdgeWeightedDigraph {
-    pub fn dijkstra_sp<'a>(&'a self, s: usize) -> DijkstraSP<'a> {
-        DijkstraSP::new(self, s)
-    }
-}
-
 /// Compute preorder and postorder for a digraph or edge-weighted digraph
 pub struct DepthFirstOrder<'a> {
     graph: &'a EdgeWeightedDigraph,
@@ -370,12 +363,6 @@ impl<'a> DepthFirstOrder<'a> {
 }
 
 
-impl EdgeWeightedDigraph {
-    pub fn depth_first_order<'a>(&'a self) -> DepthFirstOrder<'a> {
-        DepthFirstOrder::new(self)
-    }
-}
-
 // Finds a directed cycle in an edge-weighted digraph
 pub struct EdgeWeightedDirectedCycle<'a> {
     graph: &'a EdgeWeightedDigraph,
@@ -457,13 +444,6 @@ impl<'a> EdgeWeightedDirectedCycle<'a> {
     }
 }
 
-
-impl EdgeWeightedDigraph {
-    pub fn cycle<'a>(&'a self) -> EdgeWeightedDirectedCycle<'a> {
-        EdgeWeightedDirectedCycle::new(self)
-    }
-}
-
 /// Compute topological ordering of a DAG or edge-weighted DAG
 pub enum Topological {
     NonDAG,
@@ -495,12 +475,6 @@ impl Topological {
             &Topological::NonDAG    => false,
             &Topological::Order(_)  => true
         }
-    }
-}
-
-impl EdgeWeightedDigraph {
-    pub fn topological(&self) -> Topological {
-        Topological::new(self)
     }
 }
 
@@ -570,11 +544,6 @@ impl<'a> AcyclicSP<'a> {
     }
 }
 
-impl EdgeWeightedDigraph {
-    pub fn acyclic_sp<'a>(&'a self, s: usize) -> AcyclicSP<'a> {
-        AcyclicSP::new(self, s)
-    }
-}
 
 /// Bellman-Ford shortest path algorithm. Computes the shortest path tree in
 /// edge-weighted digraph G from vertex s, or finds a negative cost cycle
@@ -697,6 +666,32 @@ impl<'a> BellmanFordSP<'a> {
 }
 
 impl EdgeWeightedDigraph {
+    /// Compute preorder and postorder for a digraph or edge-weighted digraph.
+    pub fn depth_first_order<'a>(&'a self) -> DepthFirstOrder<'a> {
+        DepthFirstOrder::new(self)
+    }
+
+    /// Dijkstra's algorithm. Computes the shortest path tree.
+    pub fn dijkstra_sp<'a>(&'a self, s: usize) -> DijkstraSP<'a> {
+        DijkstraSP::new(self, s)
+    }
+
+    /// Finds a directed cycle in an edge-weighted digraph.
+    pub fn cycle<'a>(&'a self) -> EdgeWeightedDirectedCycle<'a> {
+        EdgeWeightedDirectedCycle::new(self)
+    }
+
+    /// Compute topological ordering of a DAG or edge-weighted DAG.
+    pub fn topological(&self) -> Topological {
+        Topological::new(self)
+    }
+
+    /// Computes shortest paths in an edge-weighted acyclic digraph.
+    pub fn acyclic_sp<'a>(&'a self, s: usize) -> AcyclicSP<'a> {
+        AcyclicSP::new(self, s)
+    }
+
+    /// Bellman-Ford shortest path algorithm.
     pub fn bellman_ford_sp<'a>(&'a self, s: usize) -> BellmanFordSP<'a> {
         BellmanFordSP::new(self, s)
     }
