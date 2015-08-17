@@ -464,13 +464,42 @@ impl EdgeWeightedDigraph {
 }
 
 /// Compute topological ordering of a DAG or edge-weighted DAG
-pub struct Topological {
-    order: Vec<usize>
+pub enum Topological {
+    NonDAG,
+    Order(Vec<usize>)
 }
 
 impl Topological {
-    pub fn new(graph: EdgeWeightedDigraph) -> Topological {
-        unimplemented!()
+    fn new(graph: &EdgeWeightedDigraph) -> Topological {
+        if graph.cycle().has_cycle() {
+            Topological::NonDAG
+        } else {
+            Topological::Order(graph.depth_first_order().reverse_post().collect())
+        }
+    }
+
+    pub fn order(&self) -> ::std::vec::IntoIter<usize> {
+        match self {
+            &Topological::Order(ref order) => {
+                order.clone().into_iter()
+            },
+            &Topological::NonDAG => {
+                vec![].into_iter()
+            }
+        }
+    }
+
+    pub fn has_order(&self) -> bool {
+        match self {
+            &Topological::NonDAG    => false,
+            &Topological::Order(_)  => true
+        }
+    }
+}
+
+impl EdgeWeightedDigraph {
+    pub fn topological(&self) -> Topological {
+        Topological::new(self)
     }
 }
 
@@ -487,12 +516,62 @@ impl<'a> AcyclicSP<'a> {
         let mut dist_to: Vec<f64> = iter::repeat(f64::INFINITY).take(n).collect();
         let edge_to = iter::repeat(None).take(n).collect();
 
-        dist_to[s] = 0.0;
-        AcyclicSP {
+        let mut ret = AcyclicSP {
             graph: graph,
             dist_to: dist_to,
             edge_to: edge_to
+        };
+
+        ret.dist_to[s] = 0.0;
+
+        let topological = ret.graph.topological();
+        if !topological.has_order() {
+            panic!("digraph is not acyclic");
         }
+
+        for v in topological.order() {
+            for e in ret.graph.adj(v) {
+                ret.relax(e);
+            }
+        }
+        ret
+    }
+
+    fn relax(&mut self, e: DirectedEdge) {
+        let v = e.from();
+        let w = e.to();
+        if self.dist_to[w] > self.dist_to[v] + e.weight() {
+            self.dist_to[w] = self.dist_to[v] + e.weight();
+            self.edge_to[w] = Some(e);
+        }
+    }
+
+    pub fn dist_to(&self, v: usize) -> f64 {
+        self.dist_to[v]
+    }
+
+    pub fn has_path_to(&self, v: usize) -> bool {
+        self.dist_to[v] < f64::INFINITY
+    }
+
+    pub fn path_to(&self, v: usize) -> ::std::vec::IntoIter<DirectedEdge> {
+        if !self.has_path_to(v) {
+            vec![].into_iter()
+        } else {
+            let mut path = Stack::new();
+            let mut e = self.edge_to[v];
+            while e.is_some() {
+                path.push(e.unwrap());
+                e = self.edge_to[e.unwrap().from()];
+            }
+            path.into_iter().collect::<Vec<DirectedEdge>>().into_iter()
+        }
+    }
+}
+
+impl EdgeWeightedDigraph {
+    pub fn acyclic_sp<'a>(&'a self, s: usize) -> AcyclicSP<'a> {
+        AcyclicSP::new(self, s)
     }
 }
 
