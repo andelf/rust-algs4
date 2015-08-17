@@ -1,4 +1,4 @@
-#![feature(move_from, map_in_place, append, iter_arith, associated_type_defaults)]
+#![feature(iter_arith, associated_type_defaults)]
 
 extern crate rand;
 extern crate adivon;

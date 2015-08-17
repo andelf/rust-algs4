@@ -133,6 +133,7 @@ impl EdgeWeightedDigraph {
 
 
 // Single-source shortest paths API
+#[allow(dead_code)]
 pub struct DijkstraSP<'a> {
     graph: &'a EdgeWeightedDigraph,
     dist_to: Vec<f64>,
@@ -513,7 +514,7 @@ pub struct AcyclicSP<'a> {
 impl<'a> AcyclicSP<'a> {
     fn new<'b>(graph: &'b EdgeWeightedDigraph, s: usize) -> AcyclicSP<'b> {
         let n = graph.v();
-        let mut dist_to: Vec<f64> = iter::repeat(f64::INFINITY).take(n).collect();
+        let dist_to: Vec<f64> = iter::repeat(f64::INFINITY).take(n).collect();
         let edge_to = iter::repeat(None).take(n).collect();
 
         let mut ret = AcyclicSP {

@@ -66,13 +66,10 @@ impl<Key: PartialOrd>  MaxPQ<Key> for BinaryHeapMaxPQ<Key> {
 
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
-        let len = a.len();
         let mut pq = Self::new();
-        pq.pq.move_from(a.map_in_place(Some), 0, len);
-        for k in 1 .. len / 2 + 1 {
-            pq.sink(k);
+        for i in a {
+            pq.insert(i);
         }
-        pq.n = len;
         pq
     }
 
@@ -184,13 +181,10 @@ impl<Key: PartialOrd>  MinPQ<Key> for BinaryHeapMinPQ<Key> {
 
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
-        let len = a.len();
         let mut pq = Self::new();
-        pq.pq.move_from(a.map_in_place(Some), 0, len);
-        for k in 1 .. len / 2 + 1 {
-            pq.sink(k);
+        for i in a {
+            pq.insert(i);
         }
-        pq.n = len;
         pq
     }
 

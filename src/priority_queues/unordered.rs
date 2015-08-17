@@ -28,9 +28,13 @@ impl<Key: PartialOrd>  MaxPQ<Key> for UnorderedMaxPQ<Key> {
     }
     /// create a priority queue with given keys
     fn from_vec(a: Vec<Key>) -> Self {
-        let mut pq = Self::new();
-        pq.pq.append(&mut a.map_in_place(Some));
-        pq
+        let n = a.len();
+        let mut pq: Vec<Option<Key>> = a.into_iter().map(|i| Some(i)).collect();
+        pq.push(None);          // 1 extra space
+        UnorderedMaxPQ {
+            pq: pq,
+            n: n
+        }
     }
     /// insert a key into the priority queue
     fn insert(&mut self, x: Key) {
