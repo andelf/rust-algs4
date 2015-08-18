@@ -203,9 +203,9 @@ impl<'g> FordFulkerson<'g> {
     }
 
     fn ford_fulkerson(&mut self, s: usize, t: usize) {
-        // if !self.is_feasible(s, t) {
-        //     panic!("initial flow is infeasible");
-        // }
+        if !self.is_feasible(s, t) {
+            panic!("initial flow is infeasible");
+        }
 
         self.value = self.excess(t);
         while self.has_augmenting_path(s, t) {
@@ -226,9 +226,7 @@ impl<'g> FordFulkerson<'g> {
             }
 
             self.value += bottle;
-            println!("233 value=> {}", self.value);
         }
-
     }
 
     pub fn value(&self) -> f64 {
@@ -243,7 +241,6 @@ impl<'g> FordFulkerson<'g> {
 
     // is there an augmenting path?
     fn has_augmenting_path(&mut self, s: usize, t: usize) -> bool {
-        println!("calling s={} t={}", s, t);
         self.edge_to = iter::repeat(None).take(self.graph.v()).collect();
         self.marked = iter::repeat(false).take(self.graph.v()).collect();
 
@@ -319,7 +316,7 @@ impl<'g> FordFulkerson<'g> {
 }
 
 impl FlowNetwork {
-    pub fn ford_fulkerson<'a>(&'a self, s: usize, t: usize) -> FordFulkerson<'a> {
+    pub fn ford_fulkerson<'a>(&'a mut self, s: usize, t: usize) -> FordFulkerson<'a> {
         assert!(s != t, "source equal to sink");
         FordFulkerson::new(self, s, t)
     }
@@ -339,8 +336,10 @@ fn test_flow_network() {
     g.add_edge(FlowEdge::new(3, 5, 2.0));
     g.add_edge(FlowEdge::new(4, 3, 3.0));
 
-    println!("=> \n{}", g.to_dot());
-
-    let maxflow = g.ford_fulkerson(0, 5);
-
+    // println!("=> \n{}", g.to_dot());
+    {
+        let maxflow = g.ford_fulkerson(0, 5);
+        assert_eq!(2.0, maxflow.value());
+    }
+    // println!("maxflow => \n{}", g.to_dot());
 }
