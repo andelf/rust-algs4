@@ -117,9 +117,10 @@ impl EdgeWeightedGraph {
         self.e += 1
     }
 
-    pub fn adj(&self, v: usize) -> ::std::vec::IntoIter<Edge> {
+    // this implements IntoIterator
+    pub fn adj(&self, v: usize) -> Vec<Edge> {
         self.validate_vertex(v);
-        self.adj[v].iter().map(|e| e.clone()).collect::<Vec<Edge>>().into_iter()
+        self.adj[v].iter().map(|e| e.clone()).collect::<Vec<Edge>>()
     }
 
     pub fn degree(&self, v: usize) -> usize {
@@ -127,7 +128,7 @@ impl EdgeWeightedGraph {
         self.adj[v].len()
     }
 
-    pub fn edges(&self) -> ::std::vec::IntoIter<Edge> {
+    pub fn edges(&self) -> Vec<Edge> {
         self.adj
             .iter()
             .flat_map(|adj| {
@@ -135,7 +136,6 @@ impl EdgeWeightedGraph {
             })
             .filter(|ref e| e.either() <= e.other(e.either()) )
             .collect::<Vec<Edge>>()
-            .into_iter()
     }
 
     pub fn to_dot(&self) -> String {
@@ -172,7 +172,7 @@ fn test_edge_weighted_graph() {
     g.add_edge(Edge::new(3, 4, 6.0));
     g.add_edge(Edge::new(2, 2, 1.0));
 
-    assert_eq!(10, g.edges().count());
+    assert_eq!(10, g.edges().len());
     assert!(!g.to_dot().is_empty());
     // println!("got => \n{}", g.to_dot());
 }
@@ -214,8 +214,8 @@ impl<'a> KruskalMST<'a> {
         }
     }
 
-    pub fn edges(&self) -> ::std::vec::IntoIter<Edge> {
-        self.mst.clone().into_iter().collect::<Vec<Edge>>().into_iter()
+    pub fn edges(&self) -> Vec<Edge> {
+        self.mst.clone().into_iter().collect::<Vec<Edge>>()
     }
 }
 
@@ -290,8 +290,8 @@ impl<'a> LazyPrimMST<'a> {
         }
     }
 
-    pub fn edges(&self) -> ::std::vec::IntoIter<Edge> {
-        self.mst.clone().into_iter().collect::<Vec<Edge>>().into_iter()
+    pub fn edges(&self) -> Vec<Edge> {
+        self.mst.clone().into_iter().collect::<Vec<Edge>>()
     }
 }
 
@@ -364,12 +364,12 @@ impl<'a> PrimMST<'a> {
         }
     }
 
-    pub fn edges(&self) -> ::std::vec::IntoIter<Edge> {
+    pub fn edges(&self) -> Vec<Edge> {
         let mut mst = ResizingArrayQueue::new();
         for e in self.edge_to.iter() {
             e.map(|e| mst.enqueue(e.clone()));
         }
-        mst.into_iter().collect::<Vec<Edge>>().into_iter()
+        mst.into_iter().collect::<Vec<Edge>>()
     }
 }
 
@@ -395,10 +395,10 @@ fn test_edge_weighted_graph_mst() {
     g.add_edge(Edge::new(2, 2, 1.0));
 
     assert_eq!(33.0, g.kruskal_mst().weight);
-    assert_eq!(33.0, g.kruskal_mst().edges().map(|e| e.weight).sum());
+    assert_eq!(33.0, g.kruskal_mst().edges().iter().map(|e| e.weight).sum());
 
     assert_eq!(33.0, g.lazy_prim_mst().weight);
-    assert_eq!(33.0, g.lazy_prim_mst().edges().map(|e| e.weight).sum());
+    assert_eq!(33.0, g.lazy_prim_mst().edges().iter().map(|e| e.weight).sum());
 
-    assert_eq!(33.0, g.prim_mst().edges().map(|e| e.weight).sum());
+    assert_eq!(33.0, g.prim_mst().edges().iter().map(|e| e.weight).sum());
 }

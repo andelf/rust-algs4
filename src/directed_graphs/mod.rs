@@ -74,8 +74,8 @@ impl Digraph {
         dot
     }
 
-    pub fn adj(&self, v: usize) -> ::std::vec::IntoIter<usize> {
-        self.adj[v].iter().map(|v| v.clone()).collect::<Vec<usize>>().into_iter()
+    pub fn adj(&self, v: usize) -> Vec<usize> {
+        self.adj[v].iter().map(|v| v.clone()).collect::<Vec<usize>>()
     }
 
     pub fn reverse(&self) -> Digraph {
