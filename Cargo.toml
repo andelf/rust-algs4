@@ -17,7 +17,7 @@ rand = "*"
 adivon = "*"
 
 [dev-dependencies.sdl2]
-sdl2 = "0.6.0"
+sdl2 = "0.6.2"
 
 [dev-dependencies.sdl2_gfx]
-sdl2_gfx = "0.6.0"
+sdl2_gfx = "0.6.2"

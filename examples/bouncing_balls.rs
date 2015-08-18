@@ -6,17 +6,19 @@ extern crate rand;
 use sdl2::pixels::Color;
 use sdl2::keyboard::Keycode;
 use sdl2::event::Event;
-use sdl2::timer::get_ticks;
 use sdl2_gfx::primitives::DrawRenderer;
 
 use rand::{thread_rng, Rng};
 use algs4::priority_queues::event_driven_simulation::{Particle, CollisionSystem};
 
 fn run() -> Result<(), String> {
-    let mut ctx = sdl2::init().video().unwrap();
+    let sdl_context = sdl2::init().unwrap();
+    let video = sdl_context.video().unwrap();
+    let mut timer = sdl_context.timer().unwrap();
+
     let mut rng = thread_rng();
 
-    let win = ctx.window("bouncing balls", 800, 800)
+    let win = video.window("bouncing balls", 800, 800)
         .position_centered()
         .opengl()
         .build()
@@ -47,7 +49,7 @@ fn run() -> Result<(), String> {
     let mut last_update_ticks = 0;
 
     while running {
-        for event in ctx.event_pump().wait_timeout_iter(10) {
+        for event in sdl_context.event_pump().unwrap().wait_timeout_iter(10) {
             match event {
                 Event::Quit {..} => {
                     running = false
@@ -65,13 +67,13 @@ fn run() -> Result<(), String> {
             };
         }
         ren.set_draw_color(Color::RGBA(255, 255, 255, 255));
-        let vp = ren.get_viewport();
+        let vp = ren.viewport();
         ren.fill_rect(vp);
         ren.clear();
         let width = vp.width();
         let height = vp.height();
         for (mut p, color) in old_ps.iter_mut().zip(colors.iter()) {
-            p.do_move((get_ticks() - last_update_ticks) as f64 / 1000.0);
+            p.do_move((timer.ticks() - last_update_ticks) as f64 / 1000.0);
             ren.filled_circle((p.rx * width as f64) as i16,
                               (p.ry * height as f64) as i16,
                               (p.radius * width as f64) as i16,
@@ -80,10 +82,10 @@ fn run() -> Result<(), String> {
                           (p.ry * height as f64) as i16,
                           (p.radius * width as f64) as i16,
                           *color).unwrap();
-            last_update_ticks = get_ticks();
+            last_update_ticks = timer.ticks();
         }
 
-        if get_ticks() >= last_world_time {
+        if timer.ticks() >= last_world_time {
             old_ps = collision_sys.particles.clone();
             let _ = collision_sys.tick();
             last_world_time = (collision_sys.t * 1000.0) as u32;
