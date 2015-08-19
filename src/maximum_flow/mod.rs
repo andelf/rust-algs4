@@ -191,11 +191,10 @@ impl<'g> FordFulkerson<'g> {
         graph.validate_vertex(s);
         graph.validate_vertex(t);
 
-        let n = graph.v();
         let mut ret = FordFulkerson {
             graph: graph,
-            marked: iter::repeat(false).take(n).collect(),
-            edge_to: iter::repeat(None).take(n).collect(),
+            marked: Vec::new(), // will init in has_augmenting_path()
+            edge_to: Vec::new(), // as above
             value: 0.0
         };
         ret.ford_fulkerson(s, t);
