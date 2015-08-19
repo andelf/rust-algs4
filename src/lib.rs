@@ -32,3 +32,4 @@ pub mod minimum_spanning_trees;
 pub mod shortest_paths;
 
 pub mod maximum_flow;
+pub mod radix_sorts;
