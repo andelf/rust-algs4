@@ -5,9 +5,10 @@ rust-algs4
 
 Algorithms, 4ed. MOOC in Coursera.
 
-algs4partI-008 Code & Assignments in Rust.
+algs4 Code & Assignments in Rust.
 
-[Algorithms, Part I](https://class.coursera.org/algs4partI-008)
+- [Algorithms, Part I](https://www.coursera.org/course/algs4partI)
+- [Algorithms, Part II](https://www.coursera.org/course/algs4partII)
 
 ## How to
 
