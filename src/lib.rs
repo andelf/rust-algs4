@@ -1,4 +1,4 @@
-#![feature(iter_arith, associated_type_defaults)]
+#![feature(iter_arith, associated_type_defaults, str_char)]
 
 extern crate rand;
 extern crate adivon;

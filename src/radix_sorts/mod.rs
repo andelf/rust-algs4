@@ -1,5 +1,7 @@
 use std::iter;
 
+const CUTOFF: usize = 15;
+
 /// LSD radix sort
 pub fn lsd_string_sort(a: &mut [&str]) {
     let w = a[0].as_bytes().len();
@@ -35,8 +37,6 @@ pub fn lsd_string_sort(a: &mut [&str]) {
     }
 }
 
-
-const CUTOFF: usize = 15;
 
 pub trait RadixSort: Clone + Default + PartialOrd + ::std::fmt::Debug {
     fn r() -> usize;
@@ -245,4 +245,69 @@ fn test_msd_ints_sort() {
         RadixSort::msd_sort(&mut array);
         assert!(is_sorted(&array));
     }
+}
+
+/// 3-way string quicksort
+pub fn quick_sort_3way_string(a: &mut [String]) {
+    fn char_at(s: &str, d: usize) -> isize {
+        assert!(d <= s.len());
+        if d == s.len() {
+            -1
+        } else {
+            s.char_at(d) as isize
+        }
+    }
+
+    fn insertion(a: &mut [String], lo: usize, hi: usize, d: usize) {
+        for i in lo .. hi+1 {
+            for j in (0 .. i+1).rev() {
+                if !(j > lo && a[j][d..] < a[j-1][d..]) {
+                    break;
+                }
+                a.swap(j, j-1);
+            }
+        }
+    }
+
+    fn sort(a: &mut [String], lo: usize, hi: usize, d: usize) {
+        if hi <= lo + CUTOFF {
+            insertion(a, lo, hi, d);
+            return;
+        }
+
+        let mut lt = lo;
+        let mut gt = hi;
+        let v = char_at(&a[lo], d);
+        let mut i = lo + 1;
+        while i <= gt {
+            let t = char_at(&a[i], d);
+            if t < v {
+                a.swap(lt, i);
+                lt += 1;
+                i += 1;
+            } else if t > v {
+                a.swap(i, gt);
+                gt -= 1;
+            } else {
+                i += 1;
+            }
+        }
+
+        sort(a, lo, lt-1, d);
+        if v >= 0 {
+            sort(a, lt, gt, d+1);
+        }
+        sort(a, gt+1, hi, d);
+    }
+    let n = a.len();
+    sort(a, 0, n-1, 0);
+}
+
+#[test]
+fn test_quick_sort_3way_string() {
+    let mut shell = "she sells seashells by the sea shore the shells she sells are surely seashells".split(' ').map(|s| s.into()).collect::<Vec<String>>();
+    assert!(!is_sorted(&shell));
+    quick_sort_3way_string(&mut shell);
+    assert!(is_sorted(&shell));
+
 }
