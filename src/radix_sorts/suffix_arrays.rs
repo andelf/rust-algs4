@@ -121,7 +121,7 @@ impl<'a> SuffixArray<'a> {
         length
     }
 
-    pub fn select(&self, i: usize) -> &'a str {
+    pub fn select(&self, i: usize) -> &str {
         if i >= self.n {
             panic!("index out of bounds");
         }
@@ -159,6 +159,17 @@ impl<'a> SuffixArray<'a> {
         if j < qlen { return 1; }
         return 0;
     }
+
+    pub fn longest_repeated_substring(&self) -> &str {
+        let mut lrs = "";
+        for i in 1 .. self.n {
+            let length = self.lcp(i);
+            if length > lrs.len() {
+                lrs = &self.s[self.index(i) .. self.index(i) + length]
+            }
+        }
+        lrs
+    }
 }
 
 
@@ -179,4 +190,6 @@ fn test_suffix_array() {
     assert_eq!(suffix.select(4), "na");
     // "anz" should be in 3rd place
     assert_eq!(suffix.rank("anz"), 3);
+
+    assert_eq!(suffix.longest_repeated_substring(), "ana");
 }
