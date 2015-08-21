@@ -1,5 +1,9 @@
 use std::iter;
 
+pub mod suffix_arrays;
+
+pub use self::suffix_arrays::SuffixArray;
+
 const CUTOFF: usize = 15;
 
 /// LSD radix sort
