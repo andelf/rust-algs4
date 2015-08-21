@@ -74,8 +74,8 @@ impl<V> Node<V> {
         return (None, deleted);
     }
 
-    // use '.' as pattern
-    fn collect_by_pattern(x: Option<&Node<V>>, prefix: &mut String, pattern: &str, results: &mut Queue<String>) {
+    // use '?' as pattern
+    fn collect_by_pattern(x: Option<&Node<V>>, mut prefix: String, pattern: &str, results: &mut Queue<String>) {
         if x.is_none() {
             return;
         }
@@ -87,17 +87,17 @@ impl<V> Node<V> {
             return;
         }
         let c = pattern.as_bytes()[d];
-        if c == '.' as u8 {
+        if c == '?' as u8 {
             for ch in 0 .. R {
                 prefix.push(char::from_u32(ch as u32).unwrap());
-                Node::collect_by_pattern(x.unwrap().next[c as usize].as_ref(),
-                                         prefix, pattern, results);
+                Node::collect_by_pattern(x.unwrap().next[ch].as_ref(),
+                                         prefix.clone(), pattern, results);
                 prefix.pop();
             }
         } else {
             prefix.push(c as char);
             Node::collect_by_pattern(x.unwrap().next[c as usize].as_ref(),
-                                     prefix, pattern, results);
+                                     prefix.clone(), pattern, results);
             prefix.pop();
         }
     }
@@ -170,8 +170,12 @@ impl<V> TrieST<V> {
         self.keys_with_prefix("")
     }
 
+    pub fn keys_that_match(&self, pattern: &str) -> Vec<String> {
+        let mut results = Queue::new();
+        Node::collect_by_pattern(self.root.as_ref(), "".into(), pattern, &mut results);
+        results.into_iter().collect()
+    }
     // TODO:
-    // keys_that_match()
     // longest_prefix_of()
 }
 
@@ -195,6 +199,11 @@ fn test_tries() {
     assert_eq!(t.size(), 4);
     assert!(!t.contains("tel"));
     assert_eq!(vec!["addr long", "addr1", "addr2", "name"], t.keys());
+
+    t.put("addrs", "Beijing, Tianjin, Xi'an");
+    t.put("addr22", "Sanya");
+    assert_eq!(t.keys_that_match("addr?").len(), 3);
+    assert_eq!(t.keys_that_match("addr??"), vec!["addr22"]);
 }
 
 // TST
