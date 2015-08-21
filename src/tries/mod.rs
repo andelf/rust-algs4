@@ -27,7 +27,7 @@ impl<V> Node<V> {
             return x
         }
         let c = key.as_bytes()[d] as usize;
-        x.as_mut().map(|n| n.next[c] = Node::put(n.next[c].take(), key, val, d+1).take());
+        x.as_mut().map(|n| n.next[c] = Node::put(n.next[c].take(), key, val, d+1));
         x
     }
 
@@ -40,6 +40,35 @@ impl<V> Node<V> {
             let c = key.as_bytes()[d] as usize;
             x.as_ref().map(|n| Node::get(n.next[c].as_ref(), key, d+1)).unwrap()
         }
+    }
+
+    fn delete(mut x: Option<Node<V>>, key: &str, d: usize) -> (Option<Node<V>>, Option<V>) {
+        let mut deleted = None;
+        if x.is_none() {
+            return (None, deleted);
+        }
+        if d == key.bytes().len() {
+            if x.as_ref().map_or(false, |n| n.val.is_some()) {
+                deleted = x.as_mut().map(|n| n.val.take()).unwrap();
+            }
+        } else {
+            let c = key.as_bytes()[d] as usize;
+            x.as_mut().map(|n| {
+                // FIXME: https://github.com/rust-lang/rfcs/issues/372
+                let (nx, nd) = Node::delete(n.next[c].take(), key, d+1);
+                n.next[c] = nx;
+                deleted = nd;
+            });
+        }
+        if x.as_ref().map_or(false, |n| n.val.is_some()) {
+            return (x, deleted);
+        }
+        for c in 0 .. R {
+            if x.as_ref().map_or(false, |n| n.next[c].is_some()) {
+                return (x, deleted);
+            }
+        }
+        return (None, deleted);
     }
 }
 
@@ -65,8 +94,24 @@ impl<V> TrieST<V> {
         Node::get(self.root.as_ref(), key, 0).map(|n| n.val.as_ref()).unwrap_or(None)
     }
 
+    pub fn delete(&mut self, key: &str) {
+        let (root, deleted) = Node::delete(self.root.take(), key, 0);
+        self.root = root;
+        if deleted.is_some() {
+            self.n -= 1;
+        }
+    }
+
     pub fn size(&self) -> usize {
         self.n
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.n == 0
+    }
+
+    pub fn contains(&self, key: &str) -> bool {
+        Node::get(self.root.as_ref(), key, 0).map(|n| n.val.is_some()).unwrap_or(false)
     }
 }
 
@@ -85,4 +130,8 @@ fn test_tries() {
     assert_eq!(t.size(), 5);
     assert_eq!(t.get("addr2"), Some(&"Beijing"));
     assert_eq!(t.get("non-exists-key"), None);
+    assert!(t.contains("tel"));
+    t.delete("tel");
+    assert_eq!(t.size(), 4);
+    assert!(!t.contains("tel"));
 }
