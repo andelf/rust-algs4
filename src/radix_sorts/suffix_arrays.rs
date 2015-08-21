@@ -1,17 +1,20 @@
 use std::iter;
-use std::iter::FromIterator;
 
 const CUTOFF: usize = 5;
 
+// TODO: add a generic SuffixArray
 
-pub struct SuffixArray {
+/// A data type that computes the suffix array of a string using 3-way
+/// radix quicksort.
+pub struct SuffixArray<'a> {
     text: Vec<char>,
     index: Vec<usize>,
-    n: usize
+    s: &'a str,
+    n: usize,
 }
 
-impl SuffixArray {
-    pub fn new(s: &str) -> SuffixArray {
+impl<'a> SuffixArray<'a> {
+    pub fn new<'b>(s: &'a str) -> SuffixArray<'a> {
         let n = s.len();
         let text = s.chars().chain(iter::once(0 as char)).collect::<Vec<char>>();
         let index = (0..n).collect();
@@ -19,7 +22,8 @@ impl SuffixArray {
         let mut sa = SuffixArray {
             text: text,
             index: index,
-            n: n
+            n: n,
+            s: s
         };
         sa.sort(0, n-1, 0);
         sa
@@ -117,11 +121,11 @@ impl SuffixArray {
         length
     }
 
-    pub fn select(&self, i: usize) -> String {
+    pub fn select(&self, i: usize) -> &'a str {
         if i >= self.n {
             panic!("index out of bounds");
         }
-        FromIterator::from_iter(self.text[self.index[i] .. self.n].iter().map(|c| *c))
+        &self.s[self.index[i]..]
     }
 
     pub fn rank(&self, query: &str) -> usize {
