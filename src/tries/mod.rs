@@ -1,3 +1,6 @@
+use std::char;
+use adivon::queue::Queue;
+
 const R: usize = 256;
 
 /// 245-Way trie
@@ -70,6 +73,48 @@ impl<V> Node<V> {
         }
         return (None, deleted);
     }
+
+    // use '.' as pattern
+    fn collect_by_pattern(x: Option<&Node<V>>, prefix: &mut String, pattern: &str, results: &mut Queue<String>) {
+        if x.is_none() {
+            return;
+        }
+        let d = prefix.bytes().len();
+        if d == pattern.bytes().len() {
+            if x.map_or(false, |n| n.val.is_some()) {
+                results.enqueue(prefix.clone());
+            }
+            return;
+        }
+        let c = pattern.as_bytes()[d];
+        if c == '.' as u8 {
+            for ch in 0 .. R {
+                prefix.push(char::from_u32(ch as u32).unwrap());
+                Node::collect_by_pattern(x.unwrap().next[c as usize].as_ref(),
+                                         prefix, pattern, results);
+                prefix.pop();
+            }
+        } else {
+            prefix.push(c as char);
+            Node::collect_by_pattern(x.unwrap().next[c as usize].as_ref(),
+                                     prefix, pattern, results);
+            prefix.pop();
+        }
+    }
+
+    fn collect(x: Option<&Node<V>>, mut prefix: String, results: &mut Queue<String>) {
+        if x.is_none() {
+            return;
+        }
+        if x.unwrap().val.is_some() {
+            results.enqueue(prefix.clone());
+        }
+        for c in 0 .. R {
+            prefix.push(char::from_u32(c as u32).unwrap());
+            Node::collect(x.unwrap().next[c].as_ref(), prefix.clone(), results);
+            prefix.pop();
+        }
+    }
 }
 
 pub struct TrieST<V> {
@@ -113,6 +158,21 @@ impl<V> TrieST<V> {
     pub fn contains(&self, key: &str) -> bool {
         Node::get(self.root.as_ref(), key, 0).map(|n| n.val.is_some()).unwrap_or(false)
     }
+
+    pub fn keys_with_prefix(&self, prefix: &str) -> Vec<String> {
+        let mut results = Queue::new();
+        let x = Node::get(self.root.as_ref(), prefix, 0);
+        Node::collect(x, prefix.into(), &mut results);
+        results.into_iter().collect()
+    }
+
+    pub fn keys(&self) -> Vec<String> {
+        self.keys_with_prefix("")
+    }
+
+    // TODO:
+    // keys_that_match()
+    // longest_prefix_of()
 }
 
 
@@ -134,4 +194,8 @@ fn test_tries() {
     t.delete("tel");
     assert_eq!(t.size(), 4);
     assert!(!t.contains("tel"));
+    assert_eq!(vec!["addr long", "addr1", "addr2", "name"], t.keys());
 }
+
+// TST
+// pub struct TernarySearchTrie { }
