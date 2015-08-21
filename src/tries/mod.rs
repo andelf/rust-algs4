@@ -1,4 +1,5 @@
 use std::char;
+use std::usize;
 use adivon::queue::Queue;
 
 const R: usize = 256;
@@ -115,6 +116,20 @@ impl<V> Node<V> {
             prefix.pop();
         }
     }
+
+    fn longest_prefix_of(x: Option<&Node<V>>, query: &str, d: usize, mut length: usize) -> usize {
+        if x.is_none() {
+            return length;
+        }
+        if x.unwrap().val.is_some() {
+            length = d;
+        }
+        if d == query.len() {
+            return length;
+        }
+        let c = query.as_bytes()[d];
+        Node::longest_prefix_of(x.as_ref().unwrap().next[c as usize].as_ref(), query, d+1, length)
+    }
 }
 
 pub struct TrieST<V> {
@@ -175,8 +190,16 @@ impl<V> TrieST<V> {
         Node::collect_by_pattern(self.root.as_ref(), "".into(), pattern, &mut results);
         results.into_iter().collect()
     }
-    // TODO:
-    // longest_prefix_of()
+
+    pub fn longest_prefix_of<'a>(&self, query: &'a str) -> Option<&'a str> {
+        let length = Node::longest_prefix_of(self.root.as_ref(), query, 0, usize::MAX);
+        if length == usize::MAX {
+            None
+        } else {
+            Some(&query[..length])
+        }
+
+    }
 }
 
 
@@ -190,7 +213,6 @@ fn test_tries() {
     t.put("addr1", "Shaanxi");
     t.put("addr long", "Beijing Haidian");
     t.put("addr2", "Beijing");
-
     assert_eq!(t.size(), 5);
     assert_eq!(t.get("addr2"), Some(&"Beijing"));
     assert_eq!(t.get("non-exists-key"), None);
@@ -199,11 +221,11 @@ fn test_tries() {
     assert_eq!(t.size(), 4);
     assert!(!t.contains("tel"));
     assert_eq!(vec!["addr long", "addr1", "addr2", "name"], t.keys());
-
     t.put("addrs", "Beijing, Tianjin, Xi'an");
     t.put("addr22", "Sanya");
     assert_eq!(t.keys_that_match("addr?").len(), 3);
     assert_eq!(t.keys_that_match("addr??"), vec!["addr22"]);
+    assert_eq!(t.longest_prefix_of("addr22222"), Some("addr22"));
 }
 
 // TST
