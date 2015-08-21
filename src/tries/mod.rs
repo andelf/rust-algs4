@@ -2,6 +2,8 @@ use std::char;
 use std::usize;
 use adivon::queue::Queue;
 
+pub mod tst;
+
 const R: usize = 256;
 
 /// 245-Way trie
@@ -132,6 +134,9 @@ impl<V> Node<V> {
     }
 }
 
+// FIXME: u8 & char conflicts, so this only support extended-ASCII keys
+
+// A string symbol table for extended ASCII strings, implemented using a 256-way trie.
 pub struct TrieST<V> {
     root: Option<Node<V>>,
     n: usize
@@ -227,6 +232,3 @@ fn test_tries() {
     assert_eq!(t.keys_that_match("addr??"), vec!["addr22"]);
     assert_eq!(t.longest_prefix_of("addr22222"), Some("addr22"));
 }
-
-// TST
-// pub struct TernarySearchTrie { }
