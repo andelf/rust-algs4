@@ -33,3 +33,5 @@ pub mod shortest_paths;
 
 pub mod maximum_flow;
 pub mod radix_sorts;
+
+pub mod tries;
