@@ -79,6 +79,31 @@ impl<V> Node<V> {
         prefix.pop();
         Node::collect(x.unwrap().right.as_ref(), prefix, queue);
     }
+
+    fn longest_prefix_of<'a>(mut x: Option<&Box<Node<V>>>, query: &'a str) -> Option<&'a str> {
+        let mut length = 0;
+        let mut i = 0;
+        while x.is_some() && i < query.len() {
+            let c = query.char_at(i);
+            let xc = x.unwrap().c;
+            if c < xc {
+                x = x.unwrap().left.as_ref();
+            } else if c > xc {
+                x = x.unwrap().right.as_ref();
+            } else {
+                i += 1;
+                if x.unwrap().val.is_some() {
+                    length = i;
+                }
+                x = x.unwrap().mid.as_ref();
+            }
+        }
+        if length == 0 {
+            None
+        } else {
+            Some(&query[..length])
+        }
+    }
 }
 
 /// Symbol table with string keys, implemented using a ternary search trie (TST).
@@ -127,6 +152,10 @@ impl<V> TernarySearchTrie<V>  {
         self.get(key).is_some()
     }
 
+    pub fn longest_prefix_of<'a>(&self, query: &'a str) -> Option<&'a str> {
+        Node::longest_prefix_of(self.root.as_ref(), query)
+    }
+
     pub fn keys_with_prefix(&self, prefix: &str) -> Vec<String> {
         let mut queue = Queue::new();
         let x = Node::get(self.root.as_ref(), prefix, 0);
@@ -170,4 +199,8 @@ fn test_tst() {
     assert!(t.keys().contains(&"name".into()));
     assert!(t.keys().contains(&"language".into()));
     assert!(t.keys_with_prefix("lang").contains(&"language".into()));
+
+    t.put("ban", "2333");
+    t.put("banana", "2333");
+    assert_eq!(t.longest_prefix_of("bananananana"), Some("banana"));
 }
