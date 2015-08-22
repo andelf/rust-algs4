@@ -18,29 +18,44 @@ impl<V> Node<V> {
     }
 
     fn put(mut x: Option<Box<Node<V>>>, key: &str, val: V, d: usize) -> (Option<Box<Node<V>>>, Option<V>) {
-        let c = key.char_at(d);
         let replaced;
-        if x.is_none() {
-            x = Some(Box::new(Node::new(c)));
-        }
+        let c = key.char_at(d);
+        x = x.or_else(|| Some(Box::new(Node::new(c))));
         let xc = x.as_ref().unwrap().c;
         if c < xc {
-            let (left, rplcd) = Node::put(x.as_mut().unwrap().left.take(), key, val, d);
+            let (left, repl) = Node::put(x.as_mut().unwrap().left.take(), key, val, d);
             x.as_mut().map(|n| n.left = left);
-            replaced = rplcd;
+            replaced = repl;
         } else if c > xc {
-            let (right, rplcd) = Node::put(x.as_mut().unwrap().right.take(), key, val, d);
+            let (right, repl) = Node::put(x.as_mut().unwrap().right.take(), key, val, d);
             x.as_mut().map(|n| n.right = right);
-            replaced = rplcd;
-        } else if d < key.len() - 1 {
-            let (mid, rplcd) = Node::put(x.as_mut().unwrap().mid.take(), key, val, d+1);
+            replaced = repl;
+        } else if d < key.len()-1 {
+            let (mid, repl) = Node::put(x.as_mut().unwrap().mid.take(), key, val, d+1);
             x.as_mut().map(|n| n.mid = mid);
-            replaced = rplcd;
+            replaced = repl;
         } else {
             replaced = x.as_mut().unwrap().val.take();
             x.as_mut().map(|n| n.val = Some(val));
         }
         (x, replaced)
+    }
+
+    fn get<'a>(x: Option<&'a Box<Node<V>>>, key: &str, d: usize) -> Option<&'a Box<Node<V>>> {
+        if x.is_none() {
+            return None;
+        }
+        let c = key.char_at(d);
+        let xc = x.unwrap().c;
+        if c < xc {
+            Node::get(x.unwrap().left.as_ref(), key, d)
+        } else if c > xc {
+            Node::get(x.unwrap().right.as_ref(), key, d)
+        } else if d < key.len()-1 {
+            Node::get(x.unwrap().mid.as_ref(), key, d+1)
+        } else {
+            x
+        }
     }
 }
 
@@ -65,7 +80,8 @@ impl<V> TernarySearchTrie<V>  {
     }
 
     pub fn get(&self, key: &str) -> Option<&V> {
-        unimplemented!()
+        assert!(key.len() > 0, "key must have length >= 1");
+        Node::get(self.root.as_ref(), key, 0).map_or(None, |n| n.val.as_ref())
     }
 
     pub fn delete(&mut self, key: &str) {
@@ -96,4 +112,7 @@ fn test_tst() {
     assert_eq!(t.size(), 1);
     t.put("language", "Rust");
     assert_eq!(t.size(), 2);
+
+    assert_eq!(t.get("name"), Some(&"Fledna"));
+    assert_eq!(t.get("whatever"), None);
 }
