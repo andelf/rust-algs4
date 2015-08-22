@@ -1,5 +1,8 @@
 use std::iter;
 
+// FIXME: only supports extended-ASCII
+/// searches for the pattern in the input text using the
+/// KMP algorithm.
 pub struct KMP<'a> {
     r: usize,
     dfa: Vec<Vec<usize>>,
@@ -33,7 +36,7 @@ impl<'a> KMP<'a> {
                 self.dfa[c][j] = self.dfa[c][x]; // copy mismatch cases
             }
             self.dfa[self.pat.char_at(j) as usize][j] = j+1; // set match case
-            x = self.dfa[self.pat.char_at(j) as usize][x];
+            x = self.dfa[self.pat.char_at(j) as usize][x];   // update restart state
         }
     }
 
@@ -54,11 +57,77 @@ impl<'a> KMP<'a> {
     }
 }
 
-
 #[test]
 fn test_kmp() {
     let pat = "abracadabra";
     let text = "abacadabrabracabracadabrabrabracad";
     let kmp = KMP::new(pat);
     assert!(kmp.search(text).map_or(false, |pos| text[pos..].starts_with(pat)));
+    assert_eq!(kmp.search("zzzzz"), None);
+}
+
+
+/// searches for the pattern in the input text using the
+/// bad-character rule part of the Boyer-Moore algorithm.
+pub struct BoyerMoore<'a> {
+    r: usize,
+    right: Vec<isize>,
+    pat: &'a str
+}
+
+impl<'a> BoyerMoore<'a> {
+     pub fn new<'b>(pat: &'b str) -> BoyerMoore<'b> {
+         let r = 256;
+         let mut ret = BoyerMoore {
+             r: r,
+             right: Vec::new(),
+             pat: pat
+         };
+         ret.init();
+         ret
+     }
+
+    fn init(&mut self) {
+        let r = self.r;
+        self.right = iter::repeat(-1).take(r).collect();
+        for j in 0 .. self.pat.len() {
+            self.right[self.pat.char_at(j) as usize] = j as isize;
+        }
+    }
+
+    pub fn search(&self, txt: &str) -> Option<usize> {
+        let m = self.pat.len();
+        let n = txt.len();
+        if n < m {
+            return None;
+        }
+        let mut skip;
+        let mut i = 0;
+        while i <= n-m {
+            skip = 0;
+            for j in (0 .. m).rev() {
+                if self.pat.char_at(j) != txt.char_at(i+j) {
+                    skip = j as isize - self.right[txt.char_at(i+j) as usize];
+                    if skip < 1 {
+                        skip = 1;
+                    }
+                    break;
+                }
+            }
+            if skip == 0 {
+                return Some(i);
+            }
+            i += skip as usize;
+        }
+        return None;
+    }
+}
+
+#[test]
+fn test_boyer_moore() {
+    let pat = "abracadabra";
+    let text = "abacadabrabracabracadabrabrabracad";
+    let bm = BoyerMoore::new(pat);
+    assert!(bm.search(text).map_or(false, |pos| text[pos..].starts_with(pat)));
+    assert_eq!(bm.search("zzzzz"), None);
 }
