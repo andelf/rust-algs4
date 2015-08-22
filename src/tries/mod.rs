@@ -150,9 +150,12 @@ impl<V> TrieST<V> {
         }
     }
 
+    // FIXME: search twice
     pub fn put(&mut self, key: &str, val: V) {
+        if !self.contains(key) {
+            self.n += 1;
+        }
         self.root = Node::put(self.root.take(), key, val, 0);
-        self.n += 1;
     }
 
     pub fn get(&self, key: &str) -> Option<&V> {
