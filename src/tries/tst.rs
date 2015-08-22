@@ -1,3 +1,5 @@
+use adivon::queue::Queue;
+
 pub struct Node<V> {
     c: char,
     left:  Option<Box<Node<V>>>,
@@ -62,6 +64,21 @@ impl<V> Node<V> {
             x
         }
     }
+
+    fn collect(x: Option<&Box<Node<V>>>, mut prefix: String, queue: &mut Queue<String>) {
+        if x.is_none() {
+            return;
+        }
+        Node::collect(x.unwrap().left.as_ref(), prefix.clone(), queue);
+        let xc = x.unwrap().c;
+        prefix.push(xc);
+        if x.unwrap().val.is_some() {
+            queue.enqueue(prefix.clone());
+        }
+        Node::collect(x.unwrap().mid.as_ref(), prefix.clone(), queue);
+        prefix.pop();
+        Node::collect(x.unwrap().right.as_ref(), prefix, queue);
+    }
 }
 
 /// Symbol table with string keys, implemented using a ternary search trie (TST).
@@ -109,6 +126,24 @@ impl<V> TernarySearchTrie<V>  {
     pub fn contains(&self, key: &str) -> bool {
         self.get(key).is_some()
     }
+
+    pub fn keys_with_prefix(&self, prefix: &str) -> Vec<String> {
+        let mut queue = Queue::new();
+        let x = Node::get(self.root.as_ref(), prefix, 0);
+        if x.is_some() {
+            if x.unwrap().val.is_some() {
+                queue.enqueue(prefix.into());
+            }
+            Node::collect(x.unwrap().mid.as_ref(), prefix.into(), &mut queue);
+        }
+        queue.into_iter().collect()
+    }
+
+    pub fn keys(&self) -> Vec<String> {
+        let mut queue = Queue::new();
+        Node::collect(self.root.as_ref(), "".into(), &mut queue);
+        queue.into_iter().collect()
+    }
 }
 
 
@@ -118,6 +153,7 @@ fn test_tst() {
     assert_eq!(t.size(), 0);
     t.put("name", "Andelf");
     assert_eq!(t.size(), 1);
+    assert!(t.contains("name"));
     t.put("name", "Fledna");
     assert_eq!(t.size(), 1);
     t.put("language", "Rust");
@@ -129,4 +165,9 @@ fn test_tst() {
     t.delete("name");
     assert_eq!(t.size(), 1);
     assert_eq!(t.get("name"), None);
+
+    t.put("name", "Lednaf");
+    assert!(t.keys().contains(&"name".into()));
+    assert!(t.keys().contains(&"language".into()));
+    assert!(t.keys_with_prefix("lang").contains(&"language".into()));
 }
