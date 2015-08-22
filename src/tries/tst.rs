@@ -17,10 +17,15 @@ impl<V> Node<V> {
         }
     }
 
-    fn put(mut x: Option<Box<Node<V>>>, key: &str, val: V, d: usize) -> (Option<Box<Node<V>>>, Option<V>) {
+    fn put(mut x: Option<Box<Node<V>>>, key: &str, val: Option<V>, d: usize) -> (Option<Box<Node<V>>>, Option<V>) {
         let replaced;
         let c = key.char_at(d);
-        x = x.or_else(|| Some(Box::new(Node::new(c))));
+        if x.is_none() {
+            if val.is_none() {  // no need to call put further
+                return (x, None);
+            }
+            x = Some(Box::new(Node::new(c)));
+        }
         let xc = x.as_ref().unwrap().c;
         if c < xc {
             let (left, repl) = Node::put(x.as_mut().unwrap().left.take(), key, val, d);
@@ -36,7 +41,7 @@ impl<V> Node<V> {
             replaced = repl;
         } else {
             replaced = x.as_mut().unwrap().val.take();
-            x.as_mut().map(|n| n.val = Some(val));
+            x.as_mut().map(|n| n.val = val);
         }
         (x, replaced)
     }
@@ -71,7 +76,7 @@ impl<V> TernarySearchTrie<V>  {
     }
 
     pub fn put(&mut self, key: &str, val: V) {
-        let (root, replaced) = Node::put(self.root.take(), key, val, 0);
+        let (root, replaced) = Node::put(self.root.take(), key, Some(val), 0);
         self.root = root;
         // replace old val? or insert new?
         if replaced.is_none() {
@@ -85,7 +90,12 @@ impl<V> TernarySearchTrie<V>  {
     }
 
     pub fn delete(&mut self, key: &str) {
-        unimplemented!()
+        let (root, replaced) = Node::put(self.root.take(), key, None, 0);
+        self.root = root;
+        // deleted?
+        if replaced.is_some() {
+            self.n -= 1;
+        }
     }
 
     pub fn size(&self) -> usize {
@@ -115,4 +125,8 @@ fn test_tst() {
 
     assert_eq!(t.get("name"), Some(&"Fledna"));
     assert_eq!(t.get("whatever"), None);
+
+    t.delete("name");
+    assert_eq!(t.size(), 1);
+    assert_eq!(t.get("name"), None);
 }
