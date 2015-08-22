@@ -80,6 +80,30 @@ impl<V> Node<V> {
         Node::collect(x.unwrap().right.as_ref(), prefix, queue);
     }
 
+    fn collect_by_pattern(x: Option<&Box<Node<V>>>, mut prefix: String, i: usize, pattern: &str, queue: &mut Queue<String>) {
+        if x.is_none() {
+            return;
+        }
+        let c = pattern.char_at(i);
+        let xc = x.unwrap().c;
+        if c == '?' || c < xc {
+            Node::collect_by_pattern(x.unwrap().left.as_ref(), prefix.clone(), i, pattern, queue);
+        }
+        if c == '?' || c == xc {
+            prefix.push(xc);
+            if i == pattern.len()-1 && x.as_ref().unwrap().val.is_some() {
+                queue.enqueue(prefix.clone());
+            }
+            if i < pattern.len()-1 {
+                Node::collect_by_pattern(x.unwrap().mid.as_ref(), prefix.clone(), i+1, pattern, queue);
+            }
+            prefix.pop();
+        }
+        if c == '.' || c > xc {
+            Node::collect_by_pattern(x.unwrap().right.as_ref(), prefix, i, pattern, queue)
+        }
+    }
+
     fn longest_prefix_of<'a>(mut x: Option<&Box<Node<V>>>, query: &'a str) -> Option<&'a str> {
         let mut length = 0;
         let mut i = 0;
@@ -173,6 +197,12 @@ impl<V> TernarySearchTrie<V>  {
         Node::collect(self.root.as_ref(), "".into(), &mut queue);
         queue.into_iter().collect()
     }
+
+    pub fn keys_that_match(&self, pattern: &str) -> Vec<String> {
+        let mut queue = Queue::new();
+        Node::collect_by_pattern(self.root.as_ref(), "".into(), 0, pattern, &mut queue);
+        queue.into_iter().collect()
+    }
 }
 
 
@@ -203,4 +233,7 @@ fn test_tst() {
     t.put("ban", "2333");
     t.put("banana", "2333");
     assert_eq!(t.longest_prefix_of("bananananana"), Some("banana"));
+
+    t.put("bad", "2333");
+    assert_eq!(t.keys_that_match("ba?"), vec!["bad", "ban"]);
 }
