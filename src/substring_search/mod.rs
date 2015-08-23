@@ -208,6 +208,26 @@ impl<'a> RabinKarp<'a> {
         None
     }
 
+    pub fn search_monte_carlo(&self, txt: &str) -> Option<usize> {
+        if txt.len() < self.m {
+            return None;
+        }
+        let mut txt_hash = self.hash(txt, self.m);
+        if self.pat_hash == txt_hash && self.check(txt, 0) {
+            return Some(0);
+        }
+        for i in self.m .. txt.len() {
+            txt_hash = (txt_hash + self.q - self.rm * txt.char_at(i-self.m) as usize % self.q) % self.q;
+            txt_hash = (txt_hash * self.r + txt.char_at(i) as usize) % self.q;
+
+            let offset = i - self.m + 1;
+            if self.pat_hash == txt_hash { // diffs here
+                return Some(offset);
+            }
+        }
+        None
+    }
+
     fn long_random_prime() -> usize {
         // TODO: max bits 31, use random prime generator
         5800079
@@ -220,5 +240,6 @@ fn test_rabin_karp() {
     let text = "abacadabrabracabracadabrabrabracad";
     let bm = RabinKarp::new(pat);
     assert!(bm.search(text).map_or(false, |pos| text[pos..].starts_with(pat)));
+    assert!(bm.search_monte_carlo(text).map_or(false, |pos| text[pos..].starts_with(pat)));
     assert_eq!(bm.search("zzzzz"), None);
 }
