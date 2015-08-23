@@ -13,13 +13,9 @@ impl<'a> KMP<'a> {
     // create the DFA from a string pattern
     pub fn new<'b>(pat: &'b str) -> KMP<'b> {
         let r = 256;
-        let m = pat.len();
-        let dfa = iter::repeat(iter::repeat(0).take(m).collect::<Vec<usize>>())
-            .take(r).collect();
-
         let mut ret = KMP {
             r: r,
-            dfa: dfa,
+            dfa: Vec::new(),
             pat: pat
         };
         ret.build_dfa();
@@ -29,15 +25,18 @@ impl<'a> KMP<'a> {
     fn build_dfa(&mut self) {
         let m = self.pat.len();
         let r = self.r;
-        self.dfa[self.pat.char_at(0) as usize][0] = 1;
+        let mut dfa = iter::repeat(iter::repeat(0).take(m).collect::<Vec<usize>>())
+            .take(r).collect::<Vec<Vec<usize>>>();
+        dfa[self.pat.char_at(0) as usize][0] = 1;
         let mut x = 0;
         for j in 1 .. m {
             for c in 0 .. r {
-                self.dfa[c][j] = self.dfa[c][x]; // copy mismatch cases
+                dfa[c][j] = dfa[c][x]; // copy mismatch cases
             }
-            self.dfa[self.pat.char_at(j) as usize][j] = j+1; // set match case
-            x = self.dfa[self.pat.char_at(j) as usize][x];   // update restart state
+            dfa[self.pat.char_at(j) as usize][j] = j+1; // set match case
+            x = dfa[self.pat.char_at(j) as usize][x];   // update restart state
         }
+        self.dfa = dfa;
     }
 
     pub fn search(&self, txt: &str) -> Option<usize> {
@@ -128,6 +127,98 @@ fn test_boyer_moore() {
     let pat = "abracadabra";
     let text = "abacadabrabracabracadabrabrabracad";
     let bm = BoyerMoore::new(pat);
+    assert!(bm.search(text).map_or(false, |pos| text[pos..].starts_with(pat)));
+    assert_eq!(bm.search("zzzzz"), None);
+}
+
+pub struct RabinKarp<'a> {
+    pat: &'a str,
+    pat_hash: usize,
+    m: usize,
+    r: usize,
+    q: usize,
+    rm: usize,                    // R^(M-1) % Q
+}
+
+impl<'a> RabinKarp<'a> {
+    pub fn new<'b>(pat: &'b str) -> RabinKarp<'b> {
+        let mut ret = RabinKarp {
+            pat: pat,
+            pat_hash: 0,
+            m: pat.len(),
+            r: 256,
+            q: RabinKarp::long_random_prime(),
+            rm: 1
+        };
+        ret.init();
+        ret
+    }
+
+    fn init(&mut self) {
+        let r = self.r;
+        let q = self.q;
+        for _ in 1 .. self.m {
+            self.rm = (r * self.rm) % q;
+        }
+        self.pat_hash = self.hash(self.pat, self.m);
+    }
+
+    fn hash(&self, key: &str, m: usize) -> usize {
+        let r = self.r;
+        let q = self.q;
+        let mut h = 0;
+        for j in 0 .. m {
+            h = (r * h + key.char_at(j) as usize) % q
+        }
+        h
+    }
+
+    fn check(&self, txt: &str, i: usize) -> bool {
+        for j in 0 .. self.m {
+            if self.pat.char_at(j) != txt.char_at(i+j) {
+                return false;
+            }
+        }
+        true
+    }
+
+    pub fn search(&self, txt: &str) -> Option<usize> {
+        let n = txt.len();
+        if n < self.m {
+            return None;
+        }
+
+        let mut txt_hash = self.hash(txt, self.m);
+
+        // check for match at offset 0
+        if self.pat_hash == txt_hash && self.check(txt, 0) {
+            return Some(0);
+        }
+
+        // check for hash match
+        for i in self.m .. n {
+            txt_hash = (txt_hash + self.q - self.rm * txt.char_at(i-self.m) as usize % self.q) % self.q;
+            txt_hash = (txt_hash * self.r + txt.char_at(i) as usize) % self.q;
+
+            let offset = i - self.m + 1;
+            if self.pat_hash == txt_hash && self.check(txt, offset) {
+                return Some(offset);
+            }
+        }
+        None
+    }
+
+    fn long_random_prime() -> usize {
+        // TODO: max bits 31, use random prime generator
+        5800079
+    }
+}
+
+#[test]
+fn test_rabin_karp() {
+    let pat = "abracadabra";
+    let text = "abacadabrabracabracadabrabrabracad";
+    let bm = RabinKarp::new(pat);
     assert!(bm.search(text).map_or(false, |pos| text[pos..].starts_with(pat)));
     assert_eq!(bm.search("zzzzz"), None);
 }
