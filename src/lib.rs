@@ -1,6 +1,7 @@
 #![feature(iter_arith, associated_type_defaults, str_char)]
 
 extern crate rand;
+extern crate byteorder;
 extern crate adivon;
 
 // part1
@@ -38,3 +39,4 @@ pub mod tries;
 pub mod substring_search;
 
 pub mod regular_expressions;
+pub mod data_compression;
