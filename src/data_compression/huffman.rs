@@ -208,11 +208,11 @@ impl HuffmanEncoding for [u8] {
             // decoding trie
             huffman.write_trie(&mut out);
         }
-        for (i, v) in huffman.code_table.iter().enumerate() {
-            if !v.is_empty() {
-                println!("{} => {:?}", i as u8 as char, v);
-            }
-        }
+        // for (i, v) in huffman.code_table.iter().enumerate() {
+        //     if !v.is_empty() {
+        //         println!("{} => {:?}", i as u8 as char, v);
+        //     }
+        // }
 
         // length of original message
         try!(buf.write_u32::<LittleEndian>(self.len() as u32));
@@ -237,11 +237,11 @@ impl HuffmanEncoding for [u8] {
             Huffman::read(&mut inbits)
         };
 
-        for (i, v) in huffman.code_table.iter().enumerate() {
-            if !v.is_empty() {
-                println!("{} => {:?}", i as u8 as char, v);
-            }
-        }
+        // for (i, v) in huffman.code_table.iter().enumerate() {
+        //     if !v.is_empty() {
+        //         println!("{} => {:?}", i as u8 as char, v);
+        //     }
+        // }
         // length of original message
         let len = try!(inbuf.read_u32::<LittleEndian>()) as usize;
 
@@ -258,27 +258,30 @@ impl HuffmanEncoding for [u8] {
 
 #[test]
 fn test_huffman() {
-    println!("");
-
     let a: &'static [u8] = b"she sells seashells on the seashore the shells she sells are surely seashell";
 
-    let a = b"2333333-4666666";
-    println!("orig len = {:?}", a.len());
-    println!("orig => {:?}", a);
+    // println!("orig len = {:?}", a.len());
+    // println!("orig => {:?}", a);
+    let orig_len = a.len();
     let mut buf1 = Vec::with_capacity(1024);
     unsafe { buf1.set_len(1024); }
     let mut buf2 = buf1.clone();
 
-    let val1 = a.compress(&mut buf1).unwrap();
-    println!("compressed len => {}", val1);
-    println!("compressed => {:?}", &buf1[..val1]);
+    let len = a.compress(&mut buf1).unwrap();
+    // println!("compressed len => {}", len);
+    // println!("compressed => {:?}", &buf1[..len]);
 
-    for c in buf1[..val1].iter() {
-        println!("{:08b}", c);
-    }
+    // compress ratio
+    assert!(len as f64 / orig_len as f64 <= 0.99);
 
-    let val2 = buf1[..val1].decompress(&mut buf2).unwrap();
+    // for c in buf1[..len].iter() {
+    //     println!("{:08b}", c);
+    // }
 
-    println!("decompressed len => {}", val2);
-    println!("result => {:?}", &buf2[..val2]);
+    let len2 = buf1[..len].decompress(&mut buf2).unwrap();
+
+    assert_eq!(len2, orig_len);
+    assert_eq!(&String::from_utf8_lossy(&buf2[..len2]),
+               "she sells seashells on the seashore the shells she sells are surely seashell");
+
 }

@@ -46,15 +46,15 @@ impl ops::Not for Bit {
 pub struct BitWriter<W: Write> {
     inner: W,
     byte: u8,
-    offset: u8
+    bits: u8                    // has n bits in byte
 }
 
 impl<W: Write> Drop for BitWriter<W> {
     fn drop(&mut self) {
-        if self.offset != 0 {
+        if self.bits != 0 {
             println!("warning: bit stream length should be a module of 8");
-            println!("warning: zero padding added to {} with offset {}", self.byte, self.offset);
-            self.inner.write_u8(self.byte << (8-self.offset)).unwrap();
+            println!("warning: zero padding added to {} with bits {}", self.byte, self.bits);
+            self.inner.write_u8(self.byte << (8-self.bits)).unwrap();
             self.inner.flush().unwrap();
         }
     }
@@ -65,30 +65,40 @@ impl<W: Write> BitWriter<W> {
         BitWriter {
             inner: inner,
             byte: 0u8,
-            offset: 0u8
+            bits: 0u8
         }
     }
 
     pub fn write_bit(&mut self, bit: Bit) -> Result<()> {
         self.byte = (self.byte << 1) + bit.to_u8();
-        self.offset += 1;
-        if self.offset == 8 {
+        self.bits += 1;
+        if self.bits == 8 {
             try!(self.inner.write_u8(self.byte));
             self.byte = 0;
-            self.offset = 0;
+            self.bits = 0;
         }
         Ok(())
     }
 
     pub fn write_u8(&mut self, s: u8) -> Result<()> {
-        let ofs = (8 - self.offset) % 8;
-        try!(self.inner.write_u8((self.byte << ofs) + (s >> self.offset)));
-        self.byte = s & (0xff >> self.offset);
+        let ofs = (8 - self.bits) % 8;
+        try!(self.inner.write_u8((self.byte << ofs) | (s >> self.bits)));
+        self.byte = s & (0xff >> ofs);
         Ok(())
     }
 
+    pub fn write_u16(&mut self, s: u16) -> Result<()> {
+        try!(self.write_u8((s >> 8) as u8));
+        self.write_u8((s & 0xff) as u8)
+    }
+
+    pub fn write_u32(&mut self, s: u32) -> Result<()> {
+        try!(self.write_u16((s >> 16) as u16));
+        self.write_u16((s & 0xffff) as u16)
+    }
+
     pub fn flush_bits(&mut self) -> Result<()> {
-        assert!(self.offset == 0 && self.byte == 0, "must be a modulo of 8");
+        assert!(self.bits == 0 && self.byte == 0, "must be a modulo of 8");
         try!(self.inner.flush());
         Ok(())
     }
@@ -202,8 +212,6 @@ impl RunLengthEncoding for [u8] {
 #[allow(unused_must_use)]
 #[test]
 fn test_bit_writer() {
-    println!("");
-
     let mut buf: Vec<u8> = Vec::with_capacity(8);
     {
         let buf = &mut buf;
@@ -216,15 +224,20 @@ fn test_bit_writer() {
         assert!(w.write_u8(0xff).is_ok());
         assert!(w.write_bit(One).is_ok());
         assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_u16(0xffff).is_ok());
         assert!(w.write_bit(Zero).is_ok());
         assert!(w.write_bit(Zero).is_ok());
     }
     // println!("D {:08b}", buf[0]);
     // println!("D {:08b}", buf[1]);
     // println!("D {:08b}", buf[2]);
+    // println!("D {:08b}", buf[3]);
+    // println!("D {:08b}", buf[4]);
     assert_eq!(buf[0], 0b01111111);
     assert_eq!(buf[1], 0b10101111);
-    assert_eq!(buf[2], 0b11111000);
+    assert_eq!(buf[2], 0b11111011);
+    assert_eq!(buf[3], 0b11111111);
+    assert_eq!(buf[4], 0b11111100);
 }
 
 
