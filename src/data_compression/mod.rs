@@ -3,6 +3,9 @@ use std::ops;
 use byteorder::{ReadBytesExt, WriteBytesExt};
 use self::Bit::{Zero, One};
 
+pub mod huffman;
+
+
 const RADIX: usize = 256;
 // const LgR: usize = 8;
 
@@ -46,6 +49,17 @@ pub struct BitWriter<W: Write> {
     offset: u8
 }
 
+impl<W: Write> Drop for BitWriter<W> {
+    fn drop(&mut self) {
+        if self.offset != 0 {
+            println!("warning: bit stream length should be a module of 8");
+            println!("warning: zero padding added to {} with offset {}", self.byte, self.offset);
+            self.inner.write_u8(self.byte << (8-self.offset)).unwrap();
+            self.inner.flush().unwrap();
+        }
+    }
+}
+
 impl<W: Write> BitWriter<W> {
     pub fn new(inner: W) -> BitWriter<W> {
         BitWriter {
@@ -66,8 +80,16 @@ impl<W: Write> BitWriter<W> {
         Ok(())
     }
 
+    pub fn write_u8(&mut self, s: u8) -> Result<()> {
+        let ofs = (8 - self.offset) % 8;
+        try!(self.inner.write_u8((self.byte << ofs) + (s >> self.offset)));
+        self.byte = s & (0xff >> self.offset);
+        Ok(())
+    }
+
     pub fn flush_bits(&mut self) -> Result<()> {
         assert!(self.offset == 0 && self.byte == 0, "must be a modulo of 8");
+        try!(self.inner.flush());
         Ok(())
     }
 }
@@ -76,6 +98,16 @@ pub struct BitReader<R: Read> {
     inner: R,
     byte: u8,
     offset: u8
+}
+
+impl<R: Read> Drop for BitReader<R> {
+    fn drop(&mut self) {
+        if self.offset != 0 {
+            println!("warning: bit stream length should be a module of 8");
+            println!("warning: bit value remain to be read: {}",
+                     self.byte & (0xff >> self.offset));
+        }
+    }
 }
 
 impl<R: Read> BitReader<R> {
@@ -93,11 +125,24 @@ impl<R: Read> BitReader<R> {
             self.offset = 8;    // 8 - 1
         }
         self.offset -= 1;
-        Ok(Bit::from_u8(self.byte >> self.offset))
+        let bit = Bit::from_u8(self.byte >> self.offset);
+        Ok(bit)
+    }
+
+    pub fn read_u8(&mut self) -> Result<u8> {
+        let offs = 8 - self.offset;
+        if self.offset == 0 {
+            Ok(try!(self.inner.read_u8()))
+        } else {
+            let next = try!(self.inner.read_u8());
+            let out = (self.byte << offs) + (next >> self.offset);
+            self.byte = next;
+            Ok(out)
+        }
     }
 }
 
-
+// FIXME: better API
 pub trait RunLengthEncoding {
     fn compress(&self, &mut [u8]) -> Result<usize>;
     fn decompress(&self, &mut [u8]) -> Result<usize>;
@@ -154,14 +199,48 @@ impl RunLengthEncoding for [u8] {
     }
 }
 
-
+#[allow(unused_must_use)]
 #[test]
-fn test_bit_reader_writer() {
-    let a: &'static [u8] = b"we";
-    let mut r = BitReader::new(a);
-    for _ in 0 .. 16 {
-        assert!(r.read_bit().is_ok());
+fn test_bit_writer() {
+    println!("");
+
+    let mut buf: Vec<u8> = Vec::with_capacity(8);
+    {
+        let buf = &mut buf;
+        let mut w = BitWriter::new(buf);
+        assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_u8(0xff).is_ok());
+        assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_bit(One).is_ok());
+        assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_u8(0xff).is_ok());
+        assert!(w.write_bit(One).is_ok());
+        assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_bit(Zero).is_ok());
     }
+    // println!("D {:08b}", buf[0]);
+    // println!("D {:08b}", buf[1]);
+    // println!("D {:08b}", buf[2]);
+    assert_eq!(buf[0], 0b01111111);
+    assert_eq!(buf[1], 0b10101111);
+    assert_eq!(buf[2], 0b11111000);
+}
+
+
+
+#[allow(unused_must_use)]
+#[test]
+fn test_bit_reader() {
+    let a: Vec<u8> = vec![0b01111111, 0b10000001];
+    let b: &[u8] = &a;
+    let mut r = BitReader::new(b);
+    assert_eq!(r.read_bit().unwrap(), Zero);
+    assert_eq!(r.read_u8().unwrap(), 0xff);
+    for _ in 0 .. 6 {
+        assert_eq!(r.read_bit().unwrap(), Zero);
+    }
+    assert_eq!(r.read_bit().unwrap(), One);
     assert!(r.read_bit().is_err());
 }
 
