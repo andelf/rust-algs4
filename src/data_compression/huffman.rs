@@ -1,8 +1,7 @@
 use std::cmp;
 use std::iter;
 use self::Node::*;
-use super::{BitWriter, BitReader, Bit};
-use super::Bit::{Zero, One};
+use super::{BitWriter, BitReader, Bit, Zero, One};
 use std::io::{Result, Write, Read};
 use byteorder::{ReadBytesExt, WriteBytesExt, LittleEndian};
 
