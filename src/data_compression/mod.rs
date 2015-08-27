@@ -3,8 +3,9 @@ use byteorder::WriteBytesExt;
 pub use self::bits::{Bit, Zero, One};
 pub use self::bits::{BitReader, BitWriter};
 
-pub mod huffman;
 pub mod bits;
+pub mod huffman;
+pub mod lzw;
 
 
 const RADIX: usize = 256;

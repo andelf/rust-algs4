@@ -1,4 +1,4 @@
-use adivon::queue::Queue;
+use adivon::Queue;
 
 pub struct Node<V> {
     c: char,

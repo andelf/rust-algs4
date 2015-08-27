@@ -81,6 +81,23 @@ impl<W: Write> BitWriter<W> {
         Ok(())
     }
 
+    pub fn write_usize(&mut self, s: usize, w: usize) -> Result<()> {
+        let mut w = w;
+        let mut remain = s;
+        while w > 8 {
+            let offset = w - 8;
+            let byte = remain >> offset;
+            try!(self.write_u8(byte as u8));
+            remain = remain & ((0x1 << offset) - 1);
+            w -= 8;
+        }
+        while w != 0 {
+            try!(self.write_bit(Bit::from_u8((remain >> (w-1)) as u8)));
+            w -= 1;
+        }
+        Ok(())
+    }
+
     pub fn write_u16(&mut self, s: u16) -> Result<()> {
         try!(self.write_u8((s >> 8) as u8));
         self.write_u8((s & 0xff) as u8)
@@ -144,6 +161,20 @@ impl<R: Read> BitReader<R> {
             Ok(out)
         }
     }
+
+    pub fn read_usize(&mut self, w: usize) -> Result<usize> {
+        let mut r = 0;
+        let mut w = w;
+        while w > 8 {
+            r = (r << 8) + try!(self.read_u8()) as usize;
+            w -= 8;
+        }
+        while w > 0 {
+            r = (r << 1) + try!(self.read_bit()).to_u8() as usize;
+            w -= 1;
+        }
+        Ok(r)
+    }
 }
 
 
@@ -164,18 +195,22 @@ fn test_bit_writer() {
         assert!(w.write_bit(Zero).is_ok());
         assert!(w.write_u16(0xffff).is_ok());
         assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_usize(0b0010, 4).is_ok());
         assert!(w.write_bit(Zero).is_ok());
+        assert!(w.write_usize(0b1011, 4).is_ok());
     }
     // println!("D {:08b}", buf[0]);
     // println!("D {:08b}", buf[1]);
     // println!("D {:08b}", buf[2]);
     // println!("D {:08b}", buf[3]);
     // println!("D {:08b}", buf[4]);
+    // println!("D {:08b}", buf[5]);
     assert_eq!(buf[0], 0b01111111);
     assert_eq!(buf[1], 0b10101111);
     assert_eq!(buf[2], 0b11111011);
     assert_eq!(buf[3], 0b11111111);
     assert_eq!(buf[4], 0b11111100);
+    assert_eq!(buf[5], 0b01001011);
 }
 
 
