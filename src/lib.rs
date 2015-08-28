@@ -40,3 +40,5 @@ pub mod substring_search;
 
 pub mod regular_expressions;
 pub mod data_compression;
+
+pub mod linear_programming;
