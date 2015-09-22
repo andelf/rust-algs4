@@ -3,6 +3,8 @@
 extern crate rand;
 extern crate byteorder;
 extern crate adivon;
+#[macro_use]
+extern crate mtl;
 
 // part1
 pub mod union_find;

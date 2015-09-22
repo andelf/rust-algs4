@@ -11,6 +11,9 @@ use sdl2_gfx::primitives::DrawRenderer;
 use rand::{thread_rng, Rng};
 use algs4::priority_queues::event_driven_simulation::{Particle, CollisionSystem};
 
+
+const BALLS: usize = 100;
+
 fn run() -> Result<(), String> {
     let sdl_context = sdl2::init().unwrap();
     let video = sdl_context.video().unwrap();
@@ -34,7 +37,7 @@ fn run() -> Result<(), String> {
 
     let mut balls: Vec<Particle> = Vec::new();
     let mut colors: Vec<Color> = Vec::new();
-    for _ in 0 .. 200 {
+    for _ in 0 .. BALLS {
         balls.push(rng.gen());
         colors.push(rng.gen());
     }

@@ -16,6 +16,7 @@ license = "MIT"
 rand = "*"
 adivon = "*"
 byteorder = "*"
+mtl = "*"
 
 [dev-dependencies.sdl2]
 sdl2 = "0.6.2"
