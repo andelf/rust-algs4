@@ -1,6 +1,6 @@
 [package]
 name = "algs4"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Shuyu Wang <andelf@gmail.com>"]
 description = "Algorithms, 4ed. MOOC in Coursera. in Rust."
 homepage = "https://github.com/andelf/rust-algs4"
@@ -13,10 +13,10 @@ keywords = [
 license = "MIT"
 
 [dependencies]
-rand = "*"
-adivon = "*"
-byteorder = "*"
-mtl = "*"
+rand = "0.3"
+adivon = "0.2"
+byteorder = "0.3"
+mtl = "0.1"
 
 
 # [dev-dependencies.piston_window]
