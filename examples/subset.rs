@@ -4,8 +4,8 @@ use std::env;
 use std::io::prelude::*;
 use std::io;
 
-use algs4::stacks_and_queues::RandomizedQueue;
-use algs4::stacks_and_queues::resizing_array_randomized_queue::ResizingArrayRandomizedQueue;
+use algs4::fundamentals::stacks_and_queues::RandomizedQueue;
+use algs4::fundamentals::stacks_and_queues::resizing_array_randomized_queue::ResizingArrayRandomizedQueue;
 
 
 fn main() {

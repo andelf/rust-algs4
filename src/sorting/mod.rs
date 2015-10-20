@@ -1,5 +1,3 @@
-use rand::{thread_rng, Rng};
-
 pub fn selection_sort<T: PartialOrd>(a: &mut [T]) {
     let n = a.len();
     for i in 0 .. n {
@@ -28,7 +26,6 @@ pub fn insertion_sort<T: PartialOrd>(a: &mut [T]) {
 
 pub fn shell_sort<T: PartialOrd>(a: &mut [T]) {
     let n  = a.len();
-
     let mut h = 1;
 
     // 3x+1 increment sequence
@@ -52,21 +49,16 @@ pub fn shell_sort<T: PartialOrd>(a: &mut [T]) {
     }
 }
 
-pub fn knuth_shuffle<T>(a: &mut [T]) {
-    let mut rng = thread_rng();
+mod mergesort;
+pub use ::self::mergesort::{merge_sort, merge_bu_sort};
 
-    let n = a.len();
+pub mod comparator;
 
-    for i in 0 .. n {
-        let r = rng.gen_range(0, i+1);
-        a.swap(i, r);
-    }
-}
 
-#[test]
-fn test_knuth_shuffle() {
-    let array = thread_rng().gen_iter().take(10).collect::<Vec<f64>>();
-    let mut new_array = array.clone();
-    knuth_shuffle(&mut new_array);
-    assert!(array != new_array);
-}
+pub mod quicksort;
+pub use ::self::quicksort::quick_sort;
+
+pub mod priority_queues;
+
+mod heapsort;
+pub use ::self::heapsort::heap_sort;

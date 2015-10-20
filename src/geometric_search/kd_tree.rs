@@ -5,10 +5,10 @@ use std::vec::IntoIter;
 use std::cmp::Ordering;
 use std::borrow::Borrow;
 
-use super::super::symbol_tables::ST;
-use super::super::stacks_and_queues::Queue;
-use super::super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
-use super::primitive::{Point2D, RectHV};
+use super::super::searching::ST;
+use super::super::fundamentals::stacks_and_queues::Queue;
+use super::super::fundamentals::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
+use super::super::fundamentals::primitive::{Point2D, RectHV};
 
 
 pub trait Point: Copy {

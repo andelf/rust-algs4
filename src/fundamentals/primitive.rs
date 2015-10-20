@@ -3,8 +3,8 @@ use std::vec::IntoIter;
 use std::f64;
 use rand::{Rand, Rng};
 use std::borrow::Borrow;
-use super::super::symbol_tables::ST;
-use super::super::balanced_search_trees::RedBlackBST;
+use super::super::searching::ST;
+use super::super::searching::red_black_tree::RedBlackBST;
 
 #[derive(Clone, Copy, PartialEq, PartialOrd, Debug)]
 pub struct Point2D {

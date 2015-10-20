@@ -4,11 +4,11 @@ extern crate algs4;
 use std::io::prelude::*;
 use std::io;
 
-use algs4::union_find::UF;
-use algs4::union_find::quick_find;
-use algs4::union_find::quick_union;
-use algs4::union_find::weighted_quick_union;
-use algs4::union_find::improved;
+use algs4::fundamentals::union_find::UF;
+use algs4::fundamentals::union_find::quick_find;
+use algs4::fundamentals::union_find::quick_union;
+use algs4::fundamentals::union_find::weighted_quick_union;
+use algs4::fundamentals::union_find::improved;
 
 fn main() {
     let mut lines = io::BufReader::new(io::stdin()).lines();

@@ -4,13 +4,8 @@ use std::cmp;
 use std::f64;
 
 use adivon::priority_queue::IndexMinPQ;
-use super::stacks_and_queues::bag::Bag;
-use super::stacks_and_queues::Queue;
-use super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
-use super::priority_queues::MinPQ;
-use super::priority_queues::binary_heaps::BinaryHeapMinPQ;
-use super::union_find::UF;
-use super::union_find::weighted_quick_union::UnionFind;
+use adivon::{Bag, Queue, MinPQ};
+use adivon::UnionFind;
 
 /// a weighted edge
 #[derive(Clone, Copy)]
@@ -182,21 +177,21 @@ fn test_edge_weighted_graph() {
 pub struct KruskalMST<'a> {
     graph: &'a EdgeWeightedGraph,
     weight: f64,
-    mst: ResizingArrayQueue<Edge>
+    mst: Queue<Edge>
 }
 
 impl<'a> KruskalMST<'a> {
     fn new<'b>(graph: &'b EdgeWeightedGraph) -> KruskalMST<'b> {
         let n = graph.v();
         let mut weight = 0f64;
-        let mut mst = ResizingArrayQueue::<Edge>::new();
-        let mut pq = BinaryHeapMinPQ::<Edge>::new();
+        let mut mst = Queue::<Edge>::new();
+        let mut pq = MinPQ::<Edge>::new();
         for e in graph.edges() {
             pq.insert(e);
         }
         let mut uf = UnionFind::new(n);
 
-        while !pq.is_empty() && mst.size() < n - 1 {
+        while !pq.is_empty() && mst.len() < n - 1 {
             let e = pq.del_min().unwrap();
             let v = e.either();
             let w = e.other(v);
@@ -229,17 +224,17 @@ impl EdgeWeightedGraph {
 pub struct LazyPrimMST<'a> {
     graph: &'a EdgeWeightedGraph,
     weight: f64,
-    mst: ResizingArrayQueue<Edge>,
+    mst: Queue<Edge>,
     marked: Vec<bool>,
-    pq: BinaryHeapMinPQ<Edge>
+    pq: MinPQ<Edge>
 }
 
 impl<'a> LazyPrimMST<'a> {
     fn new<'b>(graph: &'b EdgeWeightedGraph) -> LazyPrimMST<'b> {
         let n = graph.v();
         let marked = iter::repeat(false).take(n).collect();
-        let pq = BinaryHeapMinPQ::new();
-        let mst = ResizingArrayQueue::new();
+        let pq = MinPQ::new();
+        let mst = Queue::new();
 
         let mut ret = LazyPrimMST {
             graph: graph,
@@ -365,7 +360,7 @@ impl<'a> PrimMST<'a> {
     }
 
     pub fn edges(&self) -> Vec<Edge> {
-        let mut mst = ResizingArrayQueue::new();
+        let mut mst = Queue::new();
         for e in self.edge_to.iter() {
             e.map(|e| mst.enqueue(e.clone()));
         }

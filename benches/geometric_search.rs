@@ -8,8 +8,8 @@ extern crate algs4;
 use test::Bencher;
 use rand::{thread_rng, Rng};
 
-use algs4::geometric_search::primitive::{Point2D, PointSet, RectHV};
-use algs4::symbol_tables::ST;
+use algs4::searching::ST;
+use algs4::fundamentals::primitive::{Point2D, PointSet, RectHV};
 use algs4::geometric_search::kd_tree::KdTree;
 
 const SIZE: usize = 1000;

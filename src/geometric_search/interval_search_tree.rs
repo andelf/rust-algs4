@@ -3,7 +3,7 @@ use std::cmp::Ordering;
 use std::fmt;
 use std::iter;
 // use std::vec::IntoIter;
-use super::super::symbol_tables::ST;
+use super::super::searching::ST;
 
 
 pub struct Node<K: PartialOrd + Copy, V> {

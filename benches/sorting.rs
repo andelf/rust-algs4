@@ -7,11 +7,9 @@ extern crate algs4;
 
 use test::Bencher;
 use rand::{thread_rng, Rng};
-use algs4::elementary_sorts::*;
-use algs4::mergesort::*;
-use algs4::quicksort::*;
-use algs4::priority_queues::heapsort::heap_sort;
-
+use algs4::sorting::*;
+use algs4::sorting::quicksort::{quick_sort_3way, quick_sort_orig};
+use algs4::fundamentals::knuth_shuffle;
 
 static SIZE: usize = 1000;
 // for small array

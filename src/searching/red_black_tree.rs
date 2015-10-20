@@ -2,7 +2,7 @@ use std::iter;
 use std::fmt;
 use std::mem;
 use std::cmp::Ordering;
-use super::symbol_tables::{ST, OrderedST};
+use super::{ST, OrderedST};
 // FIXME: out implementation can't be used. :(
 // use super::super::stacks_and_queues::Queue;
 // use super::super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;

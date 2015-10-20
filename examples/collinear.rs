@@ -6,9 +6,9 @@ use std::io;
 use std::fmt;
 use std::cmp::Ordering;
 
-use algs4::quicksort::quick_sort;
-use algs4::mergesort::comparator::Comparator;
-use algs4::mergesort::comparator::insertion_sort;
+use algs4::sorting::quick_sort;
+use algs4::sorting::comparator::Comparator;
+use algs4::sorting::comparator::insertion_sort;
 
 #[derive(Copy, Clone)]
 pub struct Point {

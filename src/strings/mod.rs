@@ -1,5 +1,10 @@
 use std::iter;
 
+pub mod data_compression;
+pub mod regular_expressions;
+pub mod tries;
+pub mod radix_sort;
+
 // FIXME: only supports extended-ASCII
 /// searches for the pattern in the input text using the
 /// KMP algorithm.

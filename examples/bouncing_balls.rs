@@ -9,7 +9,7 @@ use sdl2::event::Event;
 use sdl2_gfx::primitives::DrawRenderer;
 
 use rand::{thread_rng, Rng};
-use algs4::priority_queues::event_driven_simulation::{Particle, CollisionSystem};
+use algs4::sorting::priority_queues::event_driven_simulation::{Particle, CollisionSystem};
 
 
 const BALLS: usize = 100;

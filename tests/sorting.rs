@@ -6,10 +6,8 @@ extern crate rand;
 extern crate algs4;
 
 use rand::{thread_rng, Rng};
-use algs4::elementary_sorts::*;
-use algs4::mergesort::*;
-use algs4::quicksort::*;
-use algs4::priority_queues::heapsort::heap_sort;
+use algs4::sorting::*;
+use algs4::sorting::quicksort::{quick_sort_3way, quick_sort_orig, quick_select};
 
 
 fn is_sorted<T: PartialOrd>(a: &[T]) -> bool {

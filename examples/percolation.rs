@@ -9,8 +9,8 @@ use std::iter;
 use test::stats::Stats;
 use rand::{thread_rng, Rng};
 
-use algs4::union_find::UF;
-use algs4::union_find::weighted_quick_union::UnionFind;
+use algs4::fundamentals::union_find::UF;
+use algs4::fundamentals::union_find::weighted_quick_union::UnionFind;
 
 /// a percolation system using an N-by-N grid of sites
 pub struct Percolation {

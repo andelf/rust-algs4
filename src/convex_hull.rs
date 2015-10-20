@@ -1,6 +1,6 @@
 use std::cmp::Ordering;
 use std::mem;
-use super::mergesort::comparator::Comparator;
+use super::sorting::comparator::Comparator;
 
 #[allow(non_snake_case)]
 pub struct Point2D {

@@ -64,3 +64,7 @@ pub mod linked_st;
 pub mod ordered_array_st;
 
 pub mod binary_search_tree;
+
+pub mod red_black_tree;
+
+pub mod hash_tables;

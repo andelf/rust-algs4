@@ -6,8 +6,8 @@ use std::io;
 use std::fmt;
 use std::cmp::Ordering;
 
-use algs4::priority_queues::MinPQ;
-use algs4::priority_queues::binary_heaps::BinaryHeapMinPQ;
+use algs4::sorting::priority_queues::MinPQ;
+use algs4::sorting::priority_queues::binary_heaps::BinaryHeapMinPQ;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Board {

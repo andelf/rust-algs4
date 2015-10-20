@@ -7,11 +7,7 @@ extern crate algs4;
 
 use test::{black_box, Bencher};
 
-use algs4::union_find::UF;
-use algs4::union_find::quick_find;
-use algs4::union_find::quick_union;
-use algs4::union_find::weighted_quick_union;
-use algs4::union_find::improved;
+use algs4::fundamentals::union_find::*;
 
 const NUM_OF_OBJECTS: usize = 100;
 const NUM_OF_OPERATIONS: usize = 500;

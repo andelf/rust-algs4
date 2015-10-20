@@ -137,7 +137,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
 
     fn next(&mut self) -> Option<&'a T> {
         unsafe {
-            if self.ptr < self.end {
+            if self.ptr <= self.end {
                 None
             } else {
                 self.ptr = self.ptr.offset(-1);

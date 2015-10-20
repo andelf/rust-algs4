@@ -1,8 +1,8 @@
 use std::iter;
-use super::stacks_and_queues::bag::Bag;
-use super::stacks_and_queues::{Stack, Queue};
-use super::stacks_and_queues::linked_stack;
-use super::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
+use super::super::fundamentals::stacks_and_queues::bag::Bag;
+use super::super::fundamentals::stacks_and_queues::{Stack, Queue};
+use super::super::fundamentals::stacks_and_queues::linked_stack;
+use super::super::fundamentals::stacks_and_queues::resizing_array_queue::ResizingArrayQueue;
 
 #[derive(Clone, Debug)]
 pub struct Digraph {

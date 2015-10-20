@@ -5,8 +5,8 @@ extern crate rand;
 use std::io::prelude::*;
 use std::io;
 
-use algs4::geometric_search::primitive::{Point2D, PointSet, RectHV};
-use algs4::symbol_tables::ST;
+use algs4::fundamentals::primitive::{Point2D, PointSet, RectHV};
+use algs4::searching::ST;
 // FIXME: fails under input1M.txt
 use algs4::geometric_search::kd_tree::KdTree;
 

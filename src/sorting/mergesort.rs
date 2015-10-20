@@ -1,5 +1,5 @@
 use std::cmp;
-use super::elementary_sorts::insertion_sort;
+use super::insertion_sort;
 
 fn merge<T: PartialOrd + Copy>(a: &mut [T], aux: &mut [T], lo: usize, mid: usize, hi: usize) {
     // assert!(is_sorted(&a[lo .. mid+1]));
@@ -78,5 +78,3 @@ pub fn merge_bu_sort<T: PartialOrd + Copy + ::std::fmt::Debug>(a: &mut [T]) {
         sz = sz + sz;
     }
 }
-
-pub mod comparator;

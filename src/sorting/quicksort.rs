@@ -1,7 +1,7 @@
 // use rand::{thread_rng, Rng};
 use std::mem;
 
-use super::elementary_sorts::insertion_sort;
+use super::insertion_sort;
 
 /// quicksort partitioning
 fn partition<T: PartialOrd>(a: &mut [T], lo: usize, hi: usize) -> usize {

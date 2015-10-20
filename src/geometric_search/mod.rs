@@ -1,7 +1,7 @@
-use super::symbol_tables::{ST, OrderedST};
-use super::symbol_tables::binary_search_tree::{BST, Node};
+use super::searching::{ST, OrderedST};
+use super::searching::binary_search_tree::{BST, Node};
 
-pub mod primitive;
+// pub mod primitive;
 
 pub mod kd_tree;
 

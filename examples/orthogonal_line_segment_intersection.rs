@@ -5,9 +5,9 @@ use std::cmp::Ordering;
 use rand::{Rng, Rand};
 // use rand::thread_rng;
 
-use algs4::quicksort::quick_sort;
-use algs4::symbol_tables::ST;
-use algs4::symbol_tables::binary_search_tree::BST;
+use algs4::sorting::quick_sort;
+use algs4::searching::ST;
+use algs4::searching::binary_search_tree::BST;
 use algs4::geometric_search::RangeSearch1D;
 
 use self::Event::*;

@@ -18,8 +18,12 @@ adivon = "*"
 byteorder = "*"
 mtl = "*"
 
+
+# [dev-dependencies.piston_window]
+# piston_window = "*"
+
 [dev-dependencies.sdl2]
-sdl2 = "0.6.2"
+sdl2 = "0.9"
 
 [dev-dependencies.sdl2_gfx]
 sdl2_gfx = "0.6.2"

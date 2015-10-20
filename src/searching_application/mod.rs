@@ -1,5 +1,5 @@
 use std::hash::Hash;
-use super::hash_tables::separate_chaining::SeparateChainingHashST;
+use super::searching::hash_tables::separate_chaining::SeparateChainingHashST;
 
 /// Mathematical set. A collection of distinct keys
 pub trait Set<K> {
