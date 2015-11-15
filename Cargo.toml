@@ -23,7 +23,7 @@ mtl = "0.1"
 # piston_window = "*"
 
 [dev-dependencies.sdl2]
-sdl2 = "0.9"
+sdl2 = "0.10"
 
 [dev-dependencies.sdl2_gfx]
-sdl2_gfx = "0.6.2"
+sdl2_gfx = "0.7.0"
